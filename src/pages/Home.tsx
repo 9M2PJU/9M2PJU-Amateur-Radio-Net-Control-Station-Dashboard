@@ -30,7 +30,7 @@ export default function Home() {
 
                             <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight leading-tight">
                                 <span className="block text-white">9M2PJU</span>
-                                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Net Control Station</span>
+                                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">NCS Dashboard</span>
                             </h1>
                         </div>
 

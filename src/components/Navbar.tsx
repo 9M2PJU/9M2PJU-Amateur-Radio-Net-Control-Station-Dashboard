@@ -31,31 +31,40 @@ export default function Navbar() {
     }, [])
 
     useEffect(() => {
-        const getUser = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
-            if (authUser) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', authUser.id)
-                    .single()
+        const fetchUser = async (authUser: any) => {
+            if (!authUser) return
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('id', authUser.id)
+                .single()
 
-                if (profile) {
-                    setUser(profile)
-                }
+            if (profile) {
+                setUser(profile)
+            } else {
+                // Fallback if profile doesn't exist yet but user is authenticated
+                setUser({
+                    id: authUser.id,
+                    callsign: authUser.user_metadata?.callsign || 'OPERATOR',
+                    name: authUser.user_metadata?.name || null,
+                    created_at: authUser.created_at
+                })
             }
         }
-        getUser()
+
+        const checkSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (session?.user) {
+                await fetchUser(session.user)
+            }
+        }
+
+        checkSession()
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single()
-                if (profile) setUser(profile)
+            if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user) {
+                await fetchUser(session.user)
             } else if (event === 'SIGNED_OUT') {
                 setUser(null)
             }
@@ -105,7 +114,7 @@ export default function Navbar() {
                                     9M2PJU
                                 </span>
                                 <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
-                                    NCS Control
+                                    NCS Dashboard
                                 </span>
                             </div>
                         </Link>

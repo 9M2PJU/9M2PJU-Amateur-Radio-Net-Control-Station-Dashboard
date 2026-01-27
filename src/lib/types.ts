@@ -26,8 +26,12 @@ export interface Checkin {
     name: string | null
     location: string | null
     signal_report: string | null
+    readability: number | null
+    signal_strength: number | null
     remarks: string | null
     traffic: boolean
+    traffic_precedence: 'routine' | 'welfare' | 'priority' | 'emergency' | null
+    traffic_details: string | null
     checked_in_at: string
 }
 

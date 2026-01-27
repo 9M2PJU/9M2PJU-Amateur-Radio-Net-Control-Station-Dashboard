@@ -101,8 +101,8 @@ export default function CheckinList({ checkins, onDelete, showDelete = false }: 
                                 <td className="py-4 px-6">
                                     {checkin.signal_report ? (
                                         <div className="flex items-center gap-1.5">
-                                            <Signal className={`w-4 h-4 ${checkin.signal_report.includes('S9') ? 'text-emerald-500' :
-                                                checkin.signal_report.includes('S8') ? 'text-emerald-400/80' :
+                                            <Signal className={`w-4 h-4 ${checkin.signal_strength && checkin.signal_strength >= 9 ? 'text-emerald-500' :
+                                                checkin.signal_strength && checkin.signal_strength >= 7 ? 'text-emerald-400/80' :
                                                     'text-slate-500'
                                                 }`} />
                                             <span className="font-mono text-sm font-medium">{checkin.signal_report}</span>

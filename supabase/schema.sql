@@ -95,8 +95,12 @@ CREATE TABLE IF NOT EXISTS checkins (
   name TEXT,
   location TEXT,
   signal_report TEXT,
+  readability INTEGER,
+  signal_strength INTEGER,
   remarks TEXT,
   traffic BOOLEAN DEFAULT FALSE NOT NULL,
+  traffic_precedence TEXT CHECK (traffic_precedence IN ('routine', 'welfare', 'priority', 'emergency')),
+  traffic_details TEXT,
   checked_in_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 

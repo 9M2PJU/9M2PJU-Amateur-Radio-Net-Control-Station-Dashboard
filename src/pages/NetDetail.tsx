@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import CheckinForm from '@/components/CheckinForm'
@@ -17,16 +17,24 @@ import {
     Calendar,
     Wifi,
     AlertTriangle,
-    Mic2
+    Mic2,
+    FileJson,
+    FileText as FilePdf,
+    Upload
 } from 'lucide-react'
 import type { Net, Checkin } from '@/lib/types'
+import { exportToADIF, exportToPDF, parseADIF } from '@/lib/exportUtils'
+import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 
 export default function NetDetail() {
     const [net, setNet] = useState<Net | null>(null)
     const [checkins, setCheckins] = useState<Checkin[]>([])
     const [loading, setLoading] = useState(true)
     const [ending, setEnding] = useState(false)
+    const [exporting, setExporting] = useState(false)
 
+    const chartRef = useRef<HTMLDivElement>(null)
+    const fileInputRef = useRef<HTMLInputElement>(null)
     const navigate = useNavigate()
     const { id: netId } = useParams()
 
@@ -119,6 +127,62 @@ export default function NetDetail() {
         }
     }
 
+    const handleExportADIF = () => {
+        if (!net) return
+        exportToADIF(net, checkins)
+        toast.success('ADIF Log Exported')
+    }
+
+    const handleExportPDF = async () => {
+        if (!net) return
+        setExporting(true)
+        try {
+            await exportToPDF(net, checkins, [chartRef.current])
+            toast.success('PDF Report Exported')
+        } catch (error) {
+            console.error(error)
+            toast.error('Failed to export PDF')
+        } finally {
+            setExporting(false)
+        }
+    }
+
+    const handleImportADIF = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !netId) return
+
+        const reader = new FileReader()
+        reader.onload = async (event) => {
+            const content = event.target?.result as string
+            const importedRecords = parseADIF(content)
+
+            if (importedRecords.length === 0) {
+                toast.error('No valid records found in ADIF')
+                return
+            }
+
+            toast.loading(`Importing ${importedRecords.length} records...`)
+
+            const toInsert = importedRecords.map(r => ({
+                ...r,
+                net_id: netId,
+                checked_in_at: new Date().toISOString()
+            }))
+
+            const { error } = await supabase.from('checkins').insert(toInsert)
+
+            if (error) {
+                toast.error('Import failed: ' + error.message)
+            } else {
+                toast.dismiss()
+                toast.success(`Successfully imported ${importedRecords.length} stations`)
+                fetchData()
+            }
+        }
+        reader.readAsText(file)
+        e.target.value = '' // Reset
+    }
+
     const handleCheckinDeleted = (id: string) => {
         setCheckins((prev) => prev.filter((c) => c.id !== id))
     }
@@ -141,8 +205,6 @@ export default function NetDetail() {
     const duration = net.ended_at
         ? differenceInMinutes(new Date(net.ended_at), new Date(net.started_at))
         : differenceInMinutes(new Date(), new Date(net.started_at))
-    const uniqueCallsigns = new Set(checkins.map(c => c.callsign)).size
-    const trafficCount = checkins.filter(c => c.traffic).length
 
     return (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-20 md:mt-24 pb-20 animate-fade-in">
@@ -208,25 +270,63 @@ export default function NetDetail() {
                         )}
                     </div>
 
-                    {isActive && (
-                        <button
-                            onClick={handleEndNet}
-                            disabled={ending}
-                            className="btn bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 shadow-lg shadow-rose-500/5 group"
-                        >
-                            {ending ? (
-                                <>
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                    Terminating...
-                                </>
-                            ) : (
-                                <>
-                                    <StopCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                    End Operation
-                                </>
-                            )}
-                        </button>
-                    )}
+                    <div className="flex flex-wrap items-center gap-3">
+                        {/* Import / Export Controls */}
+                        <div className="flex items-center gap-2 p-1 rounded-2xl bg-slate-900/50 border border-slate-800">
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleImportADIF}
+                                accept=".adi,.adif"
+                                className="hidden"
+                            />
+                            <button
+                                onClick={() => fileInputRef.current?.click()}
+                                className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+                                title="Import ADIF"
+                            >
+                                <Upload className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+                            </button>
+
+                            <div className="w-px h-6 bg-slate-800 mx-1"></div>
+
+                            <button
+                                onClick={handleExportADIF}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all border border-transparent hover:border-emerald-500/20"
+                            >
+                                <FileJson className="w-4 h-4" />
+                                ADIF
+                            </button>
+                            <button
+                                onClick={handleExportPDF}
+                                disabled={exporting}
+                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-rose-400 hover:bg-rose-500/10 transition-all border border-transparent hover:border-rose-500/20"
+                            >
+                                {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FilePdf className="w-4 h-4" />}
+                                PDF
+                            </button>
+                        </div>
+
+                        {isActive && (
+                            <button
+                                onClick={handleEndNet}
+                                disabled={ending}
+                                className="btn bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 shadow-lg shadow-rose-500/5 group"
+                            >
+                                {ending ? (
+                                    <>
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Terminating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <StopCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                        End Operation
+                                    </>
+                                )}
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
 
@@ -240,7 +340,7 @@ export default function NetDetail() {
                 />
                 <StatsCard
                     title="Unique Stations"
-                    value={uniqueCallsigns}
+                    value={new Set(checkins.map(c => c.callsign)).size}
                     icon={Radio}
                     color="cyan"
                 />
@@ -252,11 +352,31 @@ export default function NetDetail() {
                 />
                 <StatsCard
                     title="Traffic Reports"
-                    value={trafficCount}
+                    value={checkins.filter(c => c.traffic).length}
                     icon={AlertTriangle}
                     color="amber"
                 />
             </div>
+
+            {/* Analysis Section (Charts) */}
+            {checkins.length > 0 && (
+                <div className="mb-8 card glass-card overflow-hidden" ref={chartRef}>
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 p-1">
+                        <TopParticipantsChart
+                            data={Object.entries(
+                                checkins.reduce((acc, c) => {
+                                    acc[c.callsign] = (acc[c.callsign] || 0) + 1
+                                    return acc
+                                }, {} as Record<string, number>)
+                            )
+                                .map(([callsign, checkins]) => ({ callsign, checkins }))
+                                .sort((a, b) => b.checkins - a.checkins)
+                                .slice(0, 10)}
+                            title="Net Distribution (Top Stations)"
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Check-in Form (only for active nets) */}
             {isActive && (
