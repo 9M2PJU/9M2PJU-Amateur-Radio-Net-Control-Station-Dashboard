@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import {
-    Radio,
     LayoutDashboard,
     List,
     Plus,
@@ -105,8 +104,8 @@ export default function Navbar() {
                         <Link to="/dashboard" className="flex items-center gap-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
-                                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300">
-                                    <Radio className="w-5 h-5 text-white" />
+                                <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 border border-white/10">
+                                    <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <div className="flex flex-col">

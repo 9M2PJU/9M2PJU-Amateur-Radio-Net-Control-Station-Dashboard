@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Radio, ArrowRight, Users, BarChart3, Shield, Activity } from 'lucide-react'
+import { ArrowRight, Users, BarChart3, Shield, Activity } from 'lucide-react'
 
 export default function Home() {
     return (
@@ -24,8 +24,8 @@ export default function Home() {
                         {/* Logo & Title */}
                         <div className="mb-10 relative">
                             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-emerald-500/30 blur-3xl rounded-full"></div>
-                            <div className="relative inline-flex w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500 to-cyan-500 items-center justify-center shadow-2xl shadow-emerald-500/30 mb-8 animate-float">
-                                <Radio className="w-12 h-12 text-white" strokeWidth={2} />
+                            <div className="relative inline-flex w-32 h-32 rounded-[2rem] overflow-hidden shadow-2xl shadow-emerald-500/40 mb-8 animate-float border border-white/20 bg-slate-900">
+                                <img src="/logo.png" alt="9M2PJU NCS Dashboard Logo" className="w-full h-full object-cover scale-110" />
                             </div>
 
                             <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight leading-tight">
