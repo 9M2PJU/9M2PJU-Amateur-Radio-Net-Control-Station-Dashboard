@@ -9,8 +9,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Net Control Station Dashboard",
-  description: "Amateur Radio Net Control Station management dashboard for weekly nets and emergency exercises",
+  title: "9M2PJU Net Control Station Dashboard",
+  description: "Professional net management for amateur radio operators. Log check-ins, track participation, and analyze your nets.",
   keywords: ["amateur radio", "ham radio", "net control", "NCS", "emergency exercise"],
 };
 
