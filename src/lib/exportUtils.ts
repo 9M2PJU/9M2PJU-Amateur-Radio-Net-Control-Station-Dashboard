@@ -85,7 +85,6 @@ export const exportToPDF = async (net: Net, checkins: Checkin[], chartRefs: (HTM
     doc.setFontSize(10)
     doc.setTextColor(100, 116, 139) // Slate-500
     const netDetails = [
-        `ID: ${net.id}`,
         `Started: ${format(new Date(net.started_at), 'yyyy-MM-dd HH:mm')}`,
         `Ended: ${net.ended_at ? format(new Date(net.ended_at), 'yyyy-MM-dd HH:mm') : 'Active'}`,
         `Freq: ${net.frequency || 'N/A'}`,
