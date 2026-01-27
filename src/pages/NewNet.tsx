@@ -54,20 +54,18 @@ export default function NewNet() {
                 // Continue with new profile
             }
 
+            let formattedFrequency = frequency.trim()
+            if (formattedFrequency && !isNaN(Number(formattedFrequency))) {
+                formattedFrequency += ' MHz'
+            }
+
             const { data: net, error } = await supabase
                 .from('nets')
                 .insert({
-                    user_id: user.id, // Direct user_id FK usually, or profile_id depending on schema. Based on types.ts Net has user_id. 
-                    // Let's verify schema. backup app/nets/new/page.tsx used profile.id but types.ts says user_id.
-                    // Schema usually links to auth.users or public.profiles.
-                    // Let's stick to user.id if schema.sql isn't available to verify, but wait, the backup code used profile.id.
-                    // "user_id: profile.id"
-                    // I will trust the backup code.
-                    // Actually, if profile.id IS the user.id (which it is in Supabase usually), then it doesn't matter.
-                    // But let's be safe and fetch profile as backup did.
+                    user_id: user.id,
                     name: name.trim(),
                     type,
-                    frequency: frequency.trim() || null,
+                    frequency: formattedFrequency || null,
                     mode: mode.trim() || null,
                     notes: notes.trim() || null,
                 })
@@ -176,9 +174,12 @@ export default function NewNet() {
                                 type="text"
                                 value={frequency}
                                 onChange={(e) => setFrequency(e.target.value)}
-                                placeholder="145.500 MHz"
-                                className="input pl-11 w-full bg-slate-900/50 border-slate-800 focus:border-emerald-500/50 font-mono"
+                                placeholder="145.500"
+                                className="input pl-11 pr-16 w-full bg-slate-900/50 border-slate-800 focus:border-emerald-500/50 font-mono"
                             />
+                            <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <span className="text-xs font-bold text-slate-500 group-focus-within:text-emerald-500/50 uppercase tracking-widest">MHz</span>
+                            </div>
                         </div>
                     </div>
                     <div className="space-y-2">
