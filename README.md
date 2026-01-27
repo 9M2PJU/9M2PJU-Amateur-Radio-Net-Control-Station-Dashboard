@@ -2,7 +2,8 @@
 
 A professional-grade web dashboard for amateur radio net control operators. Manage weekly nets, emergency exercises, and log check-ins with beautiful charts and real-time updates.
 
-![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Vite](https://img.shields.io/badge/Vite-5-646CFF)
+![React](https://img.shields.io/badge/React-19-61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
@@ -15,7 +16,7 @@ A professional-grade web dashboard for amateur radio net control operators. Mana
 - 📊 **Rich Analytics** - Charts showing activity trends and top participants
 - ⚡ **Real-time Updates** - Live check-in feed with Supabase Realtime
 - 📱 **Mobile Responsive** - Full-featured mobile experience
-- 🌙 **Dark Theme** - Beautiful glassmorphism UI
+- 🌙 **Dark Theme** - Beautiful glassmorphism UI with Cyber/Space aesthetic
 
 ## 🚀 Quick Start
 
@@ -42,10 +43,14 @@ A professional-grade web dashboard for amateur radio net control operators. Mana
    
    Create a Supabase project and copy your credentials:
    ```bash
-   cp .env.example .env.local
+   cp .env.example .env
    ```
    
-   Edit `.env.local` with your Supabase URL and anon key.
+   Edit `.env` with your Supabase URL and anon key:
+   ```env
+   VITE_SUPABASE_URL=https://your-project-id.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key-here
+   ```
 
 4. **Set up database**
    
@@ -61,32 +66,43 @@ A professional-grade web dashboard for amateur radio net control operators. Mana
 
 6. **Open in browser**
    ```
-   http://localhost:3000
+   http://localhost:5173
    ```
 
 ## 📁 Project Structure
 
 ```
 src/
-├── app/                    # Next.js App Router pages
-│   ├── dashboard/          # Main dashboard
-│   ├── nets/               # Net management
-│   ├── login/              # Authentication
-│   └── register/
-├── components/             # React components
-│   ├── widgets/            # Dashboard widgets
-│   └── ...
-├── lib/                    # Utilities
-│   ├── supabase/           # Supabase clients
-│   └── types.ts            # TypeScript types
-└── middleware.ts           # Auth middleware
+├── pages/                  # Application pages
+│   ├── Dashboard.tsx       # Main dashboard
+│   ├── Nets.tsx           # Net operations list
+│   ├── NetDetail.tsx      # Net detail with real-time
+│   ├── NewNet.tsx         # Create new net
+│   ├── Profile.tsx        # User profile
+│   ├── Settings.tsx       # Settings
+│   ├── Login.tsx          # Authentication
+│   ├── Register.tsx       # Registration
+│   └── Home.tsx           # Landing page
+├── components/            # React components
+│   ├── Layout.tsx         # Main layout wrapper
+│   ├── Navbar.tsx         # Navigation
+│   ├── CheckinForm.tsx    # Check-in form
+│   ├── CheckinList.tsx    # Check-in list
+│   └── widgets/           # Dashboard widgets
+├── lib/                   # Utilities
+│   ├── supabase.ts        # Supabase client
+│   ├── types.ts           # TypeScript types
+│   └── utils.ts           # Helper functions
+└── App.tsx                # React Router setup
 ```
 
 ## 🛠️ Technology Stack
 
 | Category | Technology |
 |----------|------------|
-| Framework | [Next.js 16](https://nextjs.org) |
+| Build Tool | [Vite 5](https://vitejs.dev) |
+| Framework | [React 19](https://react.dev) |
+| Routing | [React Router 7](https://reactrouter.com) |
 | Language | [TypeScript](https://typescriptlang.org) |
 | Styling | [TailwindCSS 4](https://tailwindcss.com) |
 | Backend | [Supabase](https://supabase.com) |
@@ -100,9 +116,22 @@ src/
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/9M2PJU/9M2PJU-Amateur-Radio-Net-Control-Station-Dashboard)
 
-1. Connect your GitHub repository
-2. Add environment variables in Vercel dashboard
-3. Deploy!
+1. **Connect your GitHub repository** to Vercel
+2. **Add environment variables** in Vercel dashboard:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+3. **Deploy!** - Vercel will automatically detect Vite and build correctly
+
+The `vercel.json` configuration is already included for proper SPA routing.
+
+### Other Platforms
+
+Build the static files:
+```bash
+npm run build
+```
+
+Deploy the `dist/` folder to any static hosting service (Netlify, GitHub Pages, Cloudflare Pages, etc.).
 
 ## 📄 License
 
