@@ -41,28 +41,35 @@ export default function NetDetail() {
     const fetchData = useCallback(async () => {
         if (!netId) return
 
-        const { data: netData, error: netError } = await supabase
-            .from('nets')
-            .select('*')
-            .eq('id', netId)
-            .single()
+        try {
+            const [netResponse, checkinsResponse] = await Promise.all([
+                supabase
+                    .from('nets')
+                    .select('*')
+                    .eq('id', netId)
+                    .single(),
+                supabase
+                    .from('checkins')
+                    .select('*')
+                    .eq('net_id', netId)
+                    .order('checked_in_at', { ascending: true })
+            ])
 
-        if (netError || !netData) {
-            toast.error('Net not found')
-            navigate('/nets')
-            return
+            if (netResponse.error || !netResponse.data) {
+                console.error('Net fetch error:', netResponse.error)
+                toast.error('Net operation not found')
+                navigate('/nets')
+                return
+            }
+
+            setNet(netResponse.data)
+            setCheckins(checkinsResponse.data || [])
+        } catch (error) {
+            console.error('Data sync error:', error)
+            toast.error('System synchronization failed')
+        } finally {
+            setLoading(false)
         }
-
-        setNet(netData)
-
-        const { data: checkinsData } = await supabase
-            .from('checkins')
-            .select('*')
-            .eq('net_id', netId)
-            .order('checked_in_at', { ascending: true })
-
-        setCheckins(checkinsData || [])
-        setLoading(false)
     }, [netId, navigate])
 
     useEffect(() => {
