@@ -1,5 +1,7 @@
+'use client'
+
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import { Send, Loader2, Radio, MapPin, User, MessageSquare } from 'lucide-react'
 
@@ -20,6 +22,8 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
     const [remarks, setRemarks] = useState('')
     const [traffic, setTraffic] = useState(false)
     const [loading, setLoading] = useState(false)
+
+    const supabase = createClient()
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()

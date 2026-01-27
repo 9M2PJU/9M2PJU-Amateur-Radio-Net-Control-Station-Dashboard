@@ -1,6 +1,9 @@
+'use client'
+
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
     Radio,
@@ -11,6 +14,7 @@ import {
     Menu,
     X,
     User,
+    Activity
 } from 'lucide-react'
 import type { Profile } from '@/lib/types'
 
@@ -18,9 +22,9 @@ export default function Navbar() {
     const [user, setUser] = useState<Profile | null>(null)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
-    const navigate = useNavigate()
-    const location = useLocation()
-    const pathname = location.pathname
+    const router = useRouter()
+    const pathname = usePathname()
+    const supabase = createClient()
 
     useEffect(() => {
         const handleScroll = () => {
@@ -46,25 +50,7 @@ export default function Navbar() {
             }
         }
         getUser()
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', session.user.id)
-                    .single()
-                if (profile) setUser(profile)
-            } else if (event === 'SIGNED_OUT') {
-                setUser(null)
-            }
-        })
-
-        return () => {
-            subscription.unsubscribe()
-        }
-    }, [])
+    }, [supabase])
 
     const handleLogout = async () => {
         const { error } = await supabase.auth.signOut()
@@ -73,7 +59,8 @@ export default function Navbar() {
             return
         }
         toast.success('Signed out successfully')
-        navigate('/login')
+        router.push('/login')
+        router.refresh()
     }
 
     const navLinks = [
@@ -87,13 +74,13 @@ export default function Navbar() {
     return (
         <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'pt-4 px-4' : 'pt-0 px-0'}`}>
             <nav className={`mx-auto transition-all duration-300 ${scrolled
-                ? 'max-w-5xl rounded-2xl glass shadow-2xl border-white/10'
-                : 'max-w-7xl border-b border-white/5 bg-slate-950/50 backdrop-blur-md'
+                    ? 'max-w-5xl rounded-2xl glass shadow-2xl border-white/10'
+                    : 'max-w-7xl border-b border-white/5 bg-slate-950/50 backdrop-blur-md'
                 }`}>
                 <div className="px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
-                        <Link to="/dashboard" className="flex items-center gap-3 group">
+                        <Link href="/dashboard" className="flex items-center gap-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
                                 <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300">
@@ -118,10 +105,10 @@ export default function Navbar() {
                                 return (
                                     <Link
                                         key={link.href}
-                                        to={link.href}
+                                        href={link.href}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${active
-                                            ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)] border border-emerald-500/20'
-                                            : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                                ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)] border border-emerald-500/20'
+                                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         <Icon className={`w-4 h-4 ${active ? 'animate-pulse-glow' : ''}`} />
@@ -145,7 +132,7 @@ export default function Navbar() {
                                 </div>
                             ) : (
                                 <Link
-                                    to="/login"
+                                    href="/login"
                                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all font-medium text-sm"
                                 >
                                     Login
@@ -195,11 +182,11 @@ export default function Navbar() {
                                 return (
                                     <Link
                                         key={link.href}
-                                        to={link.href}
+                                        href={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-4 px-4 py-3 rounded-xl text-base font-medium transition-all ${active
-                                            ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/20'
-                                            : 'text-slate-400 hover:text-white hover:bg-white/5'
+                                                ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/20'
+                                                : 'text-slate-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >
                                         <Icon className={`w-5 h-5 ${active ? 'text-emerald-400' : ''}`} />

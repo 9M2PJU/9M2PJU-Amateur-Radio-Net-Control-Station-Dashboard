@@ -1,6 +1,8 @@
+'use client'
+
 import { format } from 'date-fns'
 import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
 
@@ -11,6 +13,7 @@ interface CheckinListProps {
 }
 
 export default function CheckinList({ checkins, onDelete, showDelete = false }: CheckinListProps) {
+    const supabase = createClient()
 
     const handleDelete = async (id: string, callsign: string) => {
         if (!confirm(`Delete check-in for ${callsign}?`)) return
@@ -102,8 +105,8 @@ export default function CheckinList({ checkins, onDelete, showDelete = false }: 
                                     {checkin.signal_report ? (
                                         <div className="flex items-center gap-1.5">
                                             <Signal className={`w-4 h-4 ${checkin.signal_report.includes('S9') ? 'text-emerald-500' :
-                                                checkin.signal_report.includes('S8') ? 'text-emerald-400/80' :
-                                                    'text-slate-500'
+                                                    checkin.signal_report.includes('S8') ? 'text-emerald-400/80' :
+                                                        'text-slate-500'
                                                 }`} />
                                             <span className="font-mono text-sm font-medium">{checkin.signal_report}</span>
                                         </div>

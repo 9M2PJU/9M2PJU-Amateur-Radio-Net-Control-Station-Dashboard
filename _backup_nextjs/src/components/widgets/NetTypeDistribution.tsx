@@ -1,3 +1,5 @@
+'use client'
+
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
 interface NetTypeData {
@@ -33,7 +35,7 @@ export default function NetTypeDistribution({ data, title = 'Net Type Distributi
                             paddingAngle={5}
                             dataKey="value"
                         >
-                            {data.map((_, index) => (
+                            {data.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
                             ))}
                         </Pie>
@@ -47,7 +49,7 @@ export default function NetTypeDistribution({ data, title = 'Net Type Distributi
                                 backdropFilter: 'blur(8px)',
                             }}
                             itemStyle={{ color: '#fff', fontWeight: 600 }}
-                            formatter={(value: number) => [value, 'Count'] as [number, string]}
+                            formatter={(value: number | undefined) => [value || 0, 'Count']}
                         />
                         <Legend
                             formatter={(value) => <span className="text-slate-300 font-medium ml-1">{formatName(value)}</span>}

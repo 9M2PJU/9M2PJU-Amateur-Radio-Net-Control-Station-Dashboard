@@ -1,5 +1,7 @@
+'use client'
+
 import { format } from 'date-fns'
-import { Clock, User } from 'lucide-react'
+import { Clock, User, Signal } from 'lucide-react'
 import type { Checkin } from '@/lib/types'
 
 interface RecentCheckinsProps {
@@ -54,7 +56,7 @@ export default function RecentCheckins({
                                 <div className="flex flex-wrap items-center gap-2 mt-1.5">
                                     {checkin.signal_report && (
                                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono border ${checkin.signal_report.includes('9') ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
-                                            'bg-slate-800 border-slate-700 text-slate-400'
+                                                'bg-slate-800 border-slate-700 text-slate-400'
                                             }`}>
                                             RST {checkin.signal_report}
                                         </span>
