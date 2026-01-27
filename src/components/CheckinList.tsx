@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MapPin, MessageSquare, AlertTriangle, Trash2 } from 'lucide-react'
+import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
@@ -35,80 +35,105 @@ export default function CheckinList({ checkins, onDelete, showDelete = false }: 
 
     if (checkins.length === 0) {
         return (
-            <div className="card text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
-                    <MessageSquare className="w-8 h-8 text-slate-600" />
+            <div className="card glass-card text-center py-16 animate-fade-in border-dashed border-2 border-slate-800 bg-transparent">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-slate-900/50 flex items-center justify-center border border-slate-800">
+                    <MessageSquare className="w-10 h-10 text-slate-700" />
                 </div>
-                <p className="text-slate-400">No check-ins recorded yet</p>
-                <p className="text-sm text-slate-500 mt-1">Use the form above to log check-ins</p>
+                <h3 className="text-lg font-medium text-slate-300 mb-2">No check-ins logged</h3>
+                <p className="text-slate-500 max-w-sm mx-auto">
+                    The net is currently empty. Use the form above to add the first check-in.
+                </p>
             </div>
         )
     }
 
     return (
-        <div className="card animate-fade-in">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-white">
-                    Check-in Log <span className="text-slate-400 font-normal">({checkins.length})</span>
-                </h3>
+        <div className="card glass-card animate-fade-in p-6">
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                    <div className="h-8 w-1 bg-emerald-500 rounded-full"></div>
+                    <h3 className="text-xl font-bold text-white">
+                        Station Log <span className="text-slate-500 font-mono text-sm ml-2 bg-slate-900 px-2 py-1 rounded-md">COUNT: {checkins.length}</span>
+                    </h3>
+                </div>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="table">
+            <div className="overflow-x-auto rounded-xl border border-white/5">
+                <table className="table w-full">
                     <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Time</th>
-                            <th>Callsign</th>
-                            <th>Name</th>
-                            <th>Location</th>
-                            <th>Signal</th>
-                            <th>Remarks</th>
-                            {showDelete && <th></th>}
+                        <tr className="bg-slate-950/50 text-left">
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">#</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Time</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Callsign</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Traffic</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Operator</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Signal</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Location</th>
+                            <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Remarks</th>
+                            {showDelete && <th className="py-4 px-6 text-right"></th>}
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-white/5">
                         {checkins.map((checkin, index) => (
-                            <tr key={checkin.id} className="animate-fade-in">
-                                <td className="text-slate-500">{index + 1}</td>
-                                <td className="text-slate-300 font-mono text-sm">
-                                    {format(new Date(checkin.checked_in_at), 'HH:mm:ss')}
+                            <tr
+                                key={checkin.id}
+                                className="group hover:bg-white/[0.02] transition-colors"
+                            >
+                                <td className="py-4 px-6 text-slate-600 font-mono text-sm select-none">{index + 1}</td>
+                                <td className="py-4 px-6 text-slate-400 font-mono text-sm whitespace-nowrap">
+                                    {format(new Date(checkin.checked_in_at), 'HH:mm')}
                                 </td>
-                                <td>
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-semibold text-emerald-400">{checkin.callsign}</span>
-                                        {checkin.traffic && (
-                                            <span className="badge badge-warning flex items-center gap-1">
-                                                <AlertTriangle className="w-3 h-3" />
-                                                Traffic
-                                            </span>
-                                        )}
-                                    </div>
+                                <td className="py-4 px-6">
+                                    <span className="font-bold text-emerald-400 font-mono text-lg tracking-wide group-hover:text-emerald-300 transition-colors">
+                                        {checkin.callsign}
+                                    </span>
                                 </td>
-                                <td className="text-slate-300">{checkin.name || '-'}</td>
-                                <td>
-                                    {checkin.location ? (
-                                        <span className="flex items-center gap-1 text-slate-300">
-                                            <MapPin className="w-3 h-3 text-slate-500" />
-                                            {checkin.location}
-                                        </span>
+                                <td className="py-4 px-6">
+                                    {checkin.traffic ? (
+                                        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 w-fit">
+                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-500" />
+                                            <span className="text-xs font-bold text-amber-500 uppercase">Traffic</span>
+                                        </div>
                                     ) : (
-                                        <span className="text-slate-500">-</span>
+                                        <span className="text-slate-600 text-xs uppercase font-medium">-</span>
                                     )}
                                 </td>
-                                <td>
+                                <td className="py-4 px-6 text-slate-300 font-medium whitespace-nowrap">
+                                    {checkin.name || <span className="text-slate-600">-</span>}
+                                </td>
+                                <td className="py-4 px-6">
                                     {checkin.signal_report ? (
-                                        <span className="badge badge-primary">{checkin.signal_report}</span>
+                                        <div className="flex items-center gap-1.5">
+                                            <Signal className={`w-4 h-4 ${checkin.signal_report.includes('S9') ? 'text-emerald-500' :
+                                                    checkin.signal_report.includes('S8') ? 'text-emerald-400/80' :
+                                                        'text-slate-500'
+                                                }`} />
+                                            <span className="font-mono text-sm font-medium">{checkin.signal_report}</span>
+                                        </div>
                                     ) : (
-                                        <span className="text-slate-500">-</span>
+                                        <span className="text-slate-600">-</span>
                                     )}
                                 </td>
-                                <td className="text-slate-400 max-w-xs truncate">{checkin.remarks || '-'}</td>
+                                <td className="py-4 px-6">
+                                    {checkin.location ? (
+                                        <div className="flex items-center gap-1.5 text-slate-400">
+                                            <MapPin className="w-3.5 h-3.5 text-slate-600" />
+                                            <span className="text-sm truncate max-w-[120px]">{checkin.location}</span>
+                                        </div>
+                                    ) : (
+                                        <span className="text-slate-600">-</span>
+                                    )}
+                                </td>
+                                <td className="py-4 px-6">
+                                    <p className="text-sm text-slate-400 max-w-xs truncate" title={checkin.remarks || ''}>
+                                        {checkin.remarks || <span className="text-slate-700 italic">No remarks</span>}
+                                    </p>
+                                </td>
                                 {showDelete && (
-                                    <td>
+                                    <td className="py-4 px-6 text-right">
                                         <button
                                             onClick={() => handleDelete(checkin.id, checkin.callsign)}
-                                            className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                            className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
                                             title="Delete check-in"
                                         >
                                             <Trash2 className="w-4 h-4" />

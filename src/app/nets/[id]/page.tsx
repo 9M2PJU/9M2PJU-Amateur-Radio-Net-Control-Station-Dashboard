@@ -21,7 +21,9 @@ import {
     Loader2,
     Calendar,
     Wifi,
-    AlertTriangle
+    AlertTriangle,
+    Mic2,
+    Activity
 } from 'lucide-react'
 import type { Net, Checkin } from '@/lib/types'
 
@@ -64,7 +66,6 @@ export default function NetDetailPage() {
     useEffect(() => {
         fetchData()
 
-        // Set up real-time subscription
         const channel = supabase
             .channel(`net-${netId}`)
             .on(
@@ -128,10 +129,14 @@ export default function NetDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <div className="min-h-screen bg-slate-950 text-slate-50">
                 <Navbar />
-                <div className="flex items-center justify-center h-[60vh]">
-                    <Loader2 className="w-8 h-8 text-emerald-500 animate-spin" />
+                <div className="flex flex-col items-center justify-center h-[80vh]">
+                    <div className="relative">
+                        <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse"></div>
+                        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin relative z-10" />
+                    </div>
+                    <p className="mt-4 text-slate-400 font-mono text-sm animate-pulse">ESTABLISHING UPLINK...</p>
                 </div>
             </div>
         )
@@ -146,62 +151,74 @@ export default function NetDetailPage() {
     const uniqueCallsigns = new Set(checkins.map(c => c.callsign)).size
     const trafficCount = checkins.filter(c => c.traffic).length
 
-    const getTypeBadgeClass = (type: string) => {
-        switch (type) {
-            case 'weekly': return 'badge-primary'
-            case 'emergency_exercise': return 'badge-destructive'
-            case 'special': return 'badge-accent'
-            default: return 'badge-secondary'
-        }
-    }
-
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <div className="min-h-screen bg-slate-950 text-slate-50 selection:bg-emerald-500/30 selection:text-emerald-300">
+            {/* Background elements */}
+            <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950 -z-20"></div>
+            <div className={`fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-96 ${isActive ? 'bg-emerald-500/5' : 'bg-slate-500/5'} rounded-full blur-[100px] -z-10 transition-colors duration-1000`}></div>
+
             <Navbar />
 
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-20 md:mt-24 pb-20 animate-fade-in">
                 {/* Back Button & Header */}
-                <div className="mb-6">
+                <div className="mb-8">
                     <button
                         onClick={() => router.push('/nets')}
-                        className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4"
+                        className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm font-medium"
                     >
-                        <ArrowLeft className="w-4 h-4" />
-                        Back to Nets
+                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+                        </div>
+                        Back to Operations
                     </button>
 
-                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
-                        <div>
-                            <div className="flex items-center gap-3 mb-2">
-                                <h1 className="text-2xl sm:text-3xl font-bold text-white">{net.name}</h1>
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
+                        <div className="flex-1">
+                            <div className="flex items-center gap-4 mb-3">
+                                <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">{net.name}</h1>
                                 {isActive ? (
-                                    <span className="status-active badge badge-primary">Live</span>
+                                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider animate-pulse">
+                                        <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                                        Live
+                                    </span>
                                 ) : (
-                                    <span className="badge badge-secondary">Ended</span>
+                                    <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                                        <div className="w-2 h-2 rounded-full bg-slate-500"></div>
+                                        Offline
+                                    </span>
                                 )}
                             </div>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-400">
-                                <span className="flex items-center gap-1">
-                                    <Calendar className="w-4 h-4" />
+
+                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400 font-mono">
+                                <span className="flex items-center gap-1.5">
+                                    <Calendar className="w-4 h-4 text-slate-500" />
                                     {format(new Date(net.started_at), 'MMMM d, yyyy HH:mm')}
                                 </span>
                                 {net.frequency && (
-                                    <span className="flex items-center gap-1">
-                                        <Wifi className="w-4 h-4" />
-                                        {net.frequency}
+                                    <span className="flex items-center gap-1.5">
+                                        <Wifi className="w-4 h-4 text-emerald-500" />
+                                        <span className="text-emerald-400">{net.frequency}</span>
                                     </span>
                                 )}
                                 {net.mode && (
-                                    <span className={`badge ${getTypeBadgeClass(net.type)}`}>
-                                        {net.type.replace('_', ' ')}
+                                    <span className="flex items-center gap-1.5">
+                                        <Mic2 className="w-4 h-4 text-slate-500" />
+                                        <span>{net.mode}</span>
                                     </span>
                                 )}
-                                {net.mode && (
-                                    <span className="badge badge-secondary">{net.mode}</span>
-                                )}
+                                <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                        net.type === 'emergency_exercise' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                                            'bg-violet-500/10 text-violet-400 border border-violet-500/20'
+                                    }`}>
+                                    {net.type.replace('_', ' ')}
+                                </span>
                             </div>
+
                             {net.notes && (
-                                <p className="text-slate-500 mt-2">{net.notes}</p>
+                                <p className="text-slate-400 mt-4 max-w-2xl bg-slate-900/50 p-3 rounded-lg border border-slate-800 text-sm">
+                                    <span className="text-emerald-500 font-bold mr-2">// NOTES:</span>
+                                    {net.notes}
+                                </p>
                             )}
                         </div>
 
@@ -209,17 +226,17 @@ export default function NetDetailPage() {
                             <button
                                 onClick={handleEndNet}
                                 disabled={ending}
-                                className="btn bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 border border-rose-500/30"
+                                className="btn bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 shadow-lg shadow-rose-500/5 group"
                             >
                                 {ending ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        Ending...
+                                        Terminating...
                                     </>
                                 ) : (
                                     <>
-                                        <StopCircle className="w-4 h-4" />
-                                        End Net
+                                        <StopCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                                        End Operation
                                     </>
                                 )}
                             </button>
@@ -228,7 +245,7 @@ export default function NetDetailPage() {
                 </div>
 
                 {/* Stats Cards */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
                     <StatsCard
                         title="Total Check-ins"
                         value={checkins.length}
@@ -236,19 +253,19 @@ export default function NetDetailPage() {
                         color="emerald"
                     />
                     <StatsCard
-                        title="Unique Callsigns"
+                        title="Unique Stations"
                         value={uniqueCallsigns}
                         icon={Radio}
                         color="cyan"
                     />
                     <StatsCard
-                        title="Duration"
+                        title="Session Duration"
                         value={`${Math.floor(duration / 60)}h ${duration % 60}m`}
                         icon={Clock}
                         color="violet"
                     />
                     <StatsCard
-                        title="Traffic"
+                        title="Traffic Reports"
                         value={trafficCount}
                         icon={AlertTriangle}
                         color="amber"
@@ -257,7 +274,7 @@ export default function NetDetailPage() {
 
                 {/* Check-in Form (only for active nets) */}
                 {isActive && (
-                    <div className="mb-6">
+                    <div className="mb-8">
                         <CheckinForm netId={netId} onCheckinAdded={fetchData} />
                     </div>
                 )}
@@ -265,7 +282,7 @@ export default function NetDetailPage() {
                 {/* Main Content Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Check-in List */}
-                    <div className="lg:col-span-2">
+                    <div className="lg:col-span-2 space-y-6">
                         <CheckinList
                             checkins={checkins}
                             onDelete={handleCheckinDeleted}
@@ -274,12 +291,37 @@ export default function NetDetailPage() {
                     </div>
 
                     {/* Recent Activity Sidebar */}
-                    <div>
+                    <div className="lg:sticky lg:top-24 h-fit space-y-6">
                         <RecentCheckins
                             checkins={[...checkins].reverse()}
-                            title="Latest Check-ins"
+                            title="Live Feed"
                             maxItems={8}
                         />
+
+                        {/* Session Status Widget */}
+                        <div className="card glass-card p-6">
+                            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+                                <div className="w-1 h-5 bg-slate-500 rounded-full"></div>
+                                Connection Status
+                            </h3>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                                    <span className="text-sm text-slate-400">Uplink Status</span>
+                                    <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">STABLE</span>
+                                </div>
+                                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                                    <span className="text-sm text-slate-400">Database</span>
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        CONNECTED
+                                    </span>
+                                </div>
+                                <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800">
+                                    <span className="text-xs text-slate-500 block mb-1">SESSION ID</span>
+                                    <span className="text-xs font-mono text-slate-300 break-all">{netId}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </main>

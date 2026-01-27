@@ -1,41 +1,33 @@
 'use client'
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
-interface DataPoint {
+interface NetTypeData {
     name: string
     value: number
 }
 
 interface NetTypeDistributionProps {
-    data: DataPoint[]
+    data: NetTypeData[]
     title?: string
 }
 
-const COLORS = ['#10b981', '#ef4444', '#8b5cf6', '#f59e0b']
+const COLORS = ['#10b981', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899']
 
-const typeLabels: Record<string, string> = {
-    weekly: 'Weekly Net',
-    emergency_exercise: 'Emergency Exercise',
-    special: 'Special Event',
-}
-
-export default function NetTypeDistribution({ data, title = 'Net Types' }: NetTypeDistributionProps) {
-    const formattedData = data.map(item => ({
-        ...item,
-        name: typeLabels[item.name] || item.name,
-    }))
-
-    const total = formattedData.reduce((sum, item) => sum + item.value, 0)
+export default function NetTypeDistribution({ data, title = 'Net Type Distribution' }: NetTypeDistributionProps) {
+    const formatName = (name: string) => name.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
 
     return (
-        <div className="card animate-fade-in">
-            <h3 className="text-lg font-semibold text-white mb-4">{title}</h3>
-            <div className="h-64">
+        <div className="w-full h-full p-6">
+            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                <div className="w-1 h-5 bg-violet-500 rounded-full"></div>
+                {title}
+            </h3>
+            <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
-                            data={formattedData}
+                            data={data}
                             cx="50%"
                             cy="50%"
                             innerRadius={60}
@@ -43,33 +35,29 @@ export default function NetTypeDistribution({ data, title = 'Net Types' }: NetTy
                             paddingAngle={5}
                             dataKey="value"
                         >
-                            {formattedData.map((entry, index) => (
-                                <Cell
-                                    key={`cell-${index}`}
-                                    fill={COLORS[index % COLORS.length]}
-                                    stroke="transparent"
-                                />
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
                             ))}
                         </Pie>
                         <Tooltip
                             contentStyle={{
-                                backgroundColor: '#1e293b',
-                                border: '1px solid #334155',
-                                borderRadius: '8px',
-                                color: '#f1f5f9',
+                                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                                border: '1px solid rgba(255, 255, 255, 0.1)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                backdropFilter: 'blur(8px)',
                             }}
+                            itemStyle={{ color: '#fff', fontWeight: 600 }}
+                            formatter={(value: number | undefined) => [value || 0, 'Count']}
                         />
                         <Legend
-                            verticalAlign="bottom"
-                            height={36}
-                            formatter={(value) => <span className="text-slate-300 text-sm">{value}</span>}
+                            formatter={(value) => <span className="text-slate-300 font-medium ml-1">{formatName(value)}</span>}
+                            iconType="circle"
+                            iconSize={8}
                         />
                     </PieChart>
                 </ResponsiveContainer>
-            </div>
-            <div className="text-center mt-2">
-                <p className="text-2xl font-bold text-white">{total}</p>
-                <p className="text-sm text-slate-400">Total Nets</p>
             </div>
         </div>
     )
