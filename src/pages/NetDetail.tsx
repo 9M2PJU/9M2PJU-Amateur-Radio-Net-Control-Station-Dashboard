@@ -422,10 +422,6 @@ export default function NetDetail() {
                                     CONNECTED
                                 </span>
                             </div>
-                            <div className="p-3 rounded-lg bg-slate-900/50 border border-slate-800">
-                                <span className="text-xs text-slate-500 block mb-1">SESSION ID</span>
-                                <span className="text-xs font-mono text-slate-300 break-all">{netId}</span>
-                            </div>
                         </div>
                     </div>
                 </div>
