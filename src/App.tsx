@@ -8,6 +8,7 @@ import Register from './pages/Register'
 import Dashboard from './pages/Dashboard'
 import NetList from './pages/NetList'
 import NetDetail from './pages/NetDetail'
+import NetNew from './pages/NetNew'
 import Navbar from './components/Navbar'
 
 // Protected Route Wrapper
@@ -67,6 +68,15 @@ function App() {
           }
         />
         <Route
+          path="/nets/new"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <NetNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/nets/:id"
           element={
             <ProtectedRoute>
@@ -75,6 +85,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* Catch-all - Redirect to home or dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
