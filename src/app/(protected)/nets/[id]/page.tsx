@@ -221,8 +221,14 @@ export default function NetDetail() {
     }
 
     const handleDeleteNet = async () => {
-        if (!confirm('Are you sure you want to DELETE this net? This action cannot be undone and will remove all associated check-ins.')) return
+        console.log('Delete button clicked for net:', netId)
 
+        if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to DELETE this net? This action cannot be undone and will remove all associated check-ins.')) {
+            console.log('Delete cancelled by user')
+            return
+        }
+
+        console.log('Proceeding with delete...')
         setDeleting(true)
         try {
             const { error } = await supabase
@@ -230,12 +236,16 @@ export default function NetDetail() {
                 .delete()
                 .eq('id', netId)
 
-            if (error) throw error
+            if (error) {
+                console.error('Supabase delete error:', error)
+                throw error
+            }
 
+            console.log('Delete successful')
             toast.success('Net Deleted Successfully')
             router.push('/nets')
         } catch (error: any) {
-            console.error('Delete error:', error)
+            console.error('Delete exception:', error)
             toast.error(`Failed to delete net: ${error.message}`)
         } finally {
             setDeleting(false)

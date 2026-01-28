@@ -66,33 +66,35 @@ export default function Login() {
                                     Email Address
                                 </label>
                                 <div className="relative">
+                                    <Mail className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
                                     <input
                                         id="email"
                                         type="email"
+                                        placeholder="callsign@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="name@example.com"
                                         required
-                                        className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3"
+                                        autoComplete="email"
+                                        className="w-full pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3 rounded-lg"
                                     />
-                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
                                 </div>
                             </div>
 
-                            <div className="group">
+                            <div>
                                 <div className="flex items-center justify-between mb-2">
-                                    <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 ml-1">
+                                    <label className="block text-xs font-bold uppercase text-slate-500 ml-1" htmlFor="password">
                                         Password
                                     </label>
                                     <a href="#" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Forgot?</a>
                                 </div>
                                 <div className="relative">
+                                    <Lock className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
                                     <input
                                         id="password"
                                         type="password"
+                                        placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
                                         required
                                         className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3"
                                     />
