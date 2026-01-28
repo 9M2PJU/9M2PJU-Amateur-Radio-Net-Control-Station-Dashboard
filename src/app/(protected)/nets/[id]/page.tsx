@@ -7,7 +7,6 @@ import { supabase } from '@/lib/supabase'
 import CheckinForm from '@/components/CheckinForm'
 import CheckinList from '@/components/CheckinList'
 import RecentCheckins from '@/components/widgets/RecentCheckins'
-import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 import { toast } from 'sonner'
 import { format, differenceInMinutes } from 'date-fns'
 import {
@@ -389,9 +388,18 @@ export default function NetDetail() {
         )
     }
 
-    const duration = net.ended_at
-        ? differenceInMinutes(new Date(net.ended_at), new Date(net.started_at))
-        : differenceInMinutes(new Date(), new Date(net.started_at))
+    // Safe duration calculation
+    const duration = (() => {
+        try {
+            if (!net?.started_at) return 0
+            const start = new Date(net.started_at)
+            const end = net.ended_at ? new Date(net.ended_at) : new Date()
+            if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
+            return Math.max(0, differenceInMinutes(end, start))
+        } catch {
+            return 0
+        }
+    })()
 
     // State for editing
     const [editingCheckin, setEditingCheckin] = useState<Checkin | null>(null)

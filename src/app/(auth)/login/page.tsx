@@ -103,9 +103,9 @@ export default function Login() {
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                         required
-                                        className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3"
+                                        autoComplete="current-password"
+                                        className="w-full pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3 rounded-lg text-white font-sans"
                                     />
-                                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
                                 </div>
                             </div>
                         </div>
