@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { Radio, Mail, Lock, User, Antenna, Loader2, Star } from 'lucide-react'
+import { Mail, Lock, User, Antenna, Loader2, Star } from 'lucide-react'
 
 export default function Register() {
     const [email, setEmail] = useState('')
