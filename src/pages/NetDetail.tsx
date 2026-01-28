@@ -46,7 +46,7 @@ export default function NetDetail() {
             const [netResponse, checkinsResponse] = await Promise.all([
                 supabase
                     .from('nets')
-                    .select('*')
+                    .select('*, profiles(*)')
                     .eq('id', netId)
                     .single(),
                 supabase

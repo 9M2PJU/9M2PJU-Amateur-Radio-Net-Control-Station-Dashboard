@@ -250,9 +250,19 @@ export const exportCertificate = async (net: Net, checkin: Checkin) => {
 
     // Digital Signature Placeholder
     doc.setDrawColor(203, 213, 225)
-    doc.line(pageWidth / 2 - 30, pageHeight - 45, pageWidth / 2 + 30, pageHeight - 45)
+    doc.line(pageWidth / 2 - 40, pageHeight - 45, pageWidth / 2 + 40, pageHeight - 45)
     doc.setFontSize(12)
-    doc.text('Authenticated NCS', pageWidth / 2, pageHeight - 40, { align: 'center' })
+    doc.setTextColor(30, 41, 59)
+
+    // Get Net Controller info
+    const netController = (net as any).profiles
+        ? `${(net as any).profiles.name || 'Unknown'} (${(net as any).profiles.callsign})`
+        : 'Authenticated NCS'
+
+    doc.text(netController, pageWidth / 2, pageHeight - 40, { align: 'center' })
+    doc.setFontSize(10)
+    doc.setTextColor(100, 116, 139)
+    doc.text('Net Control Station', pageWidth / 2, pageHeight - 34, { align: 'center' })
 
     doc.save(`certificate_${checkin.callsign}_${format(new Date(checkin.checked_in_at), 'yyyyMMdd')}.pdf`)
 }
