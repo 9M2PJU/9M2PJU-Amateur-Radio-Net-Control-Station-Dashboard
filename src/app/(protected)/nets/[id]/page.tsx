@@ -252,7 +252,7 @@ export default function NetDetail() {
                         </button>
                         <div>
                             <div className="flex items-center gap-3 mb-1">
-                                <h1 className="text-2xl font-bold text-white tracking-tight">{net.name}</h1>
+                                <h1 className="text-2xl font-bold text-white tracking-tight">{net?.name}</h1>
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${isActive
                                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                     : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -263,9 +263,9 @@ export default function NetDetail() {
                             <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
                                 <div className="flex items-center gap-1.5">
                                     <Calendar className="w-3 h-3" />
-                                    {format(new Date(net.started_at), 'MMM d, yyyy • HH:mm')}
+                                    {net?.started_at && format(new Date(net.started_at), 'MMM d, yyyy • HH:mm')}
                                 </div>
-                                {net.frequency && (
+                                {net?.frequency && (
                                     <div className="flex items-center gap-1.5">
                                         <Wifi className="w-3 h-3" />
                                         {net.frequency}
@@ -372,7 +372,7 @@ export default function NetDetail() {
                             <CheckinList
                                 checkins={checkins}
                                 onDelete={handleCheckinDeleted}
-                                onEdit={userId === net.user_id ? startEdit : undefined}
+                                onEdit={net && userId === net.user_id ? startEdit : undefined}
                                 onGenerateCertificate={handleGenerateCertificate}
                                 showDelete={isActive}
                             />
