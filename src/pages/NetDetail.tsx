@@ -320,33 +320,33 @@ export default function NetDetail() {
 
     return (
         <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
-            {/* Header Area - Fixed Height */}
-            <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
-                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    <div className="flex items-center gap-4">
+            {/* Header Area - Compact Fixed Height */}
+            <div className="px-4 md:px-6 py-3 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20 shrink-0">
+                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
                         <button
                             onClick={() => navigate('/nets')}
-                            className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all group"
+                            className="w-8 h-8 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all group shrink-0"
                             title="Back to Operations"
                         >
-                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                         </button>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-2xl font-bold text-white tracking-tight">{net.name}</h1>
+                        <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-lg md:text-xl font-bold text-white tracking-tight truncate">{net.name}</h1>
                                 {isActive ? (
-                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[8px] font-bold uppercase tracking-wider animate-pulse shrink-0">
+                                        <div className="w-1 h-1 rounded-full bg-emerald-500"></div>
                                         Live
                                     </span>
                                 ) : (
-                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
+                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[8px] font-bold uppercase tracking-wider shrink-0">
+                                        <div className="w-1 h-1 rounded-full bg-slate-500"></div>
                                         Offline
                                     </span>
                                 )}
                             </div>
-                            <div className="flex items-center gap-4 text-[11px] text-slate-500 font-mono mt-0.5">
+                            <div className="flex items-center gap-3 text-[10px] text-slate-500 font-mono mt-0.5">
                                 <span className="flex items-center gap-1">
                                     <Calendar className="w-3 h-3" />
                                     {format(new Date(net.started_at), 'MMM d, HH:mm')}
@@ -357,32 +357,32 @@ export default function NetDetail() {
                                         {net.frequency}
                                     </span>
                                 )}
-                                <span className="uppercase">{net.type.replace('_', ' ')}</span>
+                                <span className="uppercase truncate max-w-[100px]">{net.type.replace('_', ' ')}</span>
                             </div>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800/50">
+                    <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-1 p-0.5 rounded-lg bg-slate-900/80 border border-slate-800/50">
                             <input type="file" ref={fileInputRef} onChange={handleImportADIF} accept=".adi,.adif" className="hidden" />
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
+                                className="p-1.5 rounded-md text-slate-400 hover:text-white hover:bg-white/5 transition-all"
                                 title="Import ADIF"
                             >
-                                <Upload className="w-4 h-4" />
+                                <Upload className="w-3.5 h-3.5" />
                             </button>
-                            <div className="w-px h-4 bg-slate-800 mx-1"></div>
+                            <div className="w-px h-3 bg-slate-800 mx-0.5"></div>
                             <button
                                 onClick={handleExportADIF}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all"
+                                className="px-2 py-1 rounded-md text-[10px] font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all font-mono"
                             >
                                 ADIF
                             </button>
                             <button
                                 onClick={handleExportPDF}
                                 disabled={exporting}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-all flex items-center gap-1.5"
+                                className="px-2 py-1 rounded-md text-[10px] font-bold text-rose-400 hover:bg-rose-500/10 transition-all flex items-center gap-1 font-mono"
                             >
                                 {exporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FilePdf className="w-3 h-3" />}
                                 PDF
@@ -393,9 +393,9 @@ export default function NetDetail() {
                             <button
                                 onClick={handleEndNet}
                                 disabled={ending}
-                                className="h-10 px-4 rounded-xl bg-rose-500 text-white font-bold text-xs hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-2"
+                                className="h-8 px-3 rounded-lg bg-rose-500 text-white font-bold text-[10px] hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-1.5 uppercase"
                             >
-                                {ending ? <Loader2 className="w-4 h-4 animate-spin" /> : <StopCircle className="w-4 h-4" />}
+                                {ending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <StopCircle className="w-3.5 h-3.5" />}
                                 End Net
                             </button>
                         )}
@@ -408,35 +408,35 @@ export default function NetDetail() {
 
                 {/* Left Column: Stats & Operations (3 cols) */}
                 <div className="lg:col-span-3 border-r border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
-                    <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+                    <div className="p-3 space-y-3 flex-1 overflow-y-auto custom-scrollbar">
                         {/* Compact Stats Grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Check-ins</p>
-                                <p className="text-xl font-mono font-bold text-emerald-400">{checkins.length}</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-0.5">Check-ins</p>
+                                <p className="text-lg font-mono font-bold text-emerald-400">{checkins.length}</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Stations</p>
-                                <p className="text-xl font-mono font-bold text-cyan-400">{new Set(checkins.map(c => c.callsign)).size}</p>
+                            <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-0.5">Stations</p>
+                                <p className="text-lg font-mono font-bold text-cyan-400">{new Set(checkins.map(c => c.callsign)).size}</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Duration</p>
-                                <p className="text-sm font-mono font-bold text-violet-400">{`${Math.floor(duration / 60)}h ${duration % 60}m`}</p>
+                            <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-0.5">Duration</p>
+                                <p className="text-xs font-mono font-bold text-violet-400">{`${Math.floor(duration / 60)}h ${duration % 60}m`}</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Traffic</p>
-                                <p className="text-xl font-mono font-bold text-amber-400">{checkins.filter(c => c.traffic).length}</p>
+                            <div className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[9px] uppercase tracking-widest text-slate-500 font-bold mb-0.5">Traffic</p>
+                                <p className="text-lg font-mono font-bold text-amber-400">{checkins.filter(c => c.traffic).length}</p>
                             </div>
                         </div>
 
                         {/* Quick Check-in Form */}
                         {isActive && (
-                            <div className="mt-2">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Transmit Log</h3>
+                            <div className="mt-1">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <div className="w-1 h-3.5 bg-emerald-500 rounded-full"></div>
+                                    <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Transmit Log</h3>
                                 </div>
-                                <div className="scale-90 origin-top -mt-4 -mx-4 h-full">
+                                <div className="scale-[0.85] origin-top -mt-6 -mx-6 h-full">
                                     <CheckinForm netId={netId!} onCheckinAdded={fetchData} />
                                 </div>
                             </div>
@@ -444,7 +444,7 @@ export default function NetDetail() {
 
                         {/* Analysis - Top Stations (Smaller) */}
                         {checkins.length > 0 && (
-                            <div className="mt-4 p-3 rounded-xl bg-slate-900/30 border border-slate-800/30 h-64 overflow-hidden">
+                            <div className="mt-2 p-2 rounded-lg bg-slate-900/30 border border-slate-800/30 h-48 overflow-hidden">
                                 <TopParticipantsChart
                                     data={Object.entries(
                                         checkins.reduce((acc, c) => {
@@ -465,7 +465,7 @@ export default function NetDetail() {
                 {/* Center Column: Station Log (6 cols) */}
                 <div className="lg:col-span-6 flex flex-col overflow-hidden bg-slate-950/20">
                     <div className="p-0 flex-1 overflow-y-auto custom-scrollbar relative">
-                        <div className="p-4 md:p-6 min-h-full">
+                        <div className="p-3 md:p-4 min-h-full">
                             <CheckinList
                                 checkins={checkins}
                                 onDelete={handleCheckinDeleted}
@@ -480,24 +480,24 @@ export default function NetDetail() {
                 <div className="lg:col-span-3 border-l border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
                     <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
                         {/* Map Section - Fixed Aspect Ratio */}
-                        <div className="p-4 border-b border-white/5 bg-slate-900/40">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-1 h-4 bg-cyan-500 rounded-full"></div>
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Geo Presence</h3>
+                        <div className="p-3 border-b border-white/5 bg-slate-900/40">
+                            <div className="flex items-center gap-2 mb-2">
+                                <div className="w-1 h-3.5 bg-cyan-500 rounded-full"></div>
+                                <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Geo Presence</h3>
                             </div>
-                            <div className="rounded-xl overflow-hidden border border-slate-800/50 shadow-inner h-48">
+                            <div className="rounded-lg overflow-hidden border border-slate-800/50 shadow-inner h-40">
                                 <NetMap checkins={checkins} className="h-full w-full" />
                             </div>
                         </div>
 
                         {/* Live Feed Section */}
-                        <div className="p-4 flex-1 flex flex-col overflow-hidden">
-                            <div className="flex items-center justify-between mb-3">
+                        <div className="p-3 flex-1 flex flex-col overflow-hidden">
+                            <div className="flex items-center justify-between mb-2">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Feed</h3>
+                                    <div className="w-1 h-3.5 bg-emerald-500 rounded-full"></div>
+                                    <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Live Feed</h3>
                                 </div>
-                                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse">STREAMING</span>
+                                <span className="text-[9px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse shrink-0">STREAMING</span>
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
                                 <RecentCheckins
@@ -509,8 +509,8 @@ export default function NetDetail() {
                         </div>
 
                         {/* Connection Status - Compact Bottom */}
-                        <div className="p-4 mt-auto border-t border-white/5 bg-slate-950/40">
-                            <div className="flex items-center justify-between text-[10px] font-mono">
+                        <div className="p-3 mt-auto border-t border-white/5 bg-slate-950/40 shrink-0">
+                            <div className="flex items-center justify-between text-[9px] font-mono">
                                 <span className="text-slate-500">Uplink: <span className="text-emerald-500">STABLE</span></span>
                                 <span className="text-slate-500">Latency: <span className="text-emerald-500">24ms</span></span>
                                 <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>

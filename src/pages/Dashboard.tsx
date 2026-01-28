@@ -154,26 +154,26 @@ export default function Dashboard() {
 
     return (
         <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
-            {/* Header Area - Fixed Height */}
-            <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
-                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* Header Area - Compact Fixed Height */}
+            <div className="px-4 md:px-6 py-3 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20 shrink-0">
+                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <div>
-                        <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono mb-1">
-                            <span className="relative flex h-1.5 w-1.5">
+                        <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-mono mb-0.5">
+                            <span className="relative flex h-1 w-1">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                                <span className="relative inline-flex rounded-full h-1 w-1 bg-emerald-500"></span>
                             </span>
                             SYSTEM OPERATIONAL
                         </div>
-                        <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight">
+                        <h1 className="text-lg md:text-xl font-bold text-white tracking-tight leading-tight">
                             9M2PJU NCS Center
                         </h1>
-                        <p className="text-slate-500 text-[11px] font-mono">
+                        <p className="text-slate-500 text-[10px] font-mono">
                             OPERATOR: <span className="text-emerald-400 font-bold">{user?.callsign || '9M2PJU'}</span>
                         </p>
                     </div>
                     <div className="flex items-center gap-3">
-                        <Link to="/nets/new" className="h-10 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <Link to="/nets/new" className="h-9 px-3 rounded-lg bg-emerald-600 text-white font-bold text-[11px] hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                             <Plus className="w-4 h-4" />
                             Initialize Net
                         </Link>
@@ -181,91 +181,91 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            {/* Main Content Area - Scrollable Container */}
-            <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 space-y-4">
-                {/* KPI Grid - Top Row (Fixed Height) */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
-                    <div className="card glass-card p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500">
-                            <Radio className="w-5 h-5" />
+            {/* Main Content Area - Scroll-free Container */}
+            <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 space-y-3">
+                {/* KPI Grid - Compact Row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 shrink-0">
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500 shrink-0">
+                            <Radio className="w-4 h-4" />
                         </div>
-                        <div>
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Active</p>
-                            <p className="text-xl font-mono font-bold text-white">{activeNets.length}</p>
-                        </div>
-                    </div>
-                    <div className="card glass-card p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500">
-                            <Globe className="w-5 h-5" />
-                        </div>
-                        <div>
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Nets</p>
-                            <p className="text-xl font-mono font-bold text-white">{allNets.length}</p>
+                        <div className="min-w-0">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider truncate">Active</p>
+                            <p className="text-lg font-mono font-bold text-white">{activeNets.length}</p>
                         </div>
                     </div>
-                    <div className="card glass-card p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500">
-                            <Users className="w-5 h-5" />
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500 shrink-0">
+                            <Globe className="w-4 h-4" />
                         </div>
-                        <div>
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Check-ins</p>
-                            <p className="text-xl font-mono font-bold text-white">{totalCheckins}</p>
+                        <div className="min-w-0">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider truncate">Total Nets</p>
+                            <p className="text-lg font-mono font-bold text-white">{allNets.length}</p>
                         </div>
                     </div>
-                    <div className="card glass-card p-4 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-500">
-                            <Activity className="w-5 h-5" />
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500 shrink-0">
+                            <Users className="w-4 h-4" />
                         </div>
-                        <div>
-                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Operators</p>
-                            <p className="text-xl font-mono font-bold text-white">{uniqueCallsigns}</p>
+                        <div className="min-w-0">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider truncate">Check-ins</p>
+                            <p className="text-lg font-mono font-bold text-white">{totalCheckins}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-500 shrink-0">
+                            <Activity className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider truncate">Operators</p>
+                            <p className="text-lg font-mono font-bold text-white">{uniqueCallsigns}</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Main Dashboard Grid - Flexible Height */}
-                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
                     {/* Left Column: Activity & History (8 cols) */}
                     <div className="lg:col-span-8 flex flex-col gap-4 overflow-hidden">
-                        {/* Main Activity Chart - Semi-Flexible */}
-                        <div className="card glass-card p-4 h-[280px] shrink-0">
+                        {/* Main Activity Chart - Compact Fixed Height */}
+                        <div className="card glass-card p-3 h-[220px] shrink-0 border-white/5">
                             <NetActivityChart data={activityData} title="Check-in Activity (7 Days)" />
                         </div>
 
                         {/* Recent Operations Panel - Fully Flexible with Internal Scroll */}
-                        <div className="card glass-card flex flex-col flex-1 overflow-hidden">
-                            <div className="p-4 border-b border-white/5 flex items-center justify-between shrink-0">
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                        <div className="card glass-card flex flex-col flex-1 overflow-hidden border-white/5">
+                            <div className="p-3 border-b border-white/5 flex items-center justify-between shrink-0 bg-slate-900/50">
+                                <h3 className="text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-2">
                                     <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
                                     Recent Operations
                                 </h3>
-                                <Link to="/nets" className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300">VIEW ALL</Link>
+                                <Link to="/nets" className="text-[9px] font-bold text-emerald-400 hover:text-emerald-300">VIEW ALL</Link>
                             </div>
                             <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {allNets.length === 0 ? (
-                                    <div className="p-12 text-center text-slate-500 text-sm">No operations logged</div>
+                                    <div className="p-8 text-center text-slate-500 text-xs font-mono">No operations logged</div>
                                 ) : (
                                     <div className="divide-y divide-white/5">
-                                        {allNets.slice(0, 8).map((net) => (
+                                        {allNets.slice(0, 10).map((net) => (
                                             <Link
                                                 key={net.id}
                                                 to={`/nets/${net.id}`}
-                                                className="flex items-center justify-between p-3 hover:bg-white/5 transition-colors group"
+                                                className="flex items-center justify-between p-2.5 hover:bg-white/5 transition-colors group"
                                             >
-                                                <div className="flex items-center gap-3">
-                                                    <div className={`w-1.5 h-1.5 rounded-full ${net.ended_at ? 'bg-slate-700' : 'bg-emerald-500 animate-pulse'}`} />
-                                                    <div>
-                                                        <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate max-w-[200px]">{net.name}</p>
-                                                        <p className="text-[10px] text-slate-500 font-mono italic">{format(new Date(net.started_at), 'MMM d, HH:mm')}</p>
+                                                <div className="flex items-center gap-3 min-w-0">
+                                                    <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${net.ended_at ? 'bg-slate-700' : 'bg-emerald-500 animate-pulse'}`} />
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate">{net.name}</p>
+                                                        <p className="text-[9px] text-slate-500 font-mono italic">{format(new Date(net.started_at), 'MMM d, HH:mm')}</p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-4">
-                                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700/50">{net.type.replace('_', ' ')}</span>
-                                                    <div className="flex items-center gap-1.5 text-xs text-slate-300 min-w-[40px]">
+                                                <div className="flex items-center gap-3 shrink-0">
+                                                    <span className="hidden sm:inline-block text-[9px] font-bold text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700/50 uppercase">{net.type.replace('_', ' ')}</span>
+                                                    <div className="flex items-center gap-1.5 text-[10px] text-slate-300 min-w-[30px]">
                                                         <Users className="w-3 h-3 text-slate-500" />
                                                         {net.checkins?.length || 0}
                                                     </div>
-                                                    <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                                                    <ChevronRight className="w-4 h-4 text-slate-700 group-hover:text-emerald-500 transition-colors" />
                                                 </div>
                                             </Link>
                                         ))}
@@ -277,18 +277,18 @@ export default function Dashboard() {
 
                     {/* Right Column: Statistics (4 cols) */}
                     <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
-                        {/* Signal Strength Radar/Chart */}
-                        <div className="card glass-card p-4 h-[250px] shrink-0">
+                        {/* Signal Strength - Responsive/Fixed */}
+                        <div className="card glass-card p-3 h-[200px] shrink-0 border-white/5">
                             <SignalReportChart data={signalData} title="Signal Quality" />
                         </div>
 
                         {/* Top Participants Widget */}
-                        <div className="card glass-card p-4 h-[300px] shrink-0">
+                        <div className="card glass-card p-3 h-[260px] shrink-0 border-white/5">
                             <TopParticipantsChart data={topParticipants} title="Top Field Operators" />
                         </div>
 
                         {/* Net Types Distribution */}
-                        <div className="card glass-card p-4 h-[220px] shrink-0">
+                        <div className="card glass-card p-3 h-[180px] shrink-0 border-white/5">
                             <NetTypeDistribution data={netTypeData} title="Operational Breakdown" />
                         </div>
                     </div>
