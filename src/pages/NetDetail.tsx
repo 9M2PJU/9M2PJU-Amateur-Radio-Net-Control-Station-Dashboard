@@ -4,22 +4,16 @@ import { supabase } from '@/lib/supabase'
 import CheckinForm from '@/components/CheckinForm'
 import CheckinList from '@/components/CheckinList'
 import RecentCheckins from '@/components/widgets/RecentCheckins'
-import StatsCard from '@/components/widgets/StatsCard'
 import NetMap from '@/components/widgets/NetMap'
 import { toast } from 'sonner'
 import { format, differenceInMinutes } from 'date-fns'
 import {
-    Radio,
-    Users,
-    Clock,
     ArrowLeft,
     StopCircle,
     Loader2,
     Calendar,
     Wifi,
     AlertTriangle,
-    Mic2,
-    FileJson,
     FileText as FilePdf,
     Upload
 } from 'lucide-react'
@@ -155,39 +149,48 @@ export default function NetDetail() {
             )
             if (confirmed) {
                 // If they want to terminate, try to terminate then proceed
-                handleEndNet().then(() => {
-                    blocker.proceed()
+                handleEndNet().then((success) => {
+                    if (success) {
+                        blocker.proceed()
+                    } else {
+                        blocker.reset()
+                    }
                 }).catch(() => {
-                    // If termination fails, we might still want to let them leave or stay
-                    // For now, let's assume they might want to stay if it fails
                     blocker.reset()
                 })
             } else {
-                // If they don't want to terminate, they can either stay or leave without terminating
                 // The prompt says "prompt to terminate", if they cancel they stay.
                 blocker.reset()
             }
         }
     }, [blocker, isActive])
 
-    const handleEndNet = async () => {
-        if (!confirm('Are you sure you want to end this net?')) return
+    const handleEndNet = async (): Promise<boolean> => {
+        if (!confirm('Are you sure you want to end this net?')) return false
 
         setEnding(true)
         try {
             console.log('Terminating net:', netId)
-            const { error, data } = await supabase
+
+            // Add a timeout for the supabase call to prevent indefinite hanging
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Termination request timed out')), 10000)
+            )
+
+            const updatePromise = supabase
                 .from('nets')
                 .update({ ended_at: new Date().toISOString() })
                 .eq('id', netId)
                 .select()
                 .single()
 
+            const { error, data } = await Promise.race([updatePromise, timeoutPromise]) as any
+
             if (error) {
                 console.error('Termination error:', error)
                 const errorMsg = typeof error === 'object' ? (error as any).message || JSON.stringify(error) : error
                 toast.error(`Termination failed: ${errorMsg}`)
-                return
+                return false
             }
 
             if (data) {
@@ -195,9 +198,11 @@ export default function NetDetail() {
                 setNet(data)
             }
             toast.success('Net Operation Terminated')
+            return true
         } catch (err: any) {
             console.error('System error during termination:', err)
             toast.error(`An unexpected error occurred: ${err.message || 'Unknown error'}`)
+            return false
         } finally {
             setEnding(false)
         }
@@ -305,102 +310,72 @@ export default function NetDetail() {
         : differenceInMinutes(new Date(), new Date(net.started_at))
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mt-16 md:mt-20 pb-16 md:pb-20 animate-fade-in">
-            {/* Back Button & Header */}
-            <div className="mb-8">
-                <button
-                    onClick={() => navigate('/nets')}
-                    className="group flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-6 text-sm font-medium"
-                >
-                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-                    </div>
-                    Back to Operations
-                </button>
-
-                <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-4 mb-3">
-                            <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">{net.name}</h1>
-                            {isActive ? (
-                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-wider animate-pulse">
-                                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                                    Live
+        <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
+            {/* Header Area - Fixed Height */}
+            <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
+                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => navigate('/nets')}
+                            className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800 transition-all group"
+                            title="Back to Operations"
+                        >
+                            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
+                        </button>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h1 className="text-2xl font-bold text-white tracking-tight">{net.name}</h1>
+                                {isActive ? (
+                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                                        Live
+                                    </span>
+                                ) : (
+                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
+                                        Offline
+                                    </span>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-4 text-[11px] text-slate-500 font-mono mt-0.5">
+                                <span className="flex items-center gap-1">
+                                    <Calendar className="w-3 h-3" />
+                                    {format(new Date(net.started_at), 'MMM d, HH:mm')}
                                 </span>
-                            ) : (
-                                <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-xs font-bold uppercase tracking-wider">
-                                    <div className="w-2 h-2 rounded-full bg-slate-500"></div>
-                                    Offline
-                                </span>
-                            )}
+                                {net.frequency && (
+                                    <span className="flex items-center gap-1 text-emerald-500/80">
+                                        <Wifi className="w-3 h-3" />
+                                        {net.frequency}
+                                    </span>
+                                )}
+                                <span className="uppercase">{net.type.replace('_', ' ')}</span>
+                            </div>
                         </div>
-
-                        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-400 font-mono">
-                            <span className="flex items-center gap-1.5">
-                                <Calendar className="w-4 h-4 text-slate-500" />
-                                {format(new Date(net.started_at), 'MMMM d, yyyy HH:mm')}
-                            </span>
-                            {net.frequency && (
-                                <span className="flex items-center gap-1.5">
-                                    <Wifi className="w-4 h-4 text-emerald-500" />
-                                    <span className="text-emerald-400">{net.frequency}</span>
-                                </span>
-                            )}
-                            {net.mode && (
-                                <span className="flex items-center gap-1.5">
-                                    <Mic2 className="w-4 h-4 text-slate-500" />
-                                    <span>{net.mode}</span>
-                                </span>
-                            )}
-                            <span className={`px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                net.type === 'emergency_exercise' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                                    'bg-violet-500/10 text-violet-400 border border-violet-500/20'
-                                }`}>
-                                {net.type.replace('_', ' ')}
-                            </span>
-                        </div>
-
-                        {net.notes && (
-                            <p className="text-slate-400 mt-4 max-w-2xl bg-slate-900/50 p-3 rounded-lg border border-slate-800 text-sm">
-                                <span className="text-emerald-500 font-bold mr-2">// NOTES:</span>
-                                {net.notes}
-                            </p>
-                        )}
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3">
-                        {/* Import / Export Controls */}
-                        <div className="flex items-center gap-2 p-1 rounded-2xl bg-slate-900/50 border border-slate-800">
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleImportADIF}
-                                accept=".adi,.adif"
-                                className="hidden"
-                            />
+                    <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800/50">
+                            <input type="file" ref={fileInputRef} onChange={handleImportADIF} accept=".adi,.adif" className="hidden" />
                             <button
                                 onClick={() => fileInputRef.current?.click()}
-                                className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all group"
+                                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
                                 title="Import ADIF"
                             >
-                                <Upload className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
+                                <Upload className="w-4 h-4" />
                             </button>
-
-                            <div className="w-px h-6 bg-slate-800 mx-1"></div>
-
+                            <div className="w-px h-4 bg-slate-800 mx-1"></div>
                             <button
                                 onClick={handleExportADIF}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all border border-transparent hover:border-emerald-500/20"
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all"
                             >
-                                <FileJson className="w-4 h-4" />
                                 ADIF
                             </button>
                             <button
                                 onClick={handleExportPDF}
                                 disabled={exporting}
-                                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-rose-400 hover:bg-rose-500/10 transition-all border border-transparent hover:border-rose-500/20"
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-all flex items-center gap-1.5"
                             >
-                                {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FilePdf className="w-4 h-4" />}
+                                {exporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FilePdf className="w-3 h-3" />}
                                 PDF
                             </button>
                         </div>
@@ -409,128 +384,127 @@ export default function NetDetail() {
                             <button
                                 onClick={handleEndNet}
                                 disabled={ending}
-                                className="btn bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 border border-rose-500/20 shadow-lg shadow-rose-500/5 group"
+                                className="h-10 px-4 rounded-xl bg-rose-500 text-white font-bold text-xs hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-2"
                             >
-                                {ending ? (
-                                    <>
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                        Terminating...
-                                    </>
-                                ) : (
-                                    <>
-                                        <StopCircle className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                                        End Operation
-                                    </>
-                                )}
+                                {ending ? <Loader2 className="w-4 h-4 animate-spin" /> : <StopCircle className="w-4 h-4" />}
+                                End Net
                             </button>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <StatsCard
-                    title="Total Check-ins"
-                    value={checkins.length}
-                    icon={Users}
-                    color="emerald"
-                />
-                <StatsCard
-                    title="Unique Stations"
-                    value={new Set(checkins.map(c => c.callsign)).size}
-                    icon={Radio}
-                    color="cyan"
-                />
-                <StatsCard
-                    title="Session Duration"
-                    value={`${Math.floor(duration / 60)}h ${duration % 60}m`}
-                    icon={Clock}
-                    color="violet"
-                />
-                <StatsCard
-                    title="Traffic Reports"
-                    value={checkins.filter(c => c.traffic).length}
-                    icon={AlertTriangle}
-                    color="amber"
-                />
-            </div>
+            {/* Main Content Dashboard Area - Fills remaining space */}
+            <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0">
 
-            {/* Analysis Section (Charts) */}
-            {checkins.length > 0 && (
-                <div className="mb-8 card glass-card overflow-hidden" ref={chartRef}>
-                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-6 p-1">
-                        <TopParticipantsChart
-                            data={Object.entries(
-                                checkins.reduce((acc, c) => {
-                                    acc[c.callsign] = (acc[c.callsign] || 0) + 1
-                                    return acc
-                                }, {} as Record<string, number>)
-                            )
-                                .map(([callsign, checkins]) => ({ callsign, checkins }))
-                                .sort((a, b) => b.checkins - a.checkins)
-                                .slice(0, 10)}
-                            title="Net Distribution (Top Stations)"
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Net Map Visualization */}
-            <div className="mb-8">
-                <div className="card glass-card p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                        <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
-                        <h3 className="text-lg font-bold text-white">Geographic Distribution</h3>
-                    </div>
-                    <NetMap checkins={checkins} />
-                </div>
-            </div>
-
-            {/* Check-in Form (only for active nets) */}
-            {isActive && (
-                <div className="mb-8">
-                    <CheckinForm netId={netId!} onCheckinAdded={fetchData} />
-                </div>
-            )}
-
-            {/* Main Content Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Check-in List */}
-                <div className="lg:col-span-2 space-y-6">
-                    <CheckinList
-                        checkins={checkins}
-                        onDelete={handleCheckinDeleted}
-                        onGenerateCertificate={handleGenerateCertificate}
-                        showDelete={isActive}
-                    />
-                </div>
-
-                {/* Recent Activity Sidebar */}
-                <div className="lg:sticky lg:top-24 h-fit space-y-6">
-                    <RecentCheckins
-                        checkins={[...checkins].reverse()}
-                        title="Live Feed"
-                        maxItems={8}
-                    />
-
-                    {/* Session Status Widget */}
-                    <div className="card glass-card p-6">
-                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                            <div className="w-1 h-5 bg-slate-500 rounded-full"></div>
-                            Connection Status
-                        </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800">
-                                <span className="text-sm text-slate-400">Uplink Status</span>
-                                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">STABLE</span>
+                {/* Left Column: Stats & Operations (3 cols) */}
+                <div className="lg:col-span-3 border-r border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
+                    <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
+                        {/* Compact Stats Grid */}
+                        <div className="grid grid-cols-2 gap-3">
+                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Check-ins</p>
+                                <p className="text-xl font-mono font-bold text-emerald-400">{checkins.length}</p>
                             </div>
-                            <div className="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800">
-                                <span className="text-sm text-slate-400">Database</span>
-                                <span className="flex items-center gap-1.5 text-xs font-bold text-emerald-400">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                                    CONNECTED
-                                </span>
+                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Stations</p>
+                                <p className="text-xl font-mono font-bold text-cyan-400">{new Set(checkins.map(c => c.callsign)).size}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Duration</p>
+                                <p className="text-sm font-mono font-bold text-violet-400">{`${Math.floor(duration / 60)}h ${duration % 60}m`}</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
+                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Traffic</p>
+                                <p className="text-xl font-mono font-bold text-amber-400">{checkins.filter(c => c.traffic).length}</p>
+                            </div>
+                        </div>
+
+                        {/* Quick Check-in Form */}
+                        {isActive && (
+                            <div className="mt-2">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Transmit Log</h3>
+                                </div>
+                                <div className="scale-90 origin-top -mt-4 -mx-4 h-full">
+                                    <CheckinForm netId={netId!} onCheckinAdded={fetchData} />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Analysis - Top Stations (Smaller) */}
+                        {checkins.length > 0 && (
+                            <div className="mt-4 p-3 rounded-xl bg-slate-900/30 border border-slate-800/30 h-64 overflow-hidden">
+                                <TopParticipantsChart
+                                    data={Object.entries(
+                                        checkins.reduce((acc, c) => {
+                                            acc[c.callsign] = (acc[c.callsign] || 0) + 1
+                                            return acc
+                                        }, {} as Record<string, number>)
+                                    )
+                                        .map(([callsign, checkins]) => ({ callsign, checkins }))
+                                        .sort((a, b) => b.checkins - a.checkins)
+                                        .slice(0, 5)}
+                                    title="Distribution"
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Center Column: Station Log (6 cols) */}
+                <div className="lg:col-span-6 flex flex-col overflow-hidden bg-slate-950/20">
+                    <div className="p-0 flex-1 overflow-y-auto custom-scrollbar relative">
+                        <div className="p-4 md:p-6 min-h-full">
+                            <CheckinList
+                                checkins={checkins}
+                                onDelete={handleCheckinDeleted}
+                                onGenerateCertificate={handleGenerateCertificate}
+                                showDelete={isActive}
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Column: Visualization & Status (3 cols) */}
+                <div className="lg:col-span-3 border-l border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+                        {/* Map Section - Fixed Aspect Ratio */}
+                        <div className="p-4 border-b border-white/5 bg-slate-900/40">
+                            <div className="flex items-center gap-2 mb-3">
+                                <div className="w-1 h-4 bg-cyan-500 rounded-full"></div>
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Geo Presence</h3>
+                            </div>
+                            <div className="rounded-xl overflow-hidden border border-slate-800/50 shadow-inner h-48">
+                                <NetMap checkins={checkins} className="h-full w-full" />
+                            </div>
+                        </div>
+
+                        {/* Live Feed Section */}
+                        <div className="p-4 flex-1 flex flex-col overflow-hidden">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Feed</h3>
+                                </div>
+                                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse">STREAMING</span>
+                            </div>
+                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                                <RecentCheckins
+                                    checkins={[...checkins].reverse()}
+                                    title=""
+                                    maxItems={20}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Connection Status - Compact Bottom */}
+                        <div className="p-4 mt-auto border-t border-white/5 bg-slate-950/40">
+                            <div className="flex items-center justify-between text-[10px] font-mono">
+                                <span className="text-slate-500">Uplink: <span className="text-emerald-500">STABLE</span></span>
+                                <span className="text-slate-500">Latency: <span className="text-emerald-500">24ms</span></span>
+                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
                             </div>
                         </div>
                     </div>

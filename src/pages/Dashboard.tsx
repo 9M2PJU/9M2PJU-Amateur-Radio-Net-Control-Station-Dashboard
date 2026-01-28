@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
-import StatsCard from '@/components/widgets/StatsCard'
 import NetActivityChart from '@/components/widgets/NetActivityChart'
 import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 import NetTypeDistribution from '@/components/widgets/NetTypeDistribution'
@@ -13,7 +12,6 @@ import {
     Activity,
     Plus,
     ChevronRight,
-    Calendar,
     Globe,
     Loader2
 } from 'lucide-react'
@@ -144,164 +142,143 @@ export default function Dashboard() {
     }))
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mt-16 md:mt-20 pb-16 md:pb-20 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-2">
-                        <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        SYSTEM OPERATIONAL
-                    </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                        9M2PJU NCS Center
-                    </h1>
-                    <p className="text-slate-400 mt-2 max-w-xl">
-                        Welcome back, <span className="text-emerald-400 font-medium">{user?.callsign || 'Operator'}</span>.
-                        Your station overview and net statistics.
-                    </p>
-                </div>
-                <Link to="/nets/new" className="btn btn-primary shadow-lg shadow-emerald-500/20 group">
-                    <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                    <span>Initialize Net</span>
-                </Link>
-            </div>
-
-            {/* KPI Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
-                <StatsCard
-                    title="Active Nets"
-                    value={activeNets.length}
-                    subtitle="Currently on-air"
-                    icon={Radio}
-                    color="emerald"
-                />
-                <StatsCard
-                    title="Total Nets"
-                    value={allNets.length}
-                    subtitle="Lifetime logs"
-                    icon={Globe}
-                    color="cyan"
-                />
-                <StatsCard
-                    title="Check-ins"
-                    value={totalCheckins}
-                    subtitle="Total stations logged"
-                    icon={Users}
-                    color="violet"
-                />
-                <StatsCard
-                    title="Participants"
-                    value={uniqueCallsigns}
-                    subtitle="Unique operators"
-                    icon={Activity}
-                    color="amber"
-                />
-            </div>
-
-            {/* Analytics Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 card glass-card p-1">
-                    <NetActivityChart data={activityData} title="Activity (7 Days)" />
-                </div>
-                <div className="card glass-card p-1">
-                    <SignalReportChart data={signalData} title="Signal Reports (Strength)" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-                <div className="card glass-card p-1">
-                    <TopParticipantsChart data={topParticipants} title="Top Operators" />
-                </div>
-            </div>
-
-            {/* Bottom Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="space-y-6">
-
-                    {/* Distribution Chart */}
-                    <div className="card glass-card p-1">
-                        <NetTypeDistribution data={netTypeData} title="Net Types" />
-                    </div>
-                </div>
-
-                {/* Recent Nets List */}
-                <div className="lg:col-span-2 card glass-card p-6">
-                    <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                            <div className="h-6 w-1 bg-emerald-500 rounded-full"></div>
-                            <h3 className="text-lg font-bold text-white">Recent Operations</h3>
+        <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
+            {/* Header Area - Fixed Height */}
+            <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
+                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono mb-1">
+                            <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+                            </span>
+                            SYSTEM OPERATIONAL
                         </div>
-                        <Link to="/nets" className="text-sm font-medium text-emerald-400 hover:text-emerald-300 flex items-center gap-1 group transition-colors">
-                            Archive <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                        <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight leading-tight">
+                            9M2PJU NCS Center
+                        </h1>
+                        <p className="text-slate-500 text-[11px] font-mono">
+                            OPERATOR: <span className="text-emerald-400 font-bold">{user?.callsign || '9M2PJU'}</span>
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Link to="/nets/new" className="h-10 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                            <Plus className="w-4 h-4" />
+                            Initialize Net
                         </Link>
                     </div>
+                </div>
+            </div>
 
-                    {allNets.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
-                            <div className="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                                <Radio className="w-8 h-8 text-slate-600" />
+            {/* Main Content Area - Scrollable Container */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-6">
+                {/* KPI Grid - Top Row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="card glass-card p-4 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500">
+                            <Radio className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Active</p>
+                            <p className="text-xl font-mono font-bold text-white">{activeNets.length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500">
+                            <Globe className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Nets</p>
+                            <p className="text-xl font-mono font-bold text-white">{allNets.length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500">
+                            <Users className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Check-ins</p>
+                            <p className="text-xl font-mono font-bold text-white">{totalCheckins}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-500">
+                            <Activity className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Operators</p>
+                            <p className="text-xl font-mono font-bold text-white">{uniqueCallsigns}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Charts Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="lg:col-span-8 space-y-6">
+                        {/* Main Activity Chart */}
+                        <div className="card glass-card p-4 h-[350px]">
+                            <NetActivityChart data={activityData} title="Check-in Activity (7 Days)" />
+                        </div>
+
+                        {/* Recent Operations Panel */}
+                        <div className="card glass-card flex flex-col overflow-hidden">
+                            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                                <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
+                                    Recent Operations
+                                </h3>
+                                <Link to="/nets" className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300">VIEW ALL</Link>
                             </div>
-                            <h4 className="text-white font-medium mb-1">No operations logged</h4>
-                            <p className="text-slate-500 text-sm max-w-xs mb-4">Start your first net control session to begin logging data.</p>
-                            <Link to="/nets/new" className="text-emerald-400 hover:text-emerald-300 text-sm font-medium">
-                                Initialize First Net
-                            </Link>
-                        </div>
-                    ) : (
-                        <div className="space-y-3">
-                            {allNets.slice(0, 5).map((net) => (
-                                <Link
-                                    key={net.id}
-                                    to={`/nets/${net.id}`}
-                                    className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 hover:bg-slate-800/80 transition-all hover:shadow-lg hover:shadow-emerald-500/5"
-                                >
-                                    <div className="flex items-start gap-4 mb-3 sm:mb-0">
-                                        <div className={`mt-1.5 w-2.5 h-2.5 rounded-full shrink-0 ${net.ended_at ? 'bg-slate-600' : 'bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]'}`} />
-                                        <div>
-                                            <h4 className="font-bold text-white group-hover:text-emerald-400 transition-colors flex items-center gap-2">
-                                                {net.name}
-                                                {net.frequency && (
-                                                    <span className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono bg-slate-800 text-slate-400 border border-slate-700">
-                                                        {net.frequency}
-                                                    </span>
-                                                )}
-                                            </h4>
-                                            <div className="flex items-center gap-3 mt-1 text-xs text-slate-400 font-mono">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {format(new Date(net.started_at), 'MMM d, HH:mm')}
-                                                </span>
-                                                {!net.ended_at && (
-                                                    <span className="text-emerald-500 font-bold tracking-wider">LIVE</span>
-                                                )}
-                                            </div>
-                                        </div>
+                            <div className="max-h-[320px] overflow-y-auto custom-scrollbar">
+                                {allNets.length === 0 ? (
+                                    <div className="p-12 text-center text-slate-500 text-sm">No operations logged</div>
+                                ) : (
+                                    <div className="divide-y divide-white/5">
+                                        {allNets.slice(0, 8).map((net) => (
+                                            <Link
+                                                key={net.id}
+                                                to={`/nets/${net.id}`}
+                                                className="flex items-center justify-between p-3 hover:bg-white/5 transition-colors group"
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-1.5 h-1.5 rounded-full ${net.ended_at ? 'bg-slate-700' : 'bg-emerald-500 animate-pulse'}`} />
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate max-w-[200px]">{net.name}</p>
+                                                        <p className="text-[10px] text-slate-500 font-mono italic">{format(new Date(net.started_at), 'MMM d, HH:mm')}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-800/50 px-2 py-0.5 rounded border border-slate-700/50">{net.type.replace('_', ' ')}</span>
+                                                    <div className="flex items-center gap-1.5 text-xs text-slate-300 min-w-[40px]">
+                                                        <Users className="w-3 h-3 text-slate-500" />
+                                                        {net.checkins?.length || 0}
+                                                    </div>
+                                                    <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-emerald-500 transition-colors" />
+                                                </div>
+                                            </Link>
+                                        ))}
                                     </div>
-
-                                    <div className="flex items-center gap-3 sm:gap-6 pl-6 sm:pl-0 border-l sm:border-l-0 border-slate-800 sm:border-transparent">
-                                        <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                            net.type === 'emergency_exercise' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                                'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                                            }`}>
-                                            {net.type.replace('_', ' ')}
-                                        </span>
-
-                                        <div className="flex items-center justify-center min-w-[3rem] px-3 py-1 rounded bg-slate-800/80 border border-slate-700">
-                                            <Users className="w-3.5 h-3.5 text-slate-400 mr-2" />
-                                            <span className="text-sm font-mono font-bold text-white">{net.checkins?.length || 0}</span>
-                                        </div>
-
-                                        <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all">
-                                            <ChevronRight className="w-4 h-4" />
-                                        </div>
-                                    </div>
-                                </Link>
-                            ))}
+                                )}
+                            </div>
                         </div>
-                    )}
+                    </div>
+
+                    <div className="lg:col-span-4 space-y-6">
+                        {/* Signal Strength Radar/Chart */}
+                        <div className="card glass-card p-4 h-[300px]">
+                            <SignalReportChart data={signalData} title="Signal Quality" />
+                        </div>
+
+                        {/* Top Participants Widget */}
+                        <div className="card glass-card p-4 h-[350px]">
+                            <TopParticipantsChart data={topParticipants} title="Top Field Operators" />
+                        </div>
+
+                        {/* Net Types Distribution */}
+                        <div className="card glass-card p-4 h-[250px]">
+                            <NetTypeDistribution data={netTypeData} title="Operational Breakdown" />
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>

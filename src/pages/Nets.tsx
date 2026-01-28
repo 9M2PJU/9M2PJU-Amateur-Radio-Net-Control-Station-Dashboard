@@ -78,154 +78,136 @@ export default function Nets() {
     }
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mt-16 md:mt-20 pb-16 md:pb-20 animate-fade-in">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                <div>
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono mb-2">
-                        <Activity className="w-3 h-3" />
-                        NET CONTROL LOGS
-                    </div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">Operations Log</h1>
-                    <p className="text-slate-400 mt-2 max-w-xl">
-                        History of your net control sessions and exercises.
-                    </p>
-                </div>
-                <Link to="/nets/new" className="btn btn-primary shadow-lg shadow-emerald-500/20 group">
-                    <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform" />
-                    <span>Initialize Net</span>
-                </Link>
-            </div>
-
-            {/* Stats Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="card glass-card p-5 flex flex-col items-center justify-center text-center group hover:bg-slate-800/80 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Radio className="w-5 h-5 text-slate-400" />
-                    </div>
-                    <p className="text-3xl font-bold text-white font-mono">{allNets.length}</p>
-                    <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Total Nets</p>
-                </div>
-                <div className="card glass-card p-5 flex flex-col items-center justify-center text-center group hover:bg-slate-800/80 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Activity className="w-5 h-5 text-emerald-400" />
-                    </div>
-                    <p className="text-3xl font-bold text-emerald-400 font-mono">
-                        {allNets.filter(n => !n.ended_at).length}
-                    </p>
-                    <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Live Active</p>
-                </div>
-                <div className="card glass-card p-5 flex flex-col items-center justify-center text-center group hover:bg-slate-800/80 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-cyan-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Calendar className="w-5 h-5 text-cyan-400" />
-                    </div>
-                    <p className="text-3xl font-bold text-cyan-400 font-mono">
-                        {allNets.filter(n => n.type === 'weekly').length}
-                    </p>
-                    <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Weekly</p>
-                </div>
-                <div className="card glass-card p-5 flex flex-col items-center justify-center text-center group hover:bg-slate-800/80 transition-colors">
-                    <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                        <Signal className="w-5 h-5 text-rose-400" />
-                    </div>
-                    <p className="text-3xl font-bold text-rose-400 font-mono">
-                        {allNets.filter(n => n.type === 'emergency_exercise').length}
-                    </p>
-                    <p className="text-xs uppercase tracking-wider text-slate-500 font-bold mt-1">Exercises</p>
-                </div>
-            </div>
-
-            {/* Nets List */}
-            <div className="card glass-card p-6 min-h-[400px]">
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                    <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
-                    All Operations
-                </h3>
-
-                {allNets.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-16 text-center border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
-                        <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mb-4">
-                            <Radio className="w-10 h-10 text-slate-600" />
+        <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
+            {/* Header Area - Fixed Height */}
+            <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
+                <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                    <div>
+                        <div className="inline-flex items-center gap-2 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono mb-1">
+                            <Activity className="w-3 h-3" />
+                            NET CONTROL LOGS
                         </div>
-                        <h3 className="text-xl font-bold text-white mb-2">No operations logged</h3>
-                        <p className="text-slate-500 mb-6 max-w-sm">Start your first net control session to begin logging check-ins and tracking statistics.</p>
-                        <Link to="/nets/new" className="btn btn-primary shadow-lg shadow-emerald-500/20">
+                        <h1 className="text-xl md:text-2xl font-bold text-white tracking-tight">Operations Log</h1>
+                        <p className="text-slate-500 text-[11px] font-mono mt-0.5">
+                            HISTORY & ARCHIVE OF ON-AIR SESSIONS
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                        <Link to="/nets/new" className="h-10 px-4 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-500 transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-2">
                             <Plus className="w-4 h-4" />
-                            Initialize First Net
+                            Initialize Net
                         </Link>
                     </div>
-                ) : (
-                    <div className="space-y-3">
-                        {allNets.map((net) => (
-                            <Link
-                                key={net.id}
-                                to={`/nets/${net.id}`}
-                                className="group flex flex-col md:flex-row md:items-center p-4 rounded-xl bg-slate-900/50 border border-slate-800 hover:border-emerald-500/30 hover:bg-slate-800/80 transition-all hover:shadow-lg hover:shadow-emerald-500/5 relative overflow-hidden"
-                            >
-                                {/* Active indicator strip */}
-                                {!net.ended_at && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 animate-pulse"></div>
-                                )}
+                </div>
+            </div>
 
-                                <div className="flex items-center gap-5 flex-1 pl-2">
-                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 border border-t-white/10 ${net.ended_at
-                                        ? 'bg-slate-800 border-slate-700'
-                                        : 'bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20'
-                                        }`}>
-                                        <Radio className={`w-6 h-6 ${net.ended_at ? 'text-slate-500' : 'text-white'}`} />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <h3 className="text-lg font-bold text-white truncate group-hover:text-emerald-400 transition-colors">
-                                                {net.name}
-                                            </h3>
-                                            {!net.ended_at && (
-                                                <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 animate-pulse">
-                                                    LIVE
-                                                </span>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-slate-400 font-mono">
-                                            <span className="flex items-center gap-1.5">
-                                                <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                                                {format(new Date(net.started_at), 'MMM d, yyyy HH:mm')}
-                                            </span>
-                                            {net.frequency && (
-                                                <span className="flex items-center gap-1.5">
-                                                    <Signal className="w-3.5 h-3.5 text-slate-500" />
-                                                    {net.frequency}
-                                                </span>
-                                            )}
-                                            {net.mode && (
-                                                <span className="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700 text-slate-300">
-                                                    {net.mode}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center gap-4 mt-4 md:mt-0 pl-16 md:pl-0">
-                                    <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
-                                        net.type === 'emergency_exercise' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
-                                            'bg-violet-500/10 text-violet-400 border border-violet-500/20'
-                                        }`}>
-                                        {formatType(net.type)}
-                                    </span>
-
-                                    <div className="flex items-center justify-center min-w-[3rem] px-3 py-1.5 rounded-lg bg-slate-800/80 border border-slate-700 group-hover:border-emerald-500/20 transition-colors">
-                                        <Users className="w-3.5 h-3.5 text-slate-400 mr-2" />
-                                        <span className="text-sm font-mono font-bold text-white">{net.checkins?.length || 0}</span>
-                                    </div>
-
-                                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center group-hover:bg-emerald-500 group-hover:text-white transition-all transform group-hover:translate-x-1">
-                                        <ChevronRight className="w-4 h-4" />
-                                    </div>
-                                </div>
-                            </Link>
-                        ))}
+            {/* Main Content Area - Split into Stats and List */}
+            <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 space-y-4">
+                {/* Stats Summary - Compact Row */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+                            <Radio className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Total</p>
+                            <p className="text-lg font-mono font-bold text-white">{allNets.length}</p>
+                        </div>
                     </div>
-                )}
+                    <div className="card glass-card p-3 flex items-center gap-3 border-emerald-500/20">
+                        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20">
+                            <Activity className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] uppercase font-bold text-emerald-500 tracking-wider">On-Air</p>
+                            <p className="text-lg font-mono font-bold text-emerald-400">{allNets.filter(n => !n.ended_at).length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center text-cyan-400 border border-cyan-500/20">
+                            <Calendar className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Weekly</p>
+                            <p className="text-lg font-mono font-bold text-cyan-400">{allNets.filter(n => n.type === 'weekly').length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-3 flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 border border-rose-500/20">
+                            <Signal className="w-4 h-4" />
+                        </div>
+                        <div>
+                            <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider">Exercises</p>
+                            <p className="text-lg font-mono font-bold text-rose-400">{allNets.filter(n => n.type === 'emergency_exercise').length}</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Operations List Container - Viewport Filling */}
+                <div className="flex-1 card glass-card overflow-hidden flex flex-col">
+                    <div className="p-4 border-b border-white/5 bg-slate-900/40">
+                        <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                            <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
+                            Historical Log
+                        </h3>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        {allNets.length === 0 ? (
+                            <div className="p-16 text-center">
+                                <Radio className="w-12 h-12 text-slate-700 mx-auto mb-4" />
+                                <h3 className="text-white font-bold mb-2">No operations found</h3>
+                                <p className="text-slate-500 text-sm">Start a new net to begin logging.</p>
+                            </div>
+                        ) : (
+                            <div className="divide-y divide-white/5">
+                                {allNets.map((net) => (
+                                    <Link
+                                        key={net.id}
+                                        to={`/nets/${net.id}`}
+                                        className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group relative overflow-hidden"
+                                    >
+                                        {!net.ended_at && (
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                                        )}
+                                        <div className="flex items-center gap-4 flex-1">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-t-white/10 ${net.ended_at
+                                                ? 'bg-slate-800/80 border-slate-700'
+                                                : 'bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20'
+                                                }`}>
+                                                <Radio className={`w-5 h-5 ${net.ended_at ? 'text-slate-500' : 'text-white'}`} />
+                                            </div>
+                                            <div className="min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate max-w-[300px]">{net.name}</h3>
+                                                    {!net.ended_at && <span className="text-[8px] font-bold text-emerald-500 px-1 border border-emerald-500/30 rounded animate-pulse">LIVE</span>}
+                                                </div>
+                                                <div className="flex items-center gap-4 text-[10px] text-slate-500 font-mono italic mt-0.5">
+                                                    <span className="flex items-center gap-1"><Calendar className="w-3 h-3" /> {format(new Date(net.started_at), 'MMM d, yyyy')}</span>
+                                                    {net.frequency && <span className="flex items-center gap-1"><Signal className="w-3 h-3" /> {net.frequency}</span>}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-6">
+                                            <span className={`hidden md:inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                                net.type === 'emergency_exercise' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
+                                                    'bg-violet-500/10 text-violet-400 border border-violet-500/20'
+                                                }`}>
+                                                {formatType(net.type)}
+                                            </span>
+                                            <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1 rounded-lg border border-white/5">
+                                                <Users className="w-3 h-3 text-slate-500" />
+                                                <span className="text-xs font-mono font-bold text-white">{net.checkins?.length || 0}</span>
+                                            </div>
+                                            <ChevronRight className="w-5 h-5 text-slate-700 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                                        </div>
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </main>
     )
