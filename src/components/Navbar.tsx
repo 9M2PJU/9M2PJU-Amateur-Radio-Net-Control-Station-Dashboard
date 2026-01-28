@@ -104,15 +104,15 @@ export default function Navbar() {
                         <Link to="/dashboard" className="flex items-center gap-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
-                                <div className="relative w-10 h-10 rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 border border-white/10">
+                                <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 border border-white/10">
                                     <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xl font-bold tracking-tighter text-white">
+                                <span className="text-lg md:text-xl font-bold tracking-tighter text-white">
                                     9M2PJU <span className="text-emerald-500">NCS Center</span>
                                 </span>
-                                <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
+                                <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
                                     NCS Center
                                 </span>
                             </div>
@@ -183,8 +183,8 @@ export default function Navbar() {
 
                 {/* Mobile Menu */}
                 {mobileMenuOpen && (
-                    <div className="md:hidden glass border-t border-white/10 animate-fade-in mx-4 mb-4 rounded-xl overflow-hidden mt-2">
-                        <div className="px-4 py-6 space-y-3">
+                    <div className="md:hidden glass border-t border-white/10 animate-fade-in overflow-hidden">
+                        <div className="px-4 py-4 space-y-2">
                             {user && (
                                 <div className="flex items-center gap-4 px-4 py-4 rounded-xl bg-white/5 mb-6 border border-white/5">
                                     <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg">

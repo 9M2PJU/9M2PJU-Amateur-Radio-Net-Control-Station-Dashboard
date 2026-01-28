@@ -51,8 +51,8 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
             })
 
             if (error) {
-                toast.error('Failed to add check-in')
-                console.error(error)
+                console.error('Check-in error detail:', error)
+                toast.error(`Failed to add check-in: ${error.message}`)
                 return
             }
 

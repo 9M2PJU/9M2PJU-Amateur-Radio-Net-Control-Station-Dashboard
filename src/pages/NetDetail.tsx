@@ -135,6 +135,7 @@ export default function NetDetail() {
 
         setEnding(true)
         try {
+            console.log('Terminating net:', netId)
             const { error, data } = await supabase
                 .from('nets')
                 .update({ ended_at: new Date().toISOString() })
@@ -148,13 +149,14 @@ export default function NetDetail() {
                 return
             }
 
-            if (data) setNet(data)
+            if (data) {
+                console.log('Net terminated successfully:', data.id)
+                setNet(data)
+            }
             toast.success('Net Operation Terminated')
-            // No need to manually fetchData() as real-time subscription will handle it
-            // but we update the net state directly for immediate feedback
-        } catch (err) {
+        } catch (err: any) {
             console.error('System error during termination:', err)
-            toast.error('An unexpected error occurred')
+            toast.error(`An unexpected error occurred: ${err.message || 'Unknown error'}`)
         } finally {
             setEnding(false)
         }
@@ -263,7 +265,7 @@ export default function NetDetail() {
         : differenceInMinutes(new Date(), new Date(net.started_at))
 
     return (
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-20 md:mt-24 pb-20 animate-fade-in">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 mt-16 md:mt-20 pb-16 md:pb-20 animate-fade-in">
             {/* Back Button & Header */}
             <div className="mb-8">
                 <button

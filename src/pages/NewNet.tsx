@@ -43,15 +43,19 @@ export default function NewNet() {
                 // Try to create profile if it doesn't exist (fallback)
                 const { error: profileError } = await supabase
                     .from('profiles')
-                    .insert({ id: user.id, email: user.email, callsign: user.user_metadata?.callsign || 'UNKNOWN' })
+                    .insert({
+                        id: user.id,
+                        callsign: user.user_metadata?.callsign || 'UNKNOWN',
+                        name: user.user_metadata?.name || null
+                    })
                     .select('id')
                     .single()
 
                 if (profileError) {
-                    toast.error('Profile not found')
+                    console.error('Profile creation error:', profileError)
+                    toast.error('Profile sync failed. Please try logging out and back in.')
                     return
                 }
-                // Continue with new profile
             }
 
             let formattedFrequency = frequency.trim()

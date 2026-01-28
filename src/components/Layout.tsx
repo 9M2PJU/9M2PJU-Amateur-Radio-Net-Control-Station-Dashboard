@@ -52,7 +52,7 @@ export default function Layout() {
 
             <Navbar />
 
-            <main>
+            <main className="pb-8 md:pb-12">
                 <Outlet />
             </main>
 
