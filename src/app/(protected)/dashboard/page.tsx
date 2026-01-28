@@ -229,13 +229,13 @@ export default function Dashboard() {
                 <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4">
                     {/* Left Column: Activity & History (8 cols) */}
                     <div className="lg:col-span-8 flex flex-col gap-4 h-full min-h-0">
-                        {/* Main Activity Chart - Fixed Height via Flex */}
-                        <div className="card glass-card p-3 h-[280px] shrink-0 flex flex-col relative"> {/* Changed to fixed height for stability */}
+                        {/* Main Activity Chart - 45% Height */}
+                        <div className="card glass-card p-3 h-[45%] shrink-0 flex flex-col relative min-h-0">
                             <NetActivityChart data={activityData} title="Check-in Activity (7 Days)" />
                         </div>
 
                         {/* Recent Operations Panel - Remaining Height */}
-                        <div className="card glass-card flex flex-col flex-1 min-h-[300px]">
+                        <div className="card glass-card flex flex-col flex-1 min-h-0 overflow-hidden">
                             <div className="p-3 border-b border-white/5 flex items-center justify-between shrink-0">
                                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                                     <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
@@ -279,18 +279,18 @@ export default function Dashboard() {
 
                     {/* Right Column: Statistics (4 cols) */}
                     <div className="lg:col-span-4 flex flex-col gap-4 h-full min-h-0">
-                        {/* Signal Strength - Fixed Height */}
-                        <div className="card glass-card p-3 h-[240px] shrink-0 flex flex-col relative">
+                        {/* Signal Strength - 33% */}
+                        <div className="card glass-card p-3 flex-1 min-h-0 flex flex-col relative">
                             <SignalReportChart data={signalData} title="Signal Quality" />
                         </div>
 
-                        {/* Top Participants - Flex */}
-                        <div className="card glass-card p-3 flex-1 min-h-[240px] flex flex-col relative">
+                        {/* Top Participants - 33% */}
+                        <div className="card glass-card p-3 flex-1 min-h-0 flex flex-col relative">
                             <TopParticipantsChart data={topParticipants} title="Top Field Operators" />
                         </div>
 
-                        {/* Net Types - Fixed Height */}
-                        <div className="card glass-card p-3 h-[200px] shrink-0 flex flex-col relative">
+                        {/* Net Types - 33% */}
+                        <div className="card glass-card p-3 flex-1 min-h-0 flex flex-col relative">
                             <NetTypeDistribution data={netTypeData} title="Operational Breakdown" />
                         </div>
                     </div>
