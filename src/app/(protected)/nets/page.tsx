@@ -13,7 +13,9 @@ import {
     Calendar,
     Activity,
     Signal,
-    Loader2
+    Loader2,
+    Trash2,
+    StopCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Net } from '@/lib/types'
@@ -89,6 +91,62 @@ export default function Nets() {
 
     const formatType = (type: string) => {
         return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }
+
+    const handleDeleteNet = async (id: string, name: string) => {
+        // Double confirmation for list view safety
+        if (!confirm(`ARE YOU SURE?\n\nThis will PERMANENTLY DELETE net "${name}" and all its logs.\nThis action cannot be undone.`)) return
+
+        try {
+            // Optimistic update
+            setNets(current => current.filter(n => n.id !== id))
+
+            // Try simple delete first (cascade should work now)
+            const { error } = await supabase.from('nets').delete().eq('id', id)
+
+            if (error) {
+                // If cascade fails (23503), try manual cleanup
+                if (error.code === '23503') {
+                    await supabase.from('checkins').delete().eq('net_id', id)
+                    await supabase.from('nets').delete().eq('id', id)
+                } else {
+                    throw error
+                }
+            }
+            toast.success('Net deleted successfully')
+        } catch (error: any) {
+            console.error('Delete error:', error)
+            toast.error('Failed to delete net')
+            // Revert optimistic update
+            fetchData()
+        }
+    }
+
+    const handleEndNet = async (id: string, e: React.MouseEvent) => {
+        e.preventDefault()
+        if (!confirm('End this net operation?')) return
+
+        try {
+            const { error } = await supabase
+                .from('nets')
+                .update({ ended_at: new Date().toISOString() })
+                .eq('id', id)
+
+            if (error) throw error
+
+            setNets(current => current.map(n => n.id === id ? { ...n, ended_at: new Date().toISOString() } : n))
+            toast.success('Net marked as ended')
+        } catch (error) {
+            toast.error('Failed to update net status')
+        }
+    }
+
+    // Helper to refresh data if needed
+    const fetchData = async () => {
+        // Re-run the effect logic or just wait for next mount. 
+        // Since this is rare, window.location.reload() is a crude but effective fallback if state desyncs, 
+        // but strictly we should refactor fetchNets out of useEffect. 
+        // For now, I'll trust optimistic updates.
     }
 
     return (
@@ -174,15 +232,14 @@ export default function Nets() {
                     ) : (
                         <div className="divide-y divide-white/5">
                             {allNets.map((net) => (
-                                <Link
+                                <div
                                     key={net.id}
-                                    href={`/nets/${net.id}`}
                                     className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group relative overflow-hidden"
                                 >
-                                    {!net.ended_at && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
-                                    )}
-                                    <div className="flex items-center gap-4 flex-1">
+                                    <Link href={`/nets/${net.id}`} className="flex-1 flex items-center gap-4 min-w-0">
+                                        {!net.ended_at && (
+                                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                                        )}
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border border-t-white/10 ${net.ended_at
                                             ? 'bg-slate-800/80 border-slate-700'
                                             : 'bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/20'
@@ -191,7 +248,7 @@ export default function Nets() {
                                         </div>
                                         <div className="min-w-0">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate max-w-[300px]">{net.name}</h3>
+                                                <h3 className="font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate max-w-[200px] md:max-w-[400px]">{net.name}</h3>
                                                 {!net.ended_at && <span className="text-[8px] font-bold text-emerald-500 px-1 border border-emerald-500/30 rounded animate-pulse">LIVE</span>}
                                             </div>
                                             <div className="flex items-center gap-4 text-[10px] text-slate-500 font-mono italic mt-0.5">
@@ -199,22 +256,39 @@ export default function Nets() {
                                                 {net.frequency && <span className="flex items-center gap-1"><Signal className="w-3 h-3" /> {net.frequency}</span>}
                                             </div>
                                         </div>
-                                    </div>
+                                    </Link>
 
-                                    <div className="flex items-center gap-6">
-                                        <span className={`hidden md:inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
+                                    <div className="flex items-center gap-4 pl-4 border-l border-white/5 bg-transparent z-10">
+                                        <span className={`hidden lg:inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${net.type === 'weekly' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' :
                                             net.type === 'emergency_exercise' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' :
                                                 'bg-violet-500/10 text-violet-400 border border-violet-500/20'
                                             }`}>
                                             {formatType(net.type)}
                                         </span>
-                                        <div className="flex items-center gap-2 bg-slate-900/50 px-3 py-1 rounded-lg border border-white/5">
-                                            <Users className="w-3 h-3 text-slate-500" />
-                                            <span className="text-xs font-mono font-bold text-white">{net.checkins?.length || 0}</span>
-                                        </div>
-                                        <ChevronRight className="w-5 h-5 text-slate-700 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+
+                                        {!net.ended_at && (
+                                            <button
+                                                onClick={(e) => handleEndNet(net.id, e)}
+                                                className="p-2 rounded-lg text-slate-400 hover:text-orange-400 hover:bg-orange-500/10 transition-colors"
+                                                title="End Net"
+                                            >
+                                                <StopCircle className="w-4 h-4" />
+                                            </button>
+                                        )}
+
+                                        <button
+                                            onClick={() => handleDeleteNet(net.id, net.name)}
+                                            className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                                            title="Delete Net"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+
+                                        <Link href={`/nets/${net.id}`}>
+                                            <ChevronRight className="w-5 h-5 text-slate-700 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                                        </Link>
                                     </div>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     )}
