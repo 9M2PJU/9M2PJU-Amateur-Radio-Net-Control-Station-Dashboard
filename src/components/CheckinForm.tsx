@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
-import { Send, Loader2, Radio, MapPin, User, MessageSquare, ShieldAlert, FileText, Globe } from 'lucide-react'
+import { Send, Loader2, Radio, MapPin, User, MessageSquare, ShieldAlert, FileText } from 'lucide-react'
 
 interface CheckinFormProps {
     netId: string
@@ -21,7 +21,6 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
     const [traffic, setTraffic] = useState(false)
     const [trafficPrecedence, setTrafficPrecedence] = useState<'routine' | 'welfare' | 'priority' | 'emergency'>('routine')
     const [trafficDetails, setTrafficDetails] = useState('')
-    const [gridLocator, setGridLocator] = useState('')
     const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +46,7 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
                 traffic,
                 traffic_precedence: traffic ? trafficPrecedence : null,
                 traffic_details: traffic ? trafficDetails.trim() || null : null,
-                grid_locator: gridLocator.toUpperCase().trim() || null,
+                grid_locator: null,
             })
 
             if (error) {
@@ -69,7 +68,6 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
             setTraffic(false)
             setTrafficPrecedence('routine')
             setTrafficDetails('')
-            setGridLocator('')
             onCheckinAdded?.()
         } catch {
             toast.error('An error occurred')
@@ -101,7 +99,20 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
                             id="callsign"
                             type="text"
                             value={callsign}
-                            onChange={(e) => setCallsign(e.target.value.toUpperCase())}
+                            onChange={(e) => {
+                                const val = e.target.value.toUpperCase()
+                                setCallsign(val)
+                                // Auto-populate location based on Malaysian prefix
+                                if (val.startsWith('9M2') || val.startsWith('9W2')) {
+                                    if (!location) setLocation('West Malaysia')
+                                } else if (val.startsWith('9M6') || val.startsWith('9W6')) {
+                                    if (!location) setLocation('Sabah')
+                                } else if (val.startsWith('9M8') || val.startsWith('9W8')) {
+                                    if (!location) setLocation('Sarawak')
+                                } else if (val.startsWith('9M4')) {
+                                    if (!location) setLocation('Malaysia (Satellite/Special)')
+                                }
+                            }}
                             placeholder="9M2ABC"
                             className="input font-mono text-lg uppercase pl-10 border-slate-700 focus:border-emerald-500/50 bg-slate-900/50"
                             required
@@ -146,24 +157,6 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
                     </div>
                 </div>
 
-                {/* Grid Locator */}
-                <div className="group">
-                    <label htmlFor="gridLocator" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                        Grid Locator (Maidenhead)
-                    </label>
-                    <div className="relative">
-                        <input
-                            id="gridLocator"
-                            type="text"
-                            value={gridLocator}
-                            onChange={(e) => setGridLocator(e.target.value.toUpperCase())}
-                            placeholder="e.g., OJ03VE"
-                            maxLength={6}
-                            className="input pl-10 border-slate-700 focus:border-emerald-500/50 bg-slate-900/50 uppercase font-mono"
-                        />
-                        <Globe className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
-                    </div>
-                </div>
 
                 {/* Signal Report - Readability */}
                 <div className="group">

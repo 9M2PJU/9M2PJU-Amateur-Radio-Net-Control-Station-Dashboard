@@ -29,6 +29,10 @@ interface StationMarker {
     name: string | null
 }
 
+// Character codes constants
+const CHAR_A = 'A'.charCodeAt(0)
+const CHAR_ZERO = '0'.charCodeAt(0)
+
 /**
  * Converts a Maidenhead Grid Locator (4 or 6 chars) to Latitude and Longitude
  */
@@ -44,22 +48,18 @@ function locatorToLatLng(locator: string): [number, number] | null {
 
     locator = locator.toUpperCase()
 
-    // Character codes
-    const A = 'A'.charCodeAt(0)
-    const ZERO = '0'.charCodeAt(0)
-
     // Fields (0-17)
-    let lon = (locator.charCodeAt(0) - A) * 20 - 180
-    let lat = (locator.charCodeAt(1) - A) * 10 - 90
+    let lon = (locator.charCodeAt(0) - CHAR_A) * 20 - 180
+    let lat = (locator.charCodeAt(1) - CHAR_A) * 10 - 90
 
     // Squares (0-9)
-    lon += (locator.charCodeAt(2) - ZERO) * 2
-    lat += (locator.charCodeAt(3) - ZERO) * 1
+    lon += (locator.charCodeAt(2) - CHAR_ZERO) * 2
+    lat += (locator.charCodeAt(3) - CHAR_ZERO) * 1
 
     // Subsquares (0-23) - if 6 chars
     if (locator.length >= 6) {
-        lon += (locator.charCodeAt(4) - A) * (2 / 24) + (1 / 24)
-        lat += (locator.charCodeAt(5) - A) * (1 / 24) + (0.5 / 24)
+        lon += (locator.charCodeAt(4) - CHAR_A) * (2 / 24) + (1 / 24)
+        lat += (locator.charCodeAt(5) - CHAR_A) * (1 / 24) + (0.5 / 24)
     } else {
         // Center of square if only 4 chars
         lon += 1
@@ -75,15 +75,45 @@ function locatorToLatLng(locator: string): [number, number] | null {
     return [lat, lon]
 }
 
+/**
+ * Gets coordinates for a callsign based on prefix (fallback when grid is missing)
+ */
+function getCoordsByCallsign(callsign: string): [number, number] | null {
+    const cs = callsign.toUpperCase()
+
+    // West Malaysia (9M2, 9W2)
+    if (cs.startsWith('9M2') || cs.startsWith('9W2')) return [3.1390, 101.6869] // Kuala Lumpur area
+
+    // Sabah (9M6, 9W6)
+    if (cs.startsWith('9M6') || cs.startsWith('9W6')) return [5.9804, 116.0735] // Kota Kinabalu
+
+    // Sarawak (9M8, 9W8)
+    if (cs.startsWith('9M8') || cs.startsWith('9W8')) return [1.5533, 110.3592] // Kuching
+
+    // Default to Center of Malaysia
+    if (cs.startsWith('9M') || cs.startsWith('9W')) return [4.2105, 101.9758]
+
+    return null
+}
+
 export default function NetMap({ checkins, className = "h-[400px] w-full rounded-xl overflow-hidden" }: NetMapProps) {
     const [markers, setMarkers] = useState<StationMarker[]>([])
 
     useEffect(() => {
         const newMarkers: StationMarker[] = checkins
             .map(c => {
-                if (!c.grid_locator) return null
-                const coords = locatorToLatLng(c.grid_locator)
+                let coords: [number, number] | null = null
+
+                if (c.grid_locator) {
+                    coords = locatorToLatLng(c.grid_locator)
+                }
+
+                if (!coords) {
+                    coords = getCoordsByCallsign(c.callsign)
+                }
+
                 if (!coords) return null
+
                 return {
                     callsign: c.callsign,
                     lat: coords[0],
