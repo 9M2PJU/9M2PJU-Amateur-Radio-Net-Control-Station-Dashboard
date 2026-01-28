@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import Layout from '@/components/Layout'
 import { Loader2 } from 'lucide-react'
 
@@ -21,28 +21,90 @@ const PageLoader = () => (
     </div>
 )
 
-export default function App() {
-    return (
-        <BrowserRouter>
+const router = createBrowserRouter([
+    {
+        path: "/",
+        element: (
             <Suspense fallback={<PageLoader />}>
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
-
-                    {/* Protected Routes (wrapped in Layout) */}
-                    <Route element={<Layout />}>
-                        <Route path="/dashboard" element={<Dashboard />} />
-                        <Route path="/nets" element={<Nets />} />
-                        <Route path="/nets/new" element={<NewNet />} />
-                        <Route path="/nets/:id" element={<NetDetail />} />
-                        <Route path="/profile" element={<Profile />} />
-                        <Route path="/settings" element={<Settings />} />
-                    </Route>
-
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
+                <Home />
             </Suspense>
-        </BrowserRouter>
-    )
+        ),
+    },
+    {
+        path: "/login",
+        element: (
+            <Suspense fallback={<PageLoader />}>
+                <Login />
+            </Suspense>
+        ),
+    },
+    {
+        path: "/register",
+        element: (
+            <Suspense fallback={<PageLoader />}>
+                <Register />
+            </Suspense>
+        ),
+    },
+    {
+        element: <Layout />,
+        children: [
+            {
+                path: "/dashboard",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <Dashboard />
+                    </Suspense>
+                ),
+            },
+            {
+                path: "/nets",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <Nets />
+                    </Suspense>
+                ),
+            },
+            {
+                path: "/nets/new",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <NewNet />
+                    </Suspense>
+                ),
+            },
+            {
+                path: "/nets/:id",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <NetDetail />
+                    </Suspense>
+                ),
+            },
+            {
+                path: "/profile",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <Profile />
+                    </Suspense>
+                ),
+            },
+            {
+                path: "/settings",
+                element: (
+                    <Suspense fallback={<PageLoader />}>
+                        <Settings />
+                    </Suspense>
+                ),
+            },
+        ],
+    },
+    {
+        path: "*",
+        element: <Navigate to="/" replace />,
+    },
+])
+
+export default function App() {
+    return <RouterProvider router={router} />
 }

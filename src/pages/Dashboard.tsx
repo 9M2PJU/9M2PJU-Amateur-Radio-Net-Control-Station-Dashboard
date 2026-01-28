@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import StatsCard from '@/components/widgets/StatsCard'
-import SolarWidget from '@/components/widgets/SolarWidget'
 import NetActivityChart from '@/components/widgets/NetActivityChart'
 import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 import NetTypeDistribution from '@/components/widgets/NetTypeDistribution'
@@ -221,8 +220,6 @@ export default function Dashboard() {
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="space-y-6">
-                    {/* Solar Widget */}
-                    <SolarWidget />
 
                     {/* Distribution Chart */}
                     <div className="card glass-card p-1">

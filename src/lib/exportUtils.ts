@@ -74,6 +74,18 @@ export const exportToPDF = async (net: Net, checkins: Checkin[], chartRefs: (HTM
     const pageWidth = doc.internal.pageSize.getWidth()
 
     // Header
+    try {
+        const logoImg = new Image()
+        logoImg.src = '/logo.png'
+        await new Promise((resolve, reject) => {
+            logoImg.onload = resolve
+            logoImg.onerror = reject
+        })
+        doc.addImage(logoImg, 'PNG', 15, 12, 15, 15)
+    } catch (err) {
+        console.error('Failed to load logo for PDF:', err)
+    }
+
     doc.setFontSize(22)
     doc.setTextColor(16, 185, 129) // Emerald-500
     doc.text('9M2PJU NCS DASHBOARD', pageWidth / 2, 20, { align: 'center' })
@@ -288,7 +300,7 @@ export const exportCertificate = async (net: Net, checkin: Checkin) => {
     // Digital Signature Line
     doc.setDrawColor(51, 65, 85) // Slate-700
     doc.setLineWidth(0.5)
-    doc.line(pageWidth / 2 - 50, 188, pageWidth / 2 + 50, 188)
+    doc.line(pageWidth / 2 - 50, 180, pageWidth / 2 + 50, 180)
 
     // Controller Name
     doc.setFontSize(14)
@@ -296,12 +308,12 @@ export const exportCertificate = async (net: Net, checkin: Checkin) => {
     const netController = (net as any).profiles
         ? `${(net as any).profiles.name || 'Unknown'} (${(net as any).profiles.callsign})`
         : 'Authorized NCS'
-    doc.text(netController, pageWidth / 2, 194, { align: 'center' })
+    doc.text(netController, pageWidth / 2, 186, { align: 'center' })
 
     // Controller Title
     doc.setFontSize(11)
     doc.setTextColor(16, 185, 129)
-    doc.text('Net Control Station', pageWidth / 2, 200, { align: 'center' })
+    doc.text('Net Control Station', pageWidth / 2, 192, { align: 'center' })
 
     // Bottom Branding
     doc.setFontSize(8)

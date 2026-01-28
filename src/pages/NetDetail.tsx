@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useBlocker } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import CheckinForm from '@/components/CheckinForm'
 import CheckinList from '@/components/CheckinList'
@@ -40,9 +40,12 @@ export default function NetDetail() {
     const { id: netId } = useParams()
 
     const fetchData = useCallback(async () => {
-        if (!netId) return
+        if (!netId) {
+            setLoading(false)
+            return
+        }
 
-        setLoading(true) // Ensure loading is true when starting fetch
+        setLoading(true)
         try {
             console.log('NetDetail: Fetching data for net:', netId)
             const [netResponse, checkinsResponse] = await Promise.all([
@@ -136,6 +139,36 @@ export default function NetDetail() {
             supabase.removeChannel(channel)
         }
     }, [netId, fetchData])
+
+    const isActive = !!net && !net.ended_at
+
+    // Navigation blocker
+    const blocker = useBlocker(
+        ({ nextLocation }) =>
+            isActive && nextLocation.pathname !== `/nets/${netId}`
+    )
+
+    useEffect(() => {
+        if (blocker.state === 'blocked') {
+            const confirmed = window.confirm(
+                'A net operation is currently active. Would you like to terminate it before leaving?'
+            )
+            if (confirmed) {
+                // If they want to terminate, try to terminate then proceed
+                handleEndNet().then(() => {
+                    blocker.proceed()
+                }).catch(() => {
+                    // If termination fails, we might still want to let them leave or stay
+                    // For now, let's assume they might want to stay if it fails
+                    blocker.reset()
+                })
+            } else {
+                // If they don't want to terminate, they can either stay or leave without terminating
+                // The prompt says "prompt to terminate", if they cancel they stay.
+                blocker.reset()
+            }
+        }
+    }, [blocker, isActive])
 
     const handleEndNet = async () => {
         if (!confirm('Are you sure you want to end this net?')) return
@@ -267,7 +300,6 @@ export default function NetDetail() {
         )
     }
 
-    const isActive = !net.ended_at
     const duration = net.ended_at
         ? differenceInMinutes(new Date(net.ended_at), new Date(net.started_at))
         : differenceInMinutes(new Date(), new Date(net.started_at))
