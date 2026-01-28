@@ -1,10 +1,7 @@
-'use client'
-
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-
 import { useNavigate, useLocation } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import {
     LayoutDashboard,
@@ -15,15 +12,16 @@ import {
     X,
     User,
 } from 'lucide-react'
-import type { Profile } from '@/lib/types'
+import type { Profile } from '../lib/types'
 
 export default function Navbar() {
     const [user, setUser] = useState<Profile | null>(null)
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
-    const router = useNavigate()
-    const pathname = useLocation()
+    const navigate = useNavigate()
+    const location = useLocation()
+    const pathname = location.pathname
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000)
@@ -90,7 +88,7 @@ export default function Navbar() {
             return
         }
         toast.success('Signed out successfully')
-        router.push('/login')
+        navigate('/login')
     }
 
     const navLinks = [

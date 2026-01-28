@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
 import {
     Radio,
-    Users,
+    // Users,
     Plus,
     ChevronRight,
     Calendar,
@@ -18,7 +18,7 @@ import {
     StopCircle
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Net } from '@/lib/types'
+import type { Net } from '../lib/types'
 
 interface NetWithCount extends Net {
     checkins: { id: string }[]
@@ -27,7 +27,7 @@ interface NetWithCount extends Net {
 export default function Nets() {
     const [loading, setLoading] = useState(true)
     const [nets, setNets] = useState<NetWithCount[]>([])
-    const router = useNavigate()
+    const navigate = useNavigate()
 
     useEffect(() => {
         const fetchNets = async () => {

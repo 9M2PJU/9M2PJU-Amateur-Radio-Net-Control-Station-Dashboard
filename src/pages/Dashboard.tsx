@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
-import NetActivityChart from '@/components/widgets/NetActivityChart'
-import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
-import NetTypeDistribution from '@/components/widgets/NetTypeDistribution'
-import SignalReportChart from '@/components/widgets/SignalReportChart'
+import { supabase } from '../lib/supabase'
+import NetActivityChart from '../components/widgets/NetActivityChart'
+import TopParticipantsChart from '../components/widgets/TopParticipantsChart'
+import NetTypeDistribution from '../components/widgets/NetTypeDistribution'
+import SignalReportChart from '../components/widgets/SignalReportChart'
 import { format, subDays } from 'date-fns'
 import {
     Radio,
@@ -19,7 +19,7 @@ import {
     Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Net, Checkin, Profile } from '@/lib/types'
+import type { Net, Checkin, Profile } from '../lib/types'
 
 // Extended Net type to include checkins relation
 interface NetWithCheckins extends Net {
