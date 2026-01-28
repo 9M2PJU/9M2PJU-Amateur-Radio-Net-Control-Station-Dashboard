@@ -26,9 +26,19 @@ export default function Nets() {
 
     useEffect(() => {
         const fetchNets = async () => {
+            const timeoutId = setTimeout(() => {
+                if (loading) {
+                    console.error('Nets: Data fetching timed out')
+                    setLoading(false)
+                    toast.error('Operations log synchronization timed out. Please refresh.')
+                }
+            }, 10000) // 10 second timeout
+
             try {
                 console.log('Nets: Fetching session...')
-                const { data: { session } } = await supabase.auth.getSession()
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+                if (sessionError) throw sessionError
 
                 if (!session) {
                     console.log('Nets: No session, redirecting...')
@@ -39,23 +49,24 @@ export default function Nets() {
                 const authUser = session.user
 
                 console.log('Nets: Fetching nets...')
-                const { data, error } = await supabase
+                const { data, error: netsError } = await supabase
                     .from('nets')
                     .select('*, checkins(id)')
                     .eq('user_id', authUser.id)
                     .order('created_at', { ascending: false })
 
-                if (error) {
-                    console.error('Nets: Fetch error:', error)
-                    toast.error('Failed to load nets')
+                if (netsError) {
+                    console.error('Nets: Fetch error:', netsError)
+                    throw netsError
                 } else {
                     console.log(`Nets: Loaded ${data?.length || 0} nets`)
                     setNets(data as any || [])
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Nets: Critical error:', err)
-                toast.error('System synchronization error')
+                toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
             } finally {
+                clearTimeout(timeoutId)
                 setLoading(false)
             }
         }

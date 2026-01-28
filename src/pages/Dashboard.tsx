@@ -31,9 +31,19 @@ export default function Dashboard() {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
+            const timeoutId = setTimeout(() => {
+                if (loading) {
+                    console.error('Dashboard: Data fetching timed out')
+                    setLoading(false)
+                    toast.error('Dashboard synchronization timed out. Please refresh.')
+                }
+            }, 10000) // 10 second timeout
+
             try {
                 console.log('Dashboard: Fetching user...')
-                const { data: { session } } = await supabase.auth.getSession()
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+
+                if (sessionError) throw sessionError
 
                 if (!session) {
                     console.log('Dashboard: No session, redirecting...')
@@ -58,23 +68,24 @@ export default function Dashboard() {
 
                 // Fetch all nets for this user
                 console.log('Dashboard: Fetching nets...')
-                const { data: netsData, error } = await supabase
+                const { data: netsData, error: netsError } = await supabase
                     .from('nets')
                     .select('*, checkins(*)')
                     .eq('user_id', authUser.id)
                     .order('created_at', { ascending: false })
 
-                if (error) {
-                    console.error('Dashboard: Nets error:', error)
-                    toast.error('Failed to load dashboard data')
+                if (netsError) {
+                    console.error('Dashboard: Nets error:', netsError)
+                    throw netsError
                 } else {
                     console.log(`Dashboard: Loaded ${netsData?.length || 0} nets`)
                     setNets(netsData as any || [])
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Dashboard: Critical error:', err)
-                toast.error('System synchronization error')
+                toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
             } finally {
+                clearTimeout(timeoutId)
                 setLoading(false)
             }
         }
@@ -171,9 +182,9 @@ export default function Dashboard() {
             </div>
 
             {/* Main Content Area - Scrollable Container */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-6">
-                {/* KPI Grid - Top Row */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex-1 overflow-hidden flex flex-col p-4 md:p-6 space-y-4">
+                {/* KPI Grid - Top Row (Fixed Height) */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0">
                     <div className="card glass-card p-4 flex items-center gap-4">
                         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500">
                             <Radio className="w-5 h-5" />
@@ -212,24 +223,25 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Charts Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                    <div className="lg:col-span-8 space-y-6">
-                        {/* Main Activity Chart */}
-                        <div className="card glass-card p-4 h-[350px]">
+                {/* Main Dashboard Grid - Flexible Height */}
+                <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 overflow-hidden">
+                    {/* Left Column: Activity & History (8 cols) */}
+                    <div className="lg:col-span-8 flex flex-col gap-4 overflow-hidden">
+                        {/* Main Activity Chart - Semi-Flexible */}
+                        <div className="card glass-card p-4 h-[280px] shrink-0">
                             <NetActivityChart data={activityData} title="Check-in Activity (7 Days)" />
                         </div>
 
-                        {/* Recent Operations Panel */}
-                        <div className="card glass-card flex flex-col overflow-hidden">
-                            <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                        {/* Recent Operations Panel - Fully Flexible with Internal Scroll */}
+                        <div className="card glass-card flex flex-col flex-1 overflow-hidden">
+                            <div className="p-4 border-b border-white/5 flex items-center justify-between shrink-0">
                                 <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
                                     <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
                                     Recent Operations
                                 </h3>
                                 <Link to="/nets" className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300">VIEW ALL</Link>
                             </div>
-                            <div className="max-h-[320px] overflow-y-auto custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {allNets.length === 0 ? (
                                     <div className="p-12 text-center text-slate-500 text-sm">No operations logged</div>
                                 ) : (
@@ -263,19 +275,20 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="lg:col-span-4 space-y-6">
+                    {/* Right Column: Statistics (4 cols) */}
+                    <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
                         {/* Signal Strength Radar/Chart */}
-                        <div className="card glass-card p-4 h-[300px]">
+                        <div className="card glass-card p-4 h-[250px] shrink-0">
                             <SignalReportChart data={signalData} title="Signal Quality" />
                         </div>
 
                         {/* Top Participants Widget */}
-                        <div className="card glass-card p-4 h-[350px]">
+                        <div className="card glass-card p-4 h-[300px] shrink-0">
                             <TopParticipantsChart data={topParticipants} title="Top Field Operators" />
                         </div>
 
                         {/* Net Types Distribution */}
-                        <div className="card glass-card p-4 h-[250px]">
+                        <div className="card glass-card p-4 h-[220px] shrink-0">
                             <NetTypeDistribution data={netTypeData} title="Operational Breakdown" />
                         </div>
                     </div>

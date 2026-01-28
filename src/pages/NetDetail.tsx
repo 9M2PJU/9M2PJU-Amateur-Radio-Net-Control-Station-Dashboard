@@ -39,6 +39,14 @@ export default function NetDetail() {
             return
         }
 
+        const timeoutId = setTimeout(() => {
+            if (loading) {
+                console.error('NetDetail: Data fetching timed out')
+                setLoading(false)
+                toast.error('Sync timed out. Please refresh.')
+            }
+        }, 12000)
+
         setLoading(true)
         try {
             console.log('NetDetail: Fetching data for net:', netId)
@@ -76,6 +84,7 @@ export default function NetDetail() {
             console.error('Data sync error:', error)
             toast.error(`System sync failed: ${error.message || 'Unknown error'}`)
         } finally {
+            clearTimeout(timeoutId)
             setLoading(false)
         }
     }, [netId, navigate])
