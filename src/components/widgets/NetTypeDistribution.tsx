@@ -1,3 +1,5 @@
+'use client'
+
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
 
 interface NetTypeData {
@@ -47,7 +49,7 @@ export default function NetTypeDistribution({ data, title = 'Net Type Distributi
                                 backdropFilter: 'blur(8px)',
                             }}
                             itemStyle={{ color: '#fff', fontWeight: 600 }}
-                            formatter={(value: number) => [value, 'Count'] as [number, string]}
+                            formatter={(value: any) => [value, 'Count']}
                         />
                         <Legend
                             formatter={(value) => <span className="text-slate-300 font-medium ml-1">{formatName(value)}</span>}

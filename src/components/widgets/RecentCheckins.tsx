@@ -1,3 +1,5 @@
+'use client'
+
 import { format } from 'date-fns'
 import { Clock, User } from 'lucide-react'
 import type { Checkin } from '@/lib/types'

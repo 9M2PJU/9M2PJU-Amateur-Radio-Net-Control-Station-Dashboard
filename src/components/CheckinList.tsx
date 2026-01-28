@@ -1,3 +1,5 @@
+'use client'
+
 import { format } from 'date-fns'
 import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal, Award } from 'lucide-react'
 import { supabase } from '@/lib/supabase'

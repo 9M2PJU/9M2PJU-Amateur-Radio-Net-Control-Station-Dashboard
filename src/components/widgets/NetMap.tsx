@@ -1,16 +1,20 @@
+'use client'
+
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
+// import 'leaflet/dist/leaflet.css' // Moved to globals.css
 import { Checkin } from '@/lib/types'
 import { useEffect, useState } from 'react'
-
-// Fix for default marker icons in Leaflet with Vite/React
+// Fix: Dynamic import of leaflet assets for Next.js is tricky.
+// Usually we can just use the URLs directly or rely on the CSS.
+// But standard marker icons might be broken without setting specific paths.
+// We will try without manual icon override first, or use a CDN fallback if issues.
 import icon from 'leaflet/dist/images/marker-icon.png'
 import iconShadow from 'leaflet/dist/images/marker-shadow.png'
 
 let DefaultIcon = L.icon({
-    iconUrl: icon,
-    shadowUrl: iconShadow,
+    iconUrl: icon.src,
+    shadowUrl: iconShadow.src,
     iconSize: [25, 41],
     iconAnchor: [12, 41]
 })
@@ -98,8 +102,10 @@ function getCoordsByCallsign(callsign: string): [number, number] | null {
 
 export default function NetMap({ checkins, className = "h-[400px] w-full rounded-xl overflow-hidden" }: NetMapProps) {
     const [markers, setMarkers] = useState<StationMarker[]>([])
+    const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
+        setIsClient(true)
         const newMarkers: StationMarker[] = checkins
             .map(c => {
                 let coords: [number, number] | null = null
@@ -125,6 +131,10 @@ export default function NetMap({ checkins, className = "h-[400px] w-full rounded
 
         setMarkers(newMarkers)
     }, [checkins])
+
+    if (!isClient) {
+        return <div className={`bg-slate-900 animate-pulse ${className}`} />
+    }
 
     // Default center (Malaysia as it's for 9M2PJU, but we can auto-center)
     const center: [number, number] = markers.length > 0
