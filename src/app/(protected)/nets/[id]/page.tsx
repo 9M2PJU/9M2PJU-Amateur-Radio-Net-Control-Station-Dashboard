@@ -177,8 +177,31 @@ export default function NetDetail() {
     }, [isActive])
 
 
-    const handleEndNet = async (): Promise<boolean> => {
-        if (!confirm('Are you sure you want to end this net?')) return false
+    const [confirmDelete, setConfirmDelete] = useState(false)
+    const [confirmEnd, setConfirmEnd] = useState(false)
+
+    // Reset confirmation states when clicking away or after timeout
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+        if (confirmDelete) {
+            timeout = setTimeout(() => setConfirmDelete(false), 3000)
+        }
+        return () => clearTimeout(timeout)
+    }, [confirmDelete])
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+        if (confirmEnd) {
+            timeout = setTimeout(() => setConfirmEnd(false), 3000)
+        }
+        return () => clearTimeout(timeout)
+    }, [confirmEnd])
+
+    const handleEndNet = async () => {
+        if (!confirmEnd) {
+            setConfirmEnd(true)
+            return
+        }
 
         setEnding(true)
         try {
@@ -202,7 +225,8 @@ export default function NetDetail() {
                 console.error('Termination error:', error)
                 const errorMsg = typeof error === 'object' ? (error as any).message || JSON.stringify(error) : error
                 toast.error(`Termination failed: ${errorMsg}`)
-                return false
+                setEnding(false)
+                return
             }
 
             if (data) {
@@ -210,60 +234,51 @@ export default function NetDetail() {
                 setNet(data)
             }
             toast.success('Net Operation Terminated')
-            return true
         } catch (err: any) {
             console.error('System error during termination:', err)
-            toast.error(`An unexpected error occurred: ${err.message || 'Unknown error'}`)
-            return false
+            toast.error(`Error: ${err.message}`)
         } finally {
             setEnding(false)
+            setConfirmEnd(false)
         }
     }
 
     const handleDeleteNet = async () => {
-        console.log('Delete button clicked for net:', netId)
-
-        if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to DELETE this net? This action cannot be undone and will remove all associated check-ins.')) {
-            console.log('Delete cancelled by user')
+        if (!confirmDelete) {
+            setConfirmDelete(true)
             return
         }
 
-        console.log('Proceeding with delete...')
+        console.log('Delete button clicked for net:', netId)
         setDeleting(true)
+
         try {
-            // Step 1: Manually delete associated check-ins first (Manual Cascade)
-            // This ensures deletion works even if the database Foreign Key is missing 'ON DELETE CASCADE'
-            console.log('Step 1: Deleting associated check-ins...')
-            const { error: checkinsError } = await supabase
-                .from('checkins')
-                .delete()
-                .eq('net_id', netId)
-
-            if (checkinsError) {
-                console.error('Supabase check-ins delete error:', checkinsError)
-                throw new Error(`Failed to delete associated check-ins: ${checkinsError.message}`)
-            }
-
-            // Step 2: Delete the actual net record
-            console.log('Step 2: Deleting net record...')
+            // Attempt deletion - Cascade should be handled by DB now, checking first
             const { error: netError } = await supabase
                 .from('nets')
                 .delete()
                 .eq('id', netId)
 
             if (netError) {
-                console.error('Supabase net delete error:', netError)
-                throw netError
+                // If FK violation (code 23503), try manual cascade as backup
+                if (netError.code === '23503') {
+                    toast.info('Cleaning up check-ins...')
+                    await supabase.from('checkins').delete().eq('net_id', netId)
+                    const { error: retryError } = await supabase.from('nets').delete().eq('id', netId)
+                    if (retryError) throw retryError
+                } else {
+                    throw netError
+                }
             }
 
-            console.log('Delete successful')
             toast.success('Net Deleted Successfully')
             router.push('/nets')
         } catch (error: any) {
             console.error('Delete exception:', error)
             toast.error(`Delete failed: ${error.message}`)
-        } finally {
             setDeleting(false)
+        } finally {
+            setConfirmDelete(false)
         }
     }
 
@@ -447,20 +462,20 @@ export default function NetDetail() {
                             <button
                                 onClick={handleEndNet}
                                 disabled={ending}
-                                className="h-10 px-4 rounded-xl bg-orange-500 text-white font-bold text-xs hover:bg-orange-600 transition-all shadow-lg shadow-orange-500/20 flex items-center gap-2"
+                                className={`h-10 px-4 rounded-xl font-bold text-xs transition-all shadow-lg flex items-center gap-2 ${confirmEnd ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse' : 'bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/20'}`}
                             >
                                 {ending ? <Loader2 className="w-4 h-4 animate-spin" /> : <StopCircle className="w-4 h-4" />}
-                                End Net
+                                {confirmEnd ? 'Confirm End?' : 'End Net'}
                             </button>
                         )}
 
                         <button
                             onClick={handleDeleteNet}
                             disabled={deleting}
-                            className="h-10 px-4 rounded-xl bg-rose-500 text-white font-bold text-xs hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-2"
+                            className={`h-10 px-4 rounded-xl font-bold text-xs transition-all shadow-lg flex items-center gap-2 ${confirmDelete ? 'bg-red-600 hover:bg-red-700 text-white border-2 border-white/20' : 'bg-rose-500 hover:bg-rose-600 text-white shadow-rose-500/20'}`}
                         >
                             {deleting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
-                            Delete
+                            {confirmDelete ? 'Sure?' : 'Delete'}
                         </button>
                     </div>
                 </div>
