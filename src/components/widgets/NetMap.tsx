@@ -83,6 +83,7 @@ function locatorToLatLng(locator: string): [number, number] | null {
  * Gets coordinates for a callsign based on prefix (fallback when grid is missing)
  */
 function getCoordsByCallsign(callsign: string): [number, number] | null {
+    if (!callsign) return null
     const cs = callsign.toUpperCase()
 
     // West Malaysia (9M2, 9W2)
@@ -106,8 +107,12 @@ export default function NetMap({ checkins, className = "h-[400px] w-full rounded
 
     useEffect(() => {
         setIsClient(true)
+        if (!checkins || !Array.isArray(checkins)) return
+
         const newMarkers: StationMarker[] = checkins
             .map(c => {
+                if (!c || !c.callsign) return null
+
                 let coords: [number, number] | null = null
 
                 if (c.grid_locator) {
@@ -137,7 +142,8 @@ export default function NetMap({ checkins, className = "h-[400px] w-full rounded
     }
 
     // Default center (Malaysia as it's for 9M2PJU, but we can auto-center)
-    const center: [number, number] = markers.length > 0
+    // Safety check for markers[0]
+    const center: [number, number] = (markers.length > 0 && markers[0]?.lat && markers[0]?.lon)
         ? [markers[0].lat, markers[0].lon]
         : [4.2105, 101.9758] // Malaysia default
 
