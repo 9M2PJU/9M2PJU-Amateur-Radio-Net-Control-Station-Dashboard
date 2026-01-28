@@ -89,7 +89,11 @@ export default function NetDetail() {
                     filter: `net_id=eq.${netId}`,
                 },
                 (payload) => {
-                    setCheckins((prev) => [...prev, payload.new as Checkin])
+                    setCheckins((prev) => {
+                        const exists = prev.some(c => c.id === payload.new.id)
+                        if (exists) return prev
+                        return [...prev, payload.new as Checkin]
+                    })
                 }
             )
             .on(
@@ -104,6 +108,18 @@ export default function NetDetail() {
                     setCheckins((prev) => prev.filter((c) => c.id !== payload.old.id))
                 }
             )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'nets',
+                    filter: `id=eq.${netId}`,
+                },
+                (payload) => {
+                    setNet(payload.new as Net)
+                }
+            )
             .subscribe()
 
         return () => {
@@ -116,20 +132,26 @@ export default function NetDetail() {
 
         setEnding(true)
         try {
-            const { error } = await supabase
+            const { error, data } = await supabase
                 .from('nets')
                 .update({ ended_at: new Date().toISOString() })
                 .eq('id', netId)
+                .select()
+                .single()
 
             if (error) {
-                toast.error('Failed to end net')
+                console.error('Termination error:', error)
+                toast.error(`Termination failed: ${error.message}`)
                 return
             }
 
-            toast.success('Net ended successfully')
-            fetchData()
-        } catch {
-            toast.error('An error occurred')
+            if (data) setNet(data)
+            toast.success('Net Operation Terminated')
+            // No need to manually fetchData() as real-time subscription will handle it
+            // but we update the net state directly for immediate feedback
+        } catch (err) {
+            console.error('System error during termination:', err)
+            toast.error('An unexpected error occurred')
         } finally {
             setEnding(false)
         }
