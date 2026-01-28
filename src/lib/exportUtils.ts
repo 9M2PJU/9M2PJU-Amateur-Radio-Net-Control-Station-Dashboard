@@ -167,30 +167,59 @@ export const exportCertificate = async (net: Net, checkin: Checkin) => {
     const pageWidth = doc.internal.pageSize.getWidth()
     const pageHeight = doc.internal.pageSize.getHeight()
 
-    // Background Border
+    // --- BACKGROUND ---
+    // Solid Dark Background
+    doc.setFillColor(15, 23, 42) // Slate-900
+    doc.rect(0, 0, pageWidth, pageHeight, 'F')
+
+    // Add a slightly lighter inner area
+    doc.setFillColor(2, 6, 23) // Slate-950
+    doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'F')
+
+    // --- DECORATIVE PATTERNS ---
+    const drawCircuitLine = (x1: number, y1: number, x2: number, y2: number) => {
+        doc.setDrawColor(16, 185, 129) // Emerald-500
+        doc.setLineWidth(0.3)
+        doc.line(x1, y1, x2, y2)
+        doc.setFillColor(16, 185, 129)
+        doc.circle(x2, y2, 0.6, 'F')
+    }
+
+    // Top Left Patterns
+    drawCircuitLine(15, 45, 45, 15)
+    drawCircuitLine(15, 65, 65, 15)
+    // Bottom Right Patterns
+    drawCircuitLine(pageWidth - 15, pageHeight - 45, pageWidth - 45, pageHeight - 15)
+    drawCircuitLine(pageWidth - 15, pageHeight - 65, pageWidth - 65, pageHeight - 15)
+
+    // Outer Border
     doc.setDrawColor(16, 185, 129) // Emerald-500
-    doc.setLineWidth(2)
+    doc.setLineWidth(1)
     doc.rect(10, 10, pageWidth - 20, pageHeight - 20)
-    doc.setLineWidth(0.5)
-    doc.rect(12, 12, pageWidth - 24, pageHeight - 24)
+
+    // Inner Glowing Border (Thin)
+    doc.setDrawColor(6, 182, 212) // Cyan-500
+    doc.setLineWidth(0.2)
+    doc.rect(11.5, 11.5, pageWidth - 23, pageHeight - 23)
 
     // Decorative Corners
-    const cornerSize = 20
-    doc.setLineWidth(1.5)
+    const cornerSize = 25
+    doc.setLineWidth(2)
+    doc.setDrawColor(16, 185, 129)
     // Top Left
-    doc.line(10, 10 + cornerSize, 10, 10)
     doc.line(10, 10, 10 + cornerSize, 10)
+    doc.line(10, 10, 10, 10 + cornerSize)
     // Top Right
-    doc.line(pageWidth - 10, 10 + cornerSize, pageWidth - 10, 10)
     doc.line(pageWidth - 10, 10, pageWidth - 10 - cornerSize, 10)
+    doc.line(pageWidth - 10, 10, pageWidth - 10, 10 + cornerSize)
     // Bottom Left
-    doc.line(10, pageHeight - 10 - cornerSize, 10, pageHeight - 10)
     doc.line(10, pageHeight - 10, 10 + cornerSize, pageHeight - 10)
+    doc.line(10, pageHeight - 10, 10, pageHeight - 10 - cornerSize)
     // Bottom Right
-    doc.line(pageWidth - 10, pageHeight - 10 - cornerSize, pageWidth - 10, pageHeight - 10)
     doc.line(pageWidth - 10, pageHeight - 10, pageWidth - 10 - cornerSize, pageHeight - 10)
+    doc.line(pageWidth - 10, pageHeight - 10, pageWidth - 10, pageHeight - 10 - cornerSize)
 
-    // Add Logo
+    // --- LOGO & BRANDING ---
     try {
         const logoImg = new Image()
         logoImg.src = '/logo.png'
@@ -198,71 +227,87 @@ export const exportCertificate = async (net: Net, checkin: Checkin) => {
             logoImg.onload = resolve
             logoImg.onerror = reject
         })
-        const logoWidth = 25
-        const logoHeight = (logoImg.height * logoWidth) / logoImg.width
-        doc.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, 18, logoWidth, logoHeight)
+        const logoSize = 30
+        const logoX = (pageWidth - logoSize) / 2
+        const logoY = 18
+
+        // Logo Frame / Border
+        doc.setDrawColor(16, 185, 129)
+        doc.setLineWidth(0.8)
+        doc.rect(logoX - 2, logoY - 2, logoSize + 4, logoSize + 4)
+        doc.setDrawColor(6, 182, 212)
+        doc.setLineWidth(0.3)
+        doc.rect(logoX - 3.5, logoY - 3.5, logoSize + 7, logoSize + 7)
+
+        doc.addImage(logoImg, 'PNG', logoX, logoY, logoSize, logoSize)
     } catch (err) {
         console.error('Failed to load logo for certificate:', err)
     }
 
-    // Header
+    // --- CONTENT ---
+    // Title
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(30)
-    doc.setTextColor(16, 185, 129)
-    doc.text('CERTIFICATE OF PARTICIPATION', pageWidth / 2, 55, { align: 'center' })
+    doc.setTextColor(16, 185, 129) // Emerald-500
+    doc.text('CERTIFICATE OF PARTICIPATION', pageWidth / 2, 65, { align: 'center' })
 
     doc.setFontSize(16)
-    doc.setTextColor(100, 116, 139)
-    doc.text('This is to certify that', pageWidth / 2, 70, { align: 'center' })
+    doc.setTextColor(203, 213, 225) // Slate-300
+    doc.text('This special recognition is awarded to', pageWidth / 2, 78, { align: 'center' })
 
     // Callsign
     doc.setFontSize(50)
-    doc.setTextColor(30, 41, 59)
-    doc.text(checkin.callsign, pageWidth / 2, 95, { align: 'center' })
+    doc.setTextColor(255, 255, 255)
+    doc.text(checkin.callsign.toUpperCase(), pageWidth / 2, 102, { align: 'center' })
 
     // Name
     if (checkin.name) {
-        doc.setFontSize(20)
-        doc.text(checkin.name, pageWidth / 2, 110, { align: 'center' })
+        doc.setFontSize(22)
+        doc.setTextColor(16, 185, 129)
+        doc.text(checkin.name, pageWidth / 2, 116, { align: 'center' })
     }
 
     doc.setFontSize(16)
-    doc.setTextColor(100, 116, 139)
-    doc.text('has successfully participated in the', pageWidth / 2, 130, { align: 'center' })
+    doc.setTextColor(203, 213, 225)
+    doc.text('for active participation in the radio net operation', pageWidth / 2, 132, { align: 'center' })
 
     // Net Name
-    doc.setFontSize(22)
-    doc.setTextColor(16, 185, 129)
-    doc.text(net.name, pageWidth / 2, 145, { align: 'center' })
+    doc.setFontSize(24)
+    doc.setTextColor(6, 182, 212) // Cyan-500
+    doc.text(net.name, pageWidth / 2, 146, { align: 'center' })
 
     // Details Grid
-    doc.setFontSize(12)
-    doc.setTextColor(100, 116, 139)
-    const yPos = 165
-    doc.text(`Frequency: ${net.frequency || 'N/A'}`, pageWidth / 4, yPos, { align: 'center' })
-    doc.text(`Mode: ${net.mode || 'N/A'}`, pageWidth / 2, yPos, { align: 'center' })
-    doc.text(`Date: ${format(new Date(checkin.checked_in_at), 'yyyy-MM-dd')}`, (pageWidth * 3) / 4, yPos, { align: 'center' })
+    doc.setFontSize(13)
+    doc.setTextColor(148, 163, 184) // Slate-400
+    const detailsY = 160
+    doc.text(`Frequency: ${net.frequency || 'N/A'}`, pageWidth / 4, detailsY, { align: 'center' })
+    doc.text(`Mode: ${net.mode || 'N/A'}`, pageWidth / 2, detailsY, { align: 'center' })
+    doc.text(`Date: ${format(new Date(checkin.checked_in_at), 'MMMM dd, yyyy')}`, (pageWidth * 3) / 4, detailsY, { align: 'center' })
 
-    // Footer
-    doc.setFontSize(10)
-    doc.setTextColor(148, 163, 184)
-    doc.text('Generated by 9M2PJU NCS Center', pageWidth / 2, pageHeight - 25, { align: 'center' })
+    // --- FOOTER & SIGNATURE ---
+    // Digital Signature Line
+    doc.setDrawColor(51, 65, 85) // Slate-700
+    doc.setLineWidth(0.5)
+    doc.line(pageWidth / 2 - 50, 188, pageWidth / 2 + 50, 188)
 
-    // Digital Signature Placeholder
-    doc.setDrawColor(203, 213, 225)
-    doc.line(pageWidth / 2 - 40, pageHeight - 45, pageWidth / 2 + 40, pageHeight - 45)
-    doc.setFontSize(12)
-    doc.setTextColor(30, 41, 59)
-
-    // Get Net Controller info
+    // Controller Name
+    doc.setFontSize(14)
+    doc.setTextColor(255, 255, 255)
     const netController = (net as any).profiles
         ? `${(net as any).profiles.name || 'Unknown'} (${(net as any).profiles.callsign})`
-        : 'Authenticated NCS'
+        : 'Authorized NCS'
+    doc.text(netController, pageWidth / 2, 194, { align: 'center' })
 
-    doc.text(netController, pageWidth / 2, pageHeight - 40, { align: 'center' })
-    doc.setFontSize(10)
-    doc.setTextColor(100, 116, 139)
-    doc.text('Net Control Station', pageWidth / 2, pageHeight - 34, { align: 'center' })
+    // Controller Title
+    doc.setFontSize(11)
+    doc.setTextColor(16, 185, 129)
+    doc.text('Net Control Station', pageWidth / 2, 200, { align: 'center' })
+
+    // Bottom Branding
+    doc.setFontSize(8)
+    doc.setTextColor(71, 85, 105) // Slate-600
+    doc.text(`Verification ID: ${net.id.substring(0, 8)}-${checkin.id.substring(0, 8)}`, 15, pageHeight - 12)
+    doc.text('Generated by 9M2PJU NCS Center', pageWidth - 15, pageHeight - 12, { align: 'right' })
 
     doc.save(`certificate_${checkin.callsign}_${format(new Date(checkin.checked_in_at), 'yyyyMMdd')}.pdf`)
 }
