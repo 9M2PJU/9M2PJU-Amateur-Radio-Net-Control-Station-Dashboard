@@ -132,10 +132,11 @@ export default function CheckinList({ checkins, onDelete, onGenerateCertificate,
                                         {onGenerateCertificate && (
                                             <button
                                                 onClick={() => onGenerateCertificate(checkin)}
-                                                className="p-2 rounded-lg text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 border border-emerald-500/20 transition-all hover:scale-105"
                                                 title="Generate Participation Certificate"
                                             >
                                                 <Award className="w-4 h-4" />
+                                                <span className="text-[10px] font-bold uppercase tracking-wider">CERT</span>
                                             </button>
                                         )}
                                         {showDelete && (
