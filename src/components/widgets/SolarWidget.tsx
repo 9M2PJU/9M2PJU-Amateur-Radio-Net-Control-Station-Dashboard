@@ -20,17 +20,22 @@ export default function SolarWidget() {
     useEffect(() => {
         const fetchSolarData = async () => {
             try {
-                // In a real scenario, we might want to fetch from multiple NOAA endpoints
-                // and combine them. For now, we'll simulate or use a proxy if needed.
-                // Since direct NOAA JSON might still have CORS or be tricky to parse 
-                // into hams' favorite "Signal Conditions", we'll use a reliable method.
+                // Use AllOrigins as a proxy to bypass CORS for NOAA SWPC
+                const proxyUrl = 'https://api.allorigins.win/raw?url='
+                const sfiUrl = encodeURIComponent('https://services.swpc.noaa.gov/products/summary/10cm-flux-6-hour.json')
+                const kIndexUrl = encodeURIComponent('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json')
 
-                const response = await fetch('https://services.swpc.noaa.gov/products/summary/10cm-flux-6-hour.json')
-                const sfiData = await response.json()
+                const [sfiRes, kRes] = await Promise.all([
+                    fetch(`${proxyUrl}${sfiUrl}`),
+                    fetch(`${proxyUrl}${kIndexUrl}`)
+                ])
+
+                if (!sfiRes.ok || !kRes.ok) throw new Error('Failed to reach data service')
+
+                const sfiData = await sfiRes.json()
+                const kData = await kRes.json()
+
                 const sfi = sfiData[0]?.flux || 0
-
-                const kResponse = await fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json')
-                const kData = await kResponse.json()
                 const kIndex = parseInt(kData[kData.length - 1]?.[1] || '0')
 
                 // Simplified condition logic

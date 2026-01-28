@@ -42,7 +42,9 @@ export default function NetDetail() {
     const fetchData = useCallback(async () => {
         if (!netId) return
 
+        setLoading(true) // Ensure loading is true when starting fetch
         try {
+            console.log('NetDetail: Fetching data for net:', netId)
             const [netResponse, checkinsResponse] = await Promise.all([
                 supabase
                     .from('nets')
@@ -56,21 +58,26 @@ export default function NetDetail() {
                     .order('checked_in_at', { ascending: true })
             ])
 
-            if (netResponse.error || !netResponse.data) {
+            if (netResponse.error) {
                 console.error('Net fetch error:', netResponse.error)
                 toast.error('Net operation not found')
                 navigate('/nets')
                 return
             }
 
-            console.log('NetDetail: Fetched net:', netResponse.data?.id)
-            console.log('NetDetail: Fetched checkins:', checkinsResponse.data?.length || 0)
+            if (!netResponse.data) {
+                console.error('Net data is null')
+                toast.error('Data corruption detected')
+                navigate('/nets')
+                return
+            }
 
+            console.log('NetDetail: Success!')
             setNet(netResponse.data)
             setCheckins(checkinsResponse.data || [])
-        } catch (error) {
+        } catch (error: any) {
             console.error('Data sync error:', error)
-            toast.error('System synchronization failed')
+            toast.error(`System sync failed: ${error.message || 'Unknown error'}`)
         } finally {
             setLoading(false)
         }
@@ -145,7 +152,8 @@ export default function NetDetail() {
 
             if (error) {
                 console.error('Termination error:', error)
-                toast.error(`Termination failed: ${error.message}`)
+                const errorMsg = typeof error === 'object' ? (error as any).message || JSON.stringify(error) : error
+                toast.error(`Termination failed: ${errorMsg}`)
                 return
             }
 
