@@ -237,6 +237,9 @@ export default function NetDetail() {
         }
     }
 
+    // At this point, net is guaranteed to be present
+    const currentNet = net as Net
+
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] mt-16 bg-slate-950 overflow-hidden">
             {/* Header Area */}
@@ -252,7 +255,7 @@ export default function NetDetail() {
                         </button>
                         <div>
                             <div className="flex items-center gap-3 mb-1">
-                                <h1 className="text-2xl font-bold text-white tracking-tight">{net?.name}</h1>
+                                <h1 className="text-2xl font-bold text-white tracking-tight">{currentNet.name}</h1>
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${isActive
                                     ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                     : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -263,12 +266,12 @@ export default function NetDetail() {
                             <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
                                 <div className="flex items-center gap-1.5">
                                     <Calendar className="w-3 h-3" />
-                                    {net?.started_at && format(new Date(net.started_at), 'MMM d, yyyy • HH:mm')}
+                                    {format(new Date(currentNet.started_at), 'MMM d, yyyy • HH:mm')}
                                 </div>
-                                {net?.frequency && (
+                                {currentNet.frequency && (
                                     <div className="flex items-center gap-1.5">
                                         <Wifi className="w-3 h-3" />
-                                        {net.frequency}
+                                        {currentNet.frequency}
                                     </div>
                                 )}
                             </div>
@@ -372,7 +375,7 @@ export default function NetDetail() {
                             <CheckinList
                                 checkins={checkins}
                                 onDelete={handleCheckinDeleted}
-                                onEdit={net && userId === net.user_id ? startEdit : undefined}
+                                onEdit={currentNet && userId === currentNet.user_id ? startEdit : undefined}
                                 onGenerateCertificate={handleGenerateCertificate}
                                 showDelete={isActive}
                             />
