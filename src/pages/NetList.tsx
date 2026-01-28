@@ -141,12 +141,27 @@ export default function Nets() {
         }
     }
 
-    // Helper to refresh data if needed
+    // Helper to refresh data
     const fetchData = async () => {
-        // Re-run the effect logic or just wait for next mount. 
-        // Since this is rare, window.location.reload() is a crude but effective fallback if state desyncs, 
-        // but strictly we should refactor fetchNets out of useEffect. 
-        // For now, I'll trust optimistic updates.
+        setLoading(true)
+        try {
+            const { data: { session } } = await supabase.auth.getSession()
+            if (!session) return
+
+            const { data, error } = await supabase
+                .from('nets')
+                .select('*, checkins(id)')
+                .eq('user_id', session.user.id)
+                .order('created_at', { ascending: false })
+
+            if (error) throw error
+            setNets(data as any || [])
+        } catch (error: any) {
+            console.error('Nets refresh error:', error)
+            toast.error('Failed to refresh data')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (

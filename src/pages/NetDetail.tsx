@@ -479,6 +479,16 @@ export default function NetDetail() {
                                 </div>
                             </div>
 
+                            {/* Integration of CheckinForm for active nets */}
+                            {isActive && userId === currentNet.user_id && (
+                                <div className="mb-6">
+                                    <CheckinForm
+                                        netId={currentNet.id}
+                                        onCheckinAdded={fetchData}
+                                    />
+                                </div>
+                            )}
+
                             {/* Checkin List with Edit support */}
                             <CheckinList
                                 checkins={checkins}
@@ -489,46 +499,46 @@ export default function NetDetail() {
                             />
                         </div>
                     </div>
-                </div>
 
-                {/* Right Column: Visualization & Status (3 cols) */}
-                <div className="lg:col-span-3 border-l border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                        {/* Map Section - Fixed Aspect Ratio */}
-                        <div className="p-4 border-b border-white/5 bg-slate-900/40">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-1 h-4 bg-cyan-500 rounded-full"></div>
-                                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Geo Presence</h3>
-                            </div>
-                            <div className="rounded-xl overflow-hidden border border-slate-800/50 shadow-inner h-48 relative">
-                                <NetMap checkins={checkins} className="h-full w-full" />
-                            </div>
-                        </div>
-
-                        {/* Live Feed Section */}
-                        <div className="p-4 flex-1 flex flex-col overflow-hidden">
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
-                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Feed</h3>
+                    {/* Right Column: Visualization & Status (4 cols) - Moved INSIDE the grid */}
+                    <div className="lg:col-span-4 border-l border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+                            {/* Map Section - Fixed Aspect Ratio */}
+                            <div className="p-4 border-b border-white/5 bg-slate-900/40">
+                                <div className="flex items-center gap-2 mb-3">
+                                    <div className="w-1 h-4 bg-cyan-500 rounded-full"></div>
+                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Geo Presence</h3>
                                 </div>
-                                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse">STREAMING</span>
+                                <div className="rounded-xl overflow-hidden border border-slate-800/50 shadow-inner h-48 relative">
+                                    <NetMap checkins={checkins} className="h-full w-full" />
+                                </div>
                             </div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
-                                <RecentCheckins
-                                    checkins={[...checkins].reverse()}
-                                    title=""
-                                    maxItems={20}
-                                />
-                            </div>
-                        </div>
 
-                        {/* Connection Status - Compact Bottom */}
-                        <div className="p-4 mt-auto border-t border-white/5 bg-slate-950/40">
-                            <div className="flex items-center justify-between text-[10px] font-mono">
-                                <span className="text-slate-500">Uplink: <span className="text-emerald-500">STABLE</span></span>
-                                <span className="text-slate-500">Latency: <span className="text-emerald-500">24ms</span></span>
-                                <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                            {/* Live Feed Section */}
+                            <div className="p-4 flex-1 flex flex-col overflow-hidden">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                                        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Live Feed</h3>
+                                    </div>
+                                    <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse">STREAMING</span>
+                                </div>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar pr-1">
+                                    <RecentCheckins
+                                        checkins={[...checkins].reverse()}
+                                        title=""
+                                        maxItems={20}
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Connection Status - Compact Bottom */}
+                            <div className="p-4 mt-auto border-t border-white/5 bg-slate-950/40">
+                                <div className="flex items-center justify-between text-[10px] font-mono">
+                                    <span className="text-slate-500">Uplink: <span className="text-emerald-500">STABLE</span></span>
+                                    <span className="text-slate-500">Latency: <span className="text-emerald-500">24ms</span></span>
+                                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
