@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal, Award } from 'lucide-react'
+import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal, Award, Edit2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
@@ -9,11 +9,12 @@ import type { Checkin } from '@/lib/types'
 interface CheckinListProps {
     checkins: Checkin[]
     onDelete?: (id: string) => void
+    onEdit?: (checkin: Checkin) => void
     onGenerateCertificate?: (checkin: Checkin) => void | Promise<void>
     showDelete?: boolean
 }
 
-export default function CheckinList({ checkins, onDelete, onGenerateCertificate, showDelete = false }: CheckinListProps) {
+export default function CheckinList({ checkins, onDelete, onEdit, onGenerateCertificate, showDelete = false }: CheckinListProps) {
 
     const handleDelete = async (id: string, callsign: string) => {
         if (!confirm(`Delete check-in for ${callsign}?`)) return
@@ -139,6 +140,15 @@ export default function CheckinList({ checkins, onDelete, onGenerateCertificate,
                                             >
                                                 <Award className="w-4 h-4" />
                                                 <span className="text-[10px] font-bold uppercase tracking-wider">CERT</span>
+                                            </button>
+                                        )}
+                                        {onEdit && (
+                                            <button
+                                                onClick={() => onEdit(checkin)}
+                                                className="p-2 rounded-lg text-slate-400 hover:text-blue-400 hover:bg-blue-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Edit check-in"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
                                             </button>
                                         )}
                                         {showDelete && (

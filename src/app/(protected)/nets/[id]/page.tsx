@@ -19,7 +19,8 @@ import {
     AlertTriangle,
     FileText as FilePdf,
     Upload,
-    Trash2
+    Trash2,
+    Edit2
 } from 'lucide-react'
 import type { Net, Checkin } from '@/lib/types'
 import { exportToADIF, exportToPDF, parseADIF, exportCertificate } from '@/lib/exportUtils'
@@ -37,12 +38,17 @@ export default function NetDetail() {
     const [ending, setEnding] = useState(false)
     const [deleting, setDeleting] = useState(false)
     const [exporting, setExporting] = useState(false)
+    const [userId, setUserId] = useState<string | null>(null)
 
     const chartRef = useRef<HTMLDivElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const router = useRouter()
     const params = useParams()
     const netId = params?.id as string
+
+    useEffect(() => {
+        supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null))
+    }, [])
 
     const fetchData = useCallback(async () => {
         if (!netId) {
@@ -387,6 +393,44 @@ export default function NetDetail() {
         ? differenceInMinutes(new Date(net.ended_at), new Date(net.started_at))
         : differenceInMinutes(new Date(), new Date(net.started_at))
 
+    // State for editing
+    const [editingCheckin, setEditingCheckin] = useState<Checkin | null>(null)
+    const [editForm, setEditForm] = useState<Partial<Checkin>>({})
+
+    const startEdit = (checkin: Checkin) => {
+        setEditingCheckin(checkin)
+        setEditForm({
+            callsign: checkin.callsign,
+            name: checkin.name,
+            location: checkin.location,
+            signal_report: checkin.signal_report,
+            remarks: checkin.remarks,
+            traffic: checkin.traffic
+        })
+    }
+
+    const saveEdit = async () => {
+        if (!editingCheckin) return
+
+        try {
+            const { error, data } = await supabase
+                .from('checkins')
+                .update(editForm)
+                .eq('id', editingCheckin.id)
+                .select()
+                .single()
+
+            if (error) throw error
+
+            setCheckins(prev => prev.map(c => c.id === editingCheckin.id ? data : c))
+            toast.success('Check-in Log Updated')
+            setEditingCheckin(null)
+        } catch (error: any) {
+            console.error('Update error:', error)
+            toast.error('Failed to update log entry')
+        }
+    }
+
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] mt-16 bg-slate-950 overflow-hidden">
             {/* Header Area */}
@@ -401,62 +445,69 @@ export default function NetDetail() {
                             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" />
                         </button>
                         <div>
-                            <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3 mb-1">
                                 <h1 className="text-2xl font-bold text-white tracking-tight">{net.name}</h1>
-                                {isActive ? (
-                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider animate-pulse">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
-                                        Live
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-800 border border-slate-700 text-slate-400 text-[10px] font-bold uppercase tracking-wider">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-slate-500"></div>
-                                        Offline
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-4 text-[11px] text-slate-500 font-mono mt-0.5">
-                                <span className="flex items-center gap-1">
-                                    <Calendar className="w-3 h-3" />
-                                    {format(new Date(net.started_at), 'MMM d, HH:mm')}
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${isActive
+                                    ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                    : 'bg-slate-800 text-slate-400 border-slate-700'
+                                    }`}>
+                                    {isActive ? 'Live Operation' : 'Archived'}
                                 </span>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs font-mono text-slate-500">
+                                <div className="flex items-center gap-1.5">
+                                    <Calendar className="w-3 h-3" />
+                                    {format(new Date(net.started_at), 'MMM d, yyyy • HH:mm')}
+                                </div>
                                 {net.frequency && (
-                                    <span className="flex items-center gap-1 text-emerald-500/80">
+                                    <div className="flex items-center gap-1.5">
                                         <Wifi className="w-3 h-3" />
                                         {net.frequency}
-                                    </span>
+                                    </div>
                                 )}
-                                <span className="uppercase">{net.type.replace('_', ' ')}</span>
                             </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/80 border border-slate-800/50">
-                            <input type="file" ref={fileInputRef} onChange={handleImportADIF} accept=".adi,.adif" className="hidden" />
-                            <button
-                                onClick={() => fileInputRef.current?.click()}
-                                className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-all"
-                                title="Import ADIF"
-                            >
-                                <Upload className="w-4 h-4" />
-                            </button>
-                            <div className="w-px h-4 bg-slate-800 mx-1"></div>
-                            <button
-                                onClick={handleExportADIF}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-emerald-400 hover:bg-emerald-500/10 transition-all"
-                            >
-                                ADIF
-                            </button>
-                            <button
-                                onClick={handleExportPDF}
-                                disabled={exporting}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-rose-400 hover:bg-rose-500/10 transition-all flex items-center gap-1.5"
-                            >
-                                {exporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <FilePdf className="w-3 h-3" />}
-                                PDF
-                            </button>
-                        </div>
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            className="hidden"
+                            accept=".adi,.adif"
+                            onChange={handleImportADIF}
+                        />
+
+                        {isActive && (
+                            <>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="h-10 px-4 rounded-xl bg-slate-800 text-slate-300 font-bold text-xs hover:bg-slate-700 transition-all border border-slate-700 flex items-center gap-2"
+                                >
+                                    <Upload className="w-4 h-4" />
+                                    Import ADIF
+                                </button>
+                            </>
+                        )}
+
+                        <div className="h-6 w-px bg-white/10 mx-2"></div>
+
+                        <button
+                            onClick={handleExportPDF}
+                            disabled={exporting}
+                            className="h-10 px-4 rounded-xl bg-indigo-600 text-white font-bold text-xs hover:bg-indigo-500 transition-all shadow-lg shadow-indigo-600/20 flex items-center gap-2"
+                        >
+                            {exporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FilePdf className="w-4 h-4" />}
+                            PDF Report
+                        </button>
+
+                        <button
+                            onClick={handleExportADIF}
+                            className="h-10 px-4 rounded-xl bg-violet-600 text-white font-bold text-xs hover:bg-violet-500 transition-all shadow-lg shadow-violet-600/20 flex items-center gap-2"
+                        >
+                            <FilePdf className="w-4 h-4" />
+                            ADIF Export
+                        </button>
 
                         {isActive && (
                             <button
@@ -481,72 +532,41 @@ export default function NetDetail() {
                 </div>
             </div>
 
-            {/* Main Content Dashboard Area */}
-            <div className="flex-1 overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 pb-20 md:pb-0">
-
-                {/* Left Column: Stats & Operations (3 cols) */}
-                <div className="lg:col-span-3 border-r border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
-                    <div className="p-4 space-y-4 flex-1 overflow-y-auto custom-scrollbar">
-                        {/* Compact Stats Grid */}
-                        <div className="grid grid-cols-2 gap-3">
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Check-ins</p>
-                                <p className="text-xl font-mono font-bold text-emerald-400">{checkins.length}</p>
-                            </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Stations</p>
-                                <p className="text-xl font-mono font-bold text-cyan-400">{new Set(checkins.map(c => c.callsign)).size}</p>
-                            </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Duration</p>
-                                <p className="text-sm font-mono font-bold text-violet-400">{`${Math.floor(duration / 60)}h ${duration % 60}m`}</p>
-                            </div>
-                            <div className="p-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-                                <p className="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-1">Traffic</p>
-                                <p className="text-xl font-mono font-bold text-amber-400">{checkins.filter(c => c.traffic).length}</p>
-                            </div>
-                        </div>
-
-                        {/* Quick Check-in Form */}
-                        {isActive && (
-                            <div className="mt-2">
-                                <div className="flex items-center gap-2 mb-3">
-                                    <div className="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">Transmit Log</h3>
+            {/* Main Content Grid */}
+            <div className="flex-1 overflow-hidden">
+                <div className="h-full grid grid-cols-1 lg:grid-cols-12">
+                    {/* Left Panel: Check-in List (Scrollable) */}
+                    <div className="lg:col-span-8 h-full flex flex-col min-h-0 bg-slate-950/30">
+                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-6">
+                            {/* Stats Cards */}
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div className="card glass-card p-4">
+                                    <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Check-ins</p>
+                                    <p className="text-2xl font-mono font-bold text-white mt-1">{checkins.length}</p>
                                 </div>
-                                <div className="scale-90 origin-top -mt-4 -mx-4 h-full">
-                                    <CheckinForm netId={netId!} onCheckinAdded={fetchData} />
+                                <div className="card glass-card p-4">
+                                    <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Unique Ops</p>
+                                    <p className="text-2xl font-mono font-bold text-white mt-1">
+                                        {new Set(checkins.map(c => c.callsign)).size}
+                                    </p>
+                                </div>
+                                <div className="card glass-card p-4">
+                                    <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Duration</p>
+                                    <p className="text-2xl font-mono font-bold text-white mt-1">{duration}m</p>
+                                </div>
+                                <div className="card glass-card p-4">
+                                    <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Traffic</p>
+                                    <p className="text-2xl font-mono font-bold text-amber-500 mt-1">
+                                        {checkins.filter(c => c.traffic).length}
+                                    </p>
                                 </div>
                             </div>
-                        )}
 
-                        {/* Analysis - Top Stations (Smaller) */}
-                        {checkins.length > 0 && (
-                            <div className="mt-4 p-3 rounded-xl bg-slate-900/30 border border-slate-800/30 h-64 overflow-hidden" ref={chartRef}>
-                                <TopParticipantsChart
-                                    data={Object.entries(
-                                        checkins.reduce((acc, c) => {
-                                            acc[c.callsign] = (acc[c.callsign] || 0) + 1
-                                            return acc
-                                        }, {} as Record<string, number>)
-                                    )
-                                        .map(([callsign, checkins]) => ({ callsign, checkins }))
-                                        .sort((a, b) => b.checkins - a.checkins)
-                                        .slice(0, 5)}
-                                    title="Distribution"
-                                />
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Center Column: Station Log (6 cols) */}
-                <div className="lg:col-span-6 flex flex-col overflow-hidden bg-slate-950/20">
-                    <div className="p-0 flex-1 overflow-y-auto custom-scrollbar relative">
-                        <div className="p-4 md:p-6 min-h-full">
+                            {/* Checkin List with Edit support */}
                             <CheckinList
                                 checkins={checkins}
                                 onDelete={handleCheckinDeleted}
+                                onEdit={userId === net.user_id ? startEdit : undefined}
                                 onGenerateCertificate={handleGenerateCertificate}
                                 showDelete={isActive}
                             />
