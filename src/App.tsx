@@ -9,7 +9,6 @@ import Dashboard from './pages/Dashboard'
 import NetList from './pages/NetList'
 import NetDetail from './pages/NetDetail'
 import Navbar from './components/Navbar'
-import './app.css'
 
 // Protected Route Wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
