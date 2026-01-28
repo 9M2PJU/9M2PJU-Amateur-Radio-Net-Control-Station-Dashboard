@@ -35,6 +35,13 @@ interface StationMarker {
 function locatorToLatLng(locator: string): [number, number] | null {
     if (!locator || locator.length < 4) return null
 
+    // Regex to validate Maidenhead Grid Locator format (2 letters, 2 digits, optionally 2 letters)
+    const gridRegex = /^[A-R]{2}[0-9]{2}([A-X]{2})?$/i
+    if (!gridRegex.test(locator)) {
+        console.warn(`Invalid grid locator format: ${locator}`)
+        return null
+    }
+
     locator = locator.toUpperCase()
 
     // Character codes
@@ -57,6 +64,12 @@ function locatorToLatLng(locator: string): [number, number] | null {
         // Center of square if only 4 chars
         lon += 1
         lat += 0.5
+    }
+
+    // Safety clamp (Leaflet crashes on invalid LatLng)
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        console.warn(`Calculated coordinates out of bounds: ${lat}, ${lon} for locator ${locator}`)
+        return null
     }
 
     return [lat, lon]

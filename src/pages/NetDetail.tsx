@@ -63,6 +63,9 @@ export default function NetDetail() {
                 return
             }
 
+            console.log('NetDetail: Fetched net:', netResponse.data?.id)
+            console.log('NetDetail: Fetched checkins:', checkinsResponse.data?.length || 0)
+
             setNet(netResponse.data)
             setCheckins(checkinsResponse.data || [])
         } catch (error) {
@@ -235,7 +238,19 @@ export default function NetDetail() {
         )
     }
 
-    if (!net) return null
+    if (!net) {
+        console.warn('NetDetail: Loading finished but net is null. Redirecting...')
+        return (
+            <div className="flex flex-col items-center justify-center h-[80vh] text-slate-400">
+                <AlertTriangle className="w-12 h-12 mb-4 text-amber-500" />
+                <p className="text-xl font-bold text-white mb-2">Net Operation Not Found</p>
+                <p className="mb-6">The net you are looking for may have been deleted.</p>
+                <button onClick={() => navigate('/nets')} className="btn btn-primary">
+                    Return to Operations
+                </button>
+            </div>
+        )
+    }
 
     const isActive = !net.ended_at
     const duration = net.ended_at
