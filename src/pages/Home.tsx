@@ -28,9 +28,8 @@ export default function Home() {
                                 <img src="/logo.png" alt="9M2PJU NCS Dashboard Logo" className="w-full h-full object-cover scale-110" />
                             </div>
 
-                            <h1 className="text-6xl md:text-7xl font-bold mb-6 tracking-tight leading-tight">
-                                <span className="block text-white">9M2PJU</span>
-                                <span className="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">NCS Dashboard</span>
+                            <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight text-white mb-6">
+                                <span className="text-emerald-500">9M2PJU</span> NCS Center
                             </h1>
                         </div>
 

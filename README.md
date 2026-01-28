@@ -1,6 +1,6 @@
-# 📻 Amateur Radio Net Control Station Dashboard
+# 📻 9M2PJU NCS Center
 
-A professional-grade web dashboard for amateur radio net control operators. Manage weekly nets, emergency exercises, and log check-ins with beautiful charts and real-time updates.
+A professional-grade amateur radio net control station center. Manage weekly nets, emergency exercises, and log check-ins with beautiful charts and real-time updates.
 
 ![Vite](https://img.shields.io/badge/Vite-5-646CFF)
 ![React](https://img.shields.io/badge/React-19-61DAFB)

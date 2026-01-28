@@ -109,11 +109,11 @@ export default function Navbar() {
                                 </div>
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-lg font-bold text-white tracking-tight group-hover:text-emerald-300 transition-colors">
-                                    9M2PJU
+                                <span className="text-xl font-bold tracking-tighter text-white">
+                                    9M2PJU <span className="text-emerald-500">NCS Center</span>
                                 </span>
                                 <span className="text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
-                                    NCS Dashboard
+                                    NCS Center
                                 </span>
                             </div>
                         </Link>

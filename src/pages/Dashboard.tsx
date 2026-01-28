@@ -157,7 +157,7 @@ export default function Dashboard() {
                         SYSTEM OPERATIONAL
                     </div>
                     <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
-                        9M2PJU NCS Dashboard
+                        9M2PJU NCS Center
                     </h1>
                     <p className="text-slate-400 mt-2 max-w-xl">
                         Welcome back, <span className="text-emerald-400 font-medium">{user?.callsign || 'Operator'}</span>.
