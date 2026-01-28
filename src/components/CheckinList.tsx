@@ -82,7 +82,13 @@ export default function CheckinList({ checkins, onDelete, onEdit, onGenerateCert
                             >
                                 <td className="py-4 px-6 text-slate-600 font-mono text-sm select-none">{index + 1}</td>
                                 <td className="py-4 px-6 text-slate-400 font-mono text-sm whitespace-nowrap">
-                                    {format(new Date(checkin.checked_in_at), 'HH:mm')}
+                                    {(() => {
+                                        try {
+                                            return format(new Date(checkin.checked_in_at), 'HH:mm')
+                                        } catch {
+                                            return '--:--'
+                                        }
+                                    })()}
                                 </td>
                                 <td className="py-4 px-6">
                                     <span className="font-bold text-emerald-400 font-mono text-lg tracking-wide group-hover:text-emerald-300 transition-colors">

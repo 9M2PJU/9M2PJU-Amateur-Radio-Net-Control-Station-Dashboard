@@ -41,15 +41,21 @@ export default function RecentCheckins({
                         >
                             <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center flex-shrink-0 group-hover:border-cyan-500/50 group-hover:shadow-[0_0_12px_rgba(6,182,212,0.3)] transition-all">
                                 <span className="text-sm font-bold font-mono text-cyan-400">
-                                    {checkin.callsign.slice(0, 2)}
+                                    {(checkin.callsign || '??').slice(0, 2)}
                                 </span>
                             </div>
                             <div className="flex-1 min-w-0 pt-0.5">
                                 <div className="flex items-center justify-between gap-2">
-                                    <span className="font-bold text-white font-mono tracking-wide">{checkin.callsign}</span>
+                                    <span className="font-bold text-white font-mono tracking-wide">{checkin.callsign || 'Unknown'}</span>
                                     <div className="flex items-center gap-1 text-xs text-slate-500 font-mono">
                                         <Clock className="w-3 h-3" />
-                                        {format(new Date(checkin.checked_in_at), 'HH:mm')}
+                                        {(() => {
+                                            try {
+                                                return format(new Date(checkin.checked_in_at), 'HH:mm')
+                                            } catch {
+                                                return '--:--'
+                                            }
+                                        })()}
                                     </div>
                                 </div>
 

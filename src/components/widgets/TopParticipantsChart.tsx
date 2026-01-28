@@ -54,7 +54,7 @@ export default function TopParticipantsChart({ data, title = 'Top Participants' 
                             labelStyle={{ color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' }}
                         />
                         <Bar dataKey="checkins" name="Check-ins" radius={[0, 4, 4, 0]} barSize={20}>
-                            {data.map((_, index) => (
+                            {(data || []).map((_, index) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={`hsla(189, 94%, 48%, ${1 - index * 0.08})`} // Cyan gradient
