@@ -1,9 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-
-import { useNavigate, useLocation } from 'react-router-dom'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useRouter, usePathname } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import {
@@ -22,8 +22,8 @@ export default function Navbar() {
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
-    const router = useNavigate()
-    const pathname = useLocation()
+    const router = useRouter()
+    const pathname = usePathname()
 
     useEffect(() => {
         const timer = setInterval(() => setTime(new Date()), 1000)
