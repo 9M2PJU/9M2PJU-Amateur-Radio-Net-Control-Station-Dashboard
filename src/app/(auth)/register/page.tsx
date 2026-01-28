@@ -75,8 +75,14 @@ export default function Register() {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <Link href="/" className="inline-block group">
-                            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <Radio className="w-8 h-8 text-white" strokeWidth={2.5} />
+                            <div className="relative w-20 h-20 mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <Image
+                                    src="/logo.png"
+                                    alt="9M2PJU NCS Logo"
+                                    fill
+                                    className="object-contain drop-shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+                                    priority
+                                />
                             </div>
                         </Link>
                         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Create Account</h1>
