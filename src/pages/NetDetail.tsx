@@ -166,10 +166,15 @@ export default function NetDetail() {
         toast.success('ADIF Log Exported')
     }
 
-    const handleGenerateCertificate = (checkin: Checkin) => {
+    const handleGenerateCertificate = async (checkin: Checkin) => {
         if (!net) return
-        exportCertificate(net, checkin)
-        toast.success(`Certificate for ${checkin.callsign} generated`)
+        try {
+            await exportCertificate(net, checkin)
+            toast.success(`Certificate for ${checkin.callsign} generated`)
+        } catch (err) {
+            console.error(err)
+            toast.error('Failed to generate certificate')
+        }
     }
 
     const handleExportPDF = async () => {

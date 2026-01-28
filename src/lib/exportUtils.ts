@@ -157,7 +157,7 @@ export const exportToPDF = async (net: Net, checkins: Checkin[], chartRefs: (HTM
 }
 
 // --- CERTIFICATE GENERATION ---
-export const exportCertificate = (net: Net, checkin: Checkin) => {
+export const exportCertificate = async (net: Net, checkin: Checkin) => {
     const doc = new jsPDF({
         orientation: 'landscape',
         unit: 'mm',
@@ -190,40 +190,55 @@ export const exportCertificate = (net: Net, checkin: Checkin) => {
     doc.line(pageWidth - 10, pageHeight - 10 - cornerSize, pageWidth - 10, pageHeight - 10)
     doc.line(pageWidth - 10, pageHeight - 10, pageWidth - 10 - cornerSize, pageHeight - 10)
 
+    // Add Logo
+    try {
+        const logoImg = new Image()
+        logoImg.src = '/logo.png'
+        await new Promise((resolve, reject) => {
+            logoImg.onload = resolve
+            logoImg.onerror = reject
+        })
+        const logoWidth = 25
+        const logoHeight = (logoImg.height * logoWidth) / logoImg.width
+        doc.addImage(logoImg, 'PNG', (pageWidth - logoWidth) / 2, 18, logoWidth, logoHeight)
+    } catch (err) {
+        console.error('Failed to load logo for certificate:', err)
+    }
+
     // Header
     doc.setFont('helvetica', 'bold')
     doc.setFontSize(30)
     doc.setTextColor(16, 185, 129)
-    doc.text('CERTIFICATE OF PARTICIPATION', pageWidth / 2, 45, { align: 'center' })
+    doc.text('CERTIFICATE OF PARTICIPATION', pageWidth / 2, 55, { align: 'center' })
 
     doc.setFontSize(16)
     doc.setTextColor(100, 116, 139)
-    doc.text('This is to certify that', pageWidth / 2, 65, { align: 'center' })
+    doc.text('This is to certify that', pageWidth / 2, 70, { align: 'center' })
 
     // Callsign
     doc.setFontSize(50)
     doc.setTextColor(30, 41, 59)
-    doc.text(checkin.callsign, pageWidth / 2, 90, { align: 'center' })
+    doc.text(checkin.callsign, pageWidth / 2, 95, { align: 'center' })
 
     // Name
     if (checkin.name) {
         doc.setFontSize(20)
-        doc.text(checkin.name, pageWidth / 2, 105, { align: 'center' })
+        doc.text(checkin.name, pageWidth / 2, 110, { align: 'center' })
     }
 
     doc.setFontSize(16)
     doc.setTextColor(100, 116, 139)
-    doc.text('has successfully participated in the', pageWidth / 2, 125, { align: 'center' })
+    doc.text('has successfully participated in the', pageWidth / 2, 130, { align: 'center' })
 
     // Net Name
     doc.setFontSize(22)
     doc.setTextColor(16, 185, 129)
-    doc.text(net.name, pageWidth / 2, 140, { align: 'center' })
+    doc.text(net.name, pageWidth / 2, 145, { align: 'center' })
 
     // Details Grid
     doc.setFontSize(12)
     doc.setTextColor(100, 116, 139)
-    const yPos = 160
+    const yPos = 165
     doc.text(`Frequency: ${net.frequency || 'N/A'}`, pageWidth / 4, yPos, { align: 'center' })
     doc.text(`Mode: ${net.mode || 'N/A'}`, pageWidth / 2, yPos, { align: 'center' })
     doc.text(`Date: ${format(new Date(checkin.checked_in_at), 'yyyy-MM-dd')}`, (pageWidth * 3) / 4, yPos, { align: 'center' })

@@ -7,7 +7,7 @@ import type { Checkin } from '@/lib/types'
 interface CheckinListProps {
     checkins: Checkin[]
     onDelete?: (id: string) => void
-    onGenerateCertificate?: (checkin: Checkin) => void
+    onGenerateCertificate?: (checkin: Checkin) => void | Promise<void>
     showDelete?: boolean
 }
 
