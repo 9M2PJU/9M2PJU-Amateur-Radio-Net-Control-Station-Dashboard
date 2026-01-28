@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import { Clock, User } from 'lucide-react'
-import type { Checkin } from '@/lib/types'
+import type { Checkin } from '../../lib/types'
 
 interface RecentCheckinsProps {
     checkins: Checkin[]

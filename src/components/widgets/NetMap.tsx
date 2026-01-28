@@ -3,7 +3,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
 // import 'leaflet/dist/leaflet.css' // Moved to globals.css
-import { Checkin } from '@/lib/types'
+import { Checkin } from '../../lib/types'
 import { useEffect, useState } from 'react'
 // Fix: Dynamic import of leaflet assets for Next.js is tricky.
 // Usually we can just use the URLs directly or rely on the CSS.
@@ -13,8 +13,8 @@ import icon from 'leaflet/dist/images/marker-icon.png'
 import iconShadow from 'leaflet/dist/images/marker-shadow.png'
 
 let DefaultIcon = L.icon({
-    iconUrl: icon.src,
-    shadowUrl: iconShadow.src,
+    iconUrl: icon,
+    shadowUrl: iconShadow,
     iconSize: [25, 41],
     iconAnchor: [12, 41]
 })

@@ -226,7 +226,7 @@ export default function Dashboard() {
                                         {allNets.map((net) => (
                                             <Link
                                                 key={net.id}
-                                                href={`/nets/${net.id}`}
+                                                to={`/nets/${net.id}`}
                                                 className="flex items-center justify-between p-3 hover:bg-white/5 transition-colors group"
                                             >
                                                 <div className="flex items-center gap-3">

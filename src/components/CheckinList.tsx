@@ -2,9 +2,9 @@
 
 import { format } from 'date-fns'
 import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal, Award, Edit2 } from 'lucide-react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
-import type { Checkin } from '@/lib/types'
+import type { Checkin } from '../lib/types'
 
 interface CheckinListProps {
     checkins: Checkin[]

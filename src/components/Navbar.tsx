@@ -108,11 +108,11 @@ export default function Navbar() {
                 <div className="px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
                         {/* Logo */}
-                        <Link href="/dashboard" className="flex items-center gap-3 group">
+                        <Link to="/dashboard" className="flex items-center gap-3 group">
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
                                 <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 border border-white/10">
-                                    <Image src="/favicon.png" alt="Logo" width={40} height={40} className="w-full h-full object-cover" />
+                                    <img src="/favicon.png" alt="Logo" width="40" height="40" className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <div className="flex flex-col">
@@ -139,7 +139,7 @@ export default function Navbar() {
                                 return (
                                     <Link
                                         key={link.href}
-                                        href={link.href}
+                                        to={link.href}
                                         className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${active
                                             ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 shadow-[0_0_10px_rgba(16,185,129,0.2)] border border-emerald-500/20'
                                             : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -166,7 +166,7 @@ export default function Navbar() {
                                 </div>
                             ) : (
                                 <Link
-                                    href="/login"
+                                    to="/login"
                                     className="flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-all font-medium text-sm"
                                 >
                                     Login
@@ -216,7 +216,7 @@ export default function Navbar() {
                                 return (
                                     <Link
                                         key={link.href}
-                                        href={link.href}
+                                        to={link.href}
                                         onClick={() => setMobileMenuOpen(false)}
                                         className={`flex items-center gap-4 px-4 py-3 rounded-xl text-base font-medium transition-all ${active
                                             ? 'bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-300 border border-emerald-500/20'
