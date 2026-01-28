@@ -345,6 +345,18 @@ export default function NetDetail() {
         new Date(net.started_at)
     ) : 0
 
+    // Show loading state while fetching data
+    if (loading || !net) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-slate-950">
+                <div className="text-center">
+                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mx-auto mb-4" />
+                    <p className="text-slate-400 font-mono text-sm">Loading net operation...</p>
+                </div>
+            </div>
+        )
+    }
+
     // At this point, net is guaranteed to be present
     const currentNet = net as Net
 
