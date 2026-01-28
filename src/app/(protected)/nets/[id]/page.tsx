@@ -388,7 +388,7 @@ export default function NetDetail() {
         : differenceInMinutes(new Date(), new Date(net.started_at))
 
     return (
-        <div className="flex flex-col h-screen bg-slate-950">
+        <div className="flex flex-col h-[calc(100vh-64px)] mt-16 bg-slate-950 overflow-hidden">
             {/* Header Area */}
             <div className="px-4 md:px-6 py-4 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20">
                 <div className="max-w-full mx-auto flex flex-col lg:flex-row lg:items-center justify-between gap-4">
