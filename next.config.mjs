@@ -21,6 +21,10 @@ const nextConfig = {
             },
         ];
     },
+    // Force a unique build ID on every deployment to ensure clients always download fresh bundles
+    generateBuildId: async () => {
+        return `build-${Date.now()}`
+    },
 };
 
 export default nextConfig;
