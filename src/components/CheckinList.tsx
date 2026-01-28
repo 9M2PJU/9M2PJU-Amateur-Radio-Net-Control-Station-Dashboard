@@ -1,5 +1,5 @@
 import { format } from 'date-fns'
-import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal } from 'lucide-react'
+import { MapPin, MessageSquare, AlertTriangle, Trash2, Signal, Award } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { toast } from 'sonner'
 import type { Checkin } from '@/lib/types'
@@ -7,10 +7,11 @@ import type { Checkin } from '@/lib/types'
 interface CheckinListProps {
     checkins: Checkin[]
     onDelete?: (id: string) => void
+    onGenerateCertificate?: (checkin: Checkin) => void
     showDelete?: boolean
 }
 
-export default function CheckinList({ checkins, onDelete, showDelete = false }: CheckinListProps) {
+export default function CheckinList({ checkins, onDelete, onGenerateCertificate, showDelete = false }: CheckinListProps) {
 
     const handleDelete = async (id: string, callsign: string) => {
         if (!confirm(`Delete check-in for ${callsign}?`)) return
@@ -67,7 +68,7 @@ export default function CheckinList({ checkins, onDelete, showDelete = false }: 
                             <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Signal</th>
                             <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Location</th>
                             <th className="py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider font-mono">Remarks</th>
-                            {showDelete && <th className="py-4 px-6 text-right"></th>}
+                            <th className="py-4 px-6 text-right"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -126,17 +127,28 @@ export default function CheckinList({ checkins, onDelete, showDelete = false }: 
                                         {checkin.remarks || <span className="text-slate-700 italic">No remarks</span>}
                                     </p>
                                 </td>
-                                {showDelete && (
-                                    <td className="py-4 px-6 text-right">
-                                        <button
-                                            onClick={() => handleDelete(checkin.id, checkin.callsign)}
-                                            className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
-                                            title="Delete check-in"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </td>
-                                )}
+                                <td className="py-4 px-6 text-right whitespace-nowrap">
+                                    <div className="flex items-center justify-end gap-2">
+                                        {onGenerateCertificate && (
+                                            <button
+                                                onClick={() => onGenerateCertificate(checkin)}
+                                                className="p-2 rounded-lg text-slate-600 hover:text-emerald-400 hover:bg-emerald-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Generate Participation Certificate"
+                                            >
+                                                <Award className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                        {showDelete && (
+                                            <button
+                                                onClick={() => handleDelete(checkin.id, checkin.callsign)}
+                                                className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                                                title="Delete check-in"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        )}
+                                    </div>
+                                </td>
                             </tr>
                         ))}
                     </tbody>

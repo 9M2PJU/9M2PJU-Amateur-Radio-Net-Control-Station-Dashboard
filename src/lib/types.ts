@@ -32,6 +32,7 @@ export interface Checkin {
     traffic: boolean
     traffic_precedence: 'routine' | 'welfare' | 'priority' | 'emergency' | null
     traffic_details: string | null
+    grid_locator: string | null
     checked_in_at: string
 }
 

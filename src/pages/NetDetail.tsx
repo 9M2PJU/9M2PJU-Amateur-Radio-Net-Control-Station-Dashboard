@@ -5,6 +5,7 @@ import CheckinForm from '@/components/CheckinForm'
 import CheckinList from '@/components/CheckinList'
 import RecentCheckins from '@/components/widgets/RecentCheckins'
 import StatsCard from '@/components/widgets/StatsCard'
+import NetMap from '@/components/widgets/NetMap'
 import { toast } from 'sonner'
 import { format, differenceInMinutes } from 'date-fns'
 import {
@@ -23,7 +24,7 @@ import {
     Upload
 } from 'lucide-react'
 import type { Net, Checkin } from '@/lib/types'
-import { exportToADIF, exportToPDF, parseADIF } from '@/lib/exportUtils'
+import { exportToADIF, exportToPDF, parseADIF, exportCertificate } from '@/lib/exportUtils'
 import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 
 export default function NetDetail() {
@@ -138,6 +139,12 @@ export default function NetDetail() {
         if (!net) return
         exportToADIF(net, checkins)
         toast.success('ADIF Log Exported')
+    }
+
+    const handleGenerateCertificate = (checkin: Checkin) => {
+        if (!net) return
+        exportCertificate(net, checkin)
+        toast.success(`Certificate for ${checkin.callsign} generated`)
     }
 
     const handleExportPDF = async () => {
@@ -385,6 +392,17 @@ export default function NetDetail() {
                 </div>
             )}
 
+            {/* Net Map Visualization */}
+            <div className="mb-8">
+                <div className="card glass-card p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                        <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
+                        <h3 className="text-lg font-bold text-white">Geographic Distribution</h3>
+                    </div>
+                    <NetMap checkins={checkins} />
+                </div>
+            </div>
+
             {/* Check-in Form (only for active nets) */}
             {isActive && (
                 <div className="mb-8">
@@ -399,6 +417,7 @@ export default function NetDetail() {
                     <CheckinList
                         checkins={checkins}
                         onDelete={handleCheckinDeleted}
+                        onGenerateCertificate={handleGenerateCertificate}
                         showDelete={isActive}
                     />
                 </div>

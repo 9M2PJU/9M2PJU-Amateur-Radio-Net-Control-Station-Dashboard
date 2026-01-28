@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import StatsCard from '@/components/widgets/StatsCard'
+import SolarWidget from '@/components/widgets/SolarWidget'
 import NetActivityChart from '@/components/widgets/NetActivityChart'
 import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
 import NetTypeDistribution from '@/components/widgets/NetTypeDistribution'
+import SignalReportChart from '@/components/widgets/SignalReportChart'
 import { format, subDays } from 'date-fns'
 import {
     Radio,
@@ -115,6 +117,20 @@ export default function Dashboard() {
     const netTypeData = Object.entries(typeDistribution)
         .map(([name, value]) => ({ name, value }))
 
+    // Calculate signal report distribution (Strength 1-9)
+    const strengthDistribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 }
+    allNets.forEach(n => {
+        (n.checkins || []).forEach(c => {
+            if (c.signal_strength) {
+                strengthDistribution[c.signal_strength] = (strengthDistribution[c.signal_strength] || 0) + 1
+            }
+        })
+    })
+    const signalData = Object.entries(strengthDistribution).map(([name, count]) => ({
+        name: `S${name}`,
+        count
+    }))
+
     return (
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 mt-20 md:mt-24 space-y-8 animate-fade-in">
             {/* Header */}
@@ -174,10 +190,16 @@ export default function Dashboard() {
             </div>
 
             {/* Analytics Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="card glass-card p-1">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 card glass-card p-1">
                     <NetActivityChart data={activityData} title="Activity (7 Days)" />
                 </div>
+                <div className="card glass-card p-1">
+                    <SignalReportChart data={signalData} title="Signal Reports (Strength)" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6">
                 <div className="card glass-card p-1">
                     <TopParticipantsChart data={topParticipants} title="Top Operators" />
                 </div>
@@ -185,9 +207,14 @@ export default function Dashboard() {
 
             {/* Bottom Section */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Distribution Chart */}
-                <div className="card glass-card p-1">
-                    <NetTypeDistribution data={netTypeData} title="Net Types" />
+                <div className="space-y-6">
+                    {/* Solar Widget */}
+                    <SolarWidget />
+
+                    {/* Distribution Chart */}
+                    <div className="card glass-card p-1">
+                        <NetTypeDistribution data={netTypeData} title="Net Types" />
+                    </div>
                 </div>
 
                 {/* Recent Nets List */}

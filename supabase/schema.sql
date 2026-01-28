@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS checkins (
   traffic BOOLEAN DEFAULT FALSE NOT NULL,
   traffic_precedence TEXT CHECK (traffic_precedence IN ('routine', 'welfare', 'priority', 'emergency')),
   traffic_details TEXT,
+  grid_locator TEXT,
   checked_in_at TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
