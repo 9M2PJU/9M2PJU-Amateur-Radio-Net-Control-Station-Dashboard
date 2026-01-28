@@ -115,8 +115,8 @@ export default function Navbar() {
                                 <span className="text-lg md:text-xl font-bold tracking-tighter text-white">
                                     9M2PJU <span className="text-emerald-500">NCS Center</span>
                                 </span>
-                                <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
-                                    NCS Center
+                                <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono flex items-center gap-1">
+                                    NCS Center <span className="px-1 py-0.5 rounded bg-white/10 text-white leading-none">v1.1.5</span>
                                 </span>
                             </div>
                         </Link>
