@@ -45,6 +45,28 @@ export default function NetDetail() {
     const params = useParams()
     const netId = params?.id as string
 
+    const [editingCheckin, setEditingCheckin] = useState<Checkin | null>(null)
+    const [editForm, setEditForm] = useState<Partial<Checkin>>({})
+    const [confirmDelete, setConfirmDelete] = useState(false)
+    const [confirmEnd, setConfirmEnd] = useState(false)
+
+    // Reset confirmation states when clicking away or after timeout
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+        if (confirmDelete) {
+            timeout = setTimeout(() => setConfirmDelete(false), 3000)
+        }
+        return () => clearTimeout(timeout)
+    }, [confirmDelete])
+
+    useEffect(() => {
+        let timeout: NodeJS.Timeout
+        if (confirmEnd) {
+            timeout = setTimeout(() => setConfirmEnd(false), 3000)
+        }
+        return () => clearTimeout(timeout)
+    }, [confirmEnd])
+
     useEffect(() => {
         supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null))
     }, [])
@@ -180,230 +202,6 @@ export default function NetDetail() {
             window.removeEventListener('beforeunload', handleBeforeUnload)
         }
     }, [isActive])
-
-
-    const [confirmDelete, setConfirmDelete] = useState(false)
-    const [confirmEnd, setConfirmEnd] = useState(false)
-
-    // Reset confirmation states when clicking away or after timeout
-    useEffect(() => {
-        let timeout: NodeJS.Timeout
-        if (confirmDelete) {
-            timeout = setTimeout(() => setConfirmDelete(false), 3000)
-        }
-        return () => clearTimeout(timeout)
-    }, [confirmDelete])
-
-    useEffect(() => {
-        let timeout: NodeJS.Timeout
-        if (confirmEnd) {
-            timeout = setTimeout(() => setConfirmEnd(false), 3000)
-        }
-        return () => clearTimeout(timeout)
-    }, [confirmEnd])
-
-    const handleEndNet = async () => {
-        if (!confirmEnd) {
-            setConfirmEnd(true)
-            return
-        }
-
-        setEnding(true)
-        try {
-            console.log('Terminating net:', netId)
-
-            // Add a timeout for the supabase call to prevent indefinite hanging
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Termination request timed out')), 10000)
-            )
-
-            const updatePromise = supabase
-                .from('nets')
-                .update({ ended_at: new Date().toISOString() })
-                .eq('id', netId)
-                .select()
-                .single()
-
-            const { error, data } = await Promise.race([updatePromise, timeoutPromise]) as any
-
-            if (error) {
-                console.error('Termination error:', error)
-                const errorMsg = typeof error === 'object' ? (error as any).message || JSON.stringify(error) : error
-                toast.error(`Termination failed: ${errorMsg}`)
-                setEnding(false)
-                return
-            }
-
-            if (data) {
-                console.log('Net terminated successfully:', data.id)
-                setNet(data)
-            }
-            toast.success('Net Operation Terminated')
-        } catch (err: any) {
-            console.error('System error during termination:', err)
-            toast.error(`Error: ${err.message}`)
-        } finally {
-            setEnding(false)
-            setConfirmEnd(false)
-        }
-    }
-
-    const handleDeleteNet = async () => {
-        if (!confirmDelete) {
-            setConfirmDelete(true)
-            return
-        }
-
-        console.log('Delete button clicked for net:', netId)
-        setDeleting(true)
-
-        try {
-            // Attempt deletion - Cascade should be handled by DB now, checking first
-            const { error: netError } = await supabase
-                .from('nets')
-                .delete()
-                .eq('id', netId)
-
-            if (netError) {
-                // If FK violation (code 23503), try manual cascade as backup
-                if (netError.code === '23503') {
-                    toast.info('Cleaning up check-ins...')
-                    await supabase.from('checkins').delete().eq('net_id', netId)
-                    const { error: retryError } = await supabase.from('nets').delete().eq('id', netId)
-                    if (retryError) throw retryError
-                } else {
-                    throw netError
-                }
-            }
-
-            toast.success('Net Deleted Successfully')
-            router.push('/nets')
-        } catch (error: any) {
-            console.error('Delete exception:', error)
-            toast.error(`Delete failed: ${error.message}`)
-            setDeleting(false)
-        } finally {
-            setConfirmDelete(false)
-        }
-    }
-
-
-    const handleExportADIF = () => {
-        if (!net) return
-        exportToADIF(net, checkins)
-        toast.success('ADIF Log Exported')
-    }
-
-    const handleGenerateCertificate = async (checkin: Checkin) => {
-        if (!net) return
-        try {
-            await exportCertificate(net, checkin)
-            toast.success(`Certificate for ${checkin.callsign} generated`)
-        } catch (err) {
-            console.error(err)
-            toast.error('Failed to generate certificate')
-        }
-    }
-
-    const handleExportPDF = async () => {
-        if (!net) return
-        setExporting(true)
-        try {
-            // Need to pass a valid element or ref. We are using chartRef.current which might be null if not rendered.
-            // exportToPDF expects HTML elements to snapshot.
-            // In the original, it passed chartRef.current.
-            await exportToPDF(net, checkins, chartRef.current ? [chartRef.current] : [])
-            toast.success('PDF Report Exported')
-        } catch (error) {
-            console.error(error)
-            toast.error('Failed to export PDF')
-        } finally {
-            setExporting(false)
-        }
-    }
-
-    const handleImportADIF = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0]
-        if (!file || !netId) return
-
-        const reader = new FileReader()
-        reader.onload = async (event) => {
-            const content = event.target?.result as string
-            const importedRecords = parseADIF(content)
-
-            if (importedRecords.length === 0) {
-                toast.error('No valid records found in ADIF')
-                return
-            }
-
-            toast.loading(`Importing ${importedRecords.length} records...`)
-
-            const toInsert = importedRecords.map(r => ({
-                ...r,
-                net_id: netId,
-                checked_in_at: new Date().toISOString()
-            }))
-
-            const { error } = await supabase.from('checkins').insert(toInsert)
-
-            if (error) {
-                toast.error('Import failed: ' + error.message)
-            } else {
-                toast.dismiss()
-                toast.success(`Successfully imported ${importedRecords.length} stations`)
-                fetchData() // Refresh
-            }
-        }
-        reader.readAsText(file)
-        e.target.value = '' // Reset
-    }
-
-    const handleCheckinDeleted = (id: string) => {
-        setCheckins((prev) => prev.filter((c) => c.id !== id))
-    }
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-[80vh]">
-                <div className="relative">
-                    <div className="absolute inset-0 rounded-full bg-emerald-500/20 blur-xl animate-pulse"></div>
-                    <Loader2 className="w-12 h-12 text-emerald-500 animate-spin relative z-10" />
-                </div>
-                <p className="mt-4 text-slate-400 font-mono text-sm animate-pulse">ESTABLISHING UPLINK...</p>
-            </div>
-        )
-    }
-
-    if (!net) {
-        // Redirection happens in fetchData, but fallback UI here
-        return (
-            <div className="flex flex-col items-center justify-center h-[80vh] text-slate-400">
-                <AlertTriangle className="w-12 h-12 mb-4 text-amber-500" />
-                <p className="text-xl font-bold text-white mb-2">Net Operation Not Found</p>
-                <p className="mb-6">The net you are looking for may have been deleted.</p>
-                <button onClick={() => router.push('/nets')} className="btn btn-primary">
-                    Return to Operations
-                </button>
-            </div>
-        )
-    }
-
-    // Safe duration calculation
-    const duration = (() => {
-        try {
-            if (!net?.started_at) return 0
-            const start = new Date(net.started_at)
-            const end = net.ended_at ? new Date(net.ended_at) : new Date()
-            if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0
-            return Math.max(0, differenceInMinutes(end, start))
-        } catch {
-            return 0
-        }
-    })()
-
-    // State for editing
-    const [editingCheckin, setEditingCheckin] = useState<Checkin | null>(null)
-    const [editForm, setEditForm] = useState<Partial<Checkin>>({})
 
     const startEdit = (checkin: Checkin) => {
         setEditingCheckin(checkin)
