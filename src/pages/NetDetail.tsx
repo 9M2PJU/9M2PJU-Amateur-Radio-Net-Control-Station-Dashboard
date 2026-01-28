@@ -45,7 +45,7 @@ export default function NetDetail() {
 
     // Reset confirmation states when clicking away or after timeout
     useEffect(() => {
-        let timeout: NodeJS.Timeout
+        let timeout: ReturnType<typeof setTimeout>
         if (confirmDelete) {
             timeout = setTimeout(() => setConfirmDelete(false), 3000)
         }
@@ -53,7 +53,7 @@ export default function NetDetail() {
     }, [confirmDelete])
 
     useEffect(() => {
-        let timeout: NodeJS.Timeout
+        let timeout: ReturnType<typeof setTimeout>
         if (confirmEnd) {
             timeout = setTimeout(() => setConfirmEnd(false), 3000)
         }
@@ -229,6 +229,121 @@ export default function NetDetail() {
             toast.error('Failed to update log entry')
         }
     }
+
+    const handleImportADIF = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0]
+        if (!file || !netId) return
+
+        try {
+            const text = await file.text()
+            const importedCheckins = parseADIF(text)
+
+            for (const checkin of importedCheckins) {
+                await supabase.from('checkins').insert({ ...checkin, net_id: netId })
+            }
+
+            toast.success(`Imported ${importedCheckins.length} check-ins`)
+            fetchData()
+        } catch (error: any) {
+            toast.error('Failed to import ADIF file')
+            console.error(error)
+        }
+    }
+
+    const handleExportPDF = async () => {
+        if (!net) return
+        setExporting(true)
+        try {
+            await exportToPDF(net, checkins, [])
+            toast.success('PDF exported successfully')
+        } catch (error) {
+            toast.error('Failed to export PDF')
+            console.error(error)
+        } finally {
+            setExporting(false)
+        }
+    }
+
+    const handleExportADIF = () => {
+        if (!net) return
+        try {
+            exportToADIF(net, checkins)
+            toast.success('ADIF exported successfully')
+        } catch (error) {
+            toast.error('Failed to export ADIF')
+            console.error(error)
+        }
+    }
+
+    const handleEndNet = async () => {
+        if (!confirmEnd) {
+            setConfirmEnd(true)
+            return
+        }
+
+        setEnding(true)
+        try {
+            const { error } = await supabase
+                .from('nets')
+                .update({ ended_at: new Date().toISOString() })
+                .eq('id', netId)
+
+            if (error) throw error
+
+            toast.success('Net operation ended')
+            setConfirmEnd(false)
+            fetchData()
+        } catch (error: any) {
+            toast.error('Failed to end net')
+            console.error(error)
+        } finally {
+            setEnding(false)
+        }
+    }
+
+    const handleDeleteNet = async () => {
+        if (!confirmDelete) {
+            setConfirmDelete(true)
+            return
+        }
+
+        setDeleting(true)
+        try {
+            const { error } = await supabase
+                .from('nets')
+                .delete()
+                .eq('id', netId)
+
+            if (error) throw error
+
+            toast.success('Net deleted successfully')
+            navigate('/nets')
+        } catch (error: any) {
+            toast.error('Failed to delete net')
+            console.error(error)
+            setDeleting(false)
+        }
+    }
+
+    const handleCheckinDeleted = (checkinId: string) => {
+        setCheckins(prev => prev.filter(c => c.id !== checkinId))
+    }
+
+    const handleGenerateCertificate = async (checkin: Checkin) => {
+        if (!net) return
+        try {
+            await exportCertificate(net, checkin)
+            toast.success('Certificate generated')
+        } catch (error) {
+            toast.error('Failed to generate certificate')
+            console.error(error)
+        }
+    }
+
+    const duration = net ? differenceInMinutes(
+        net.ended_at ? new Date(net.ended_at) : new Date(),
+        new Date(net.started_at)
+    ) : 0
 
     // At this point, net is guaranteed to be present
     const currentNet = net as Net
