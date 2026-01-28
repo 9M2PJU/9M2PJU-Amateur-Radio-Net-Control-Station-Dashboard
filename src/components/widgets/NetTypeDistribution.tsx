@@ -16,12 +16,12 @@ export default function NetTypeDistribution({ data, title = 'Net Type Distributi
     const formatName = (name: string) => name.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
 
     return (
-        <div className="w-full h-full p-6">
+        <div className="w-full h-full p-6 flex flex-col">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                 <div className="w-1 h-5 bg-violet-500 rounded-full"></div>
                 {title}
             </h3>
-            <div className="h-[300px] w-full">
+            <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                     <PieChart>
                         <Pie
