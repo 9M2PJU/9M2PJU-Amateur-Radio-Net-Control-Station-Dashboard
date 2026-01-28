@@ -231,14 +231,29 @@ export default function NetDetail() {
         console.log('Proceeding with delete...')
         setDeleting(true)
         try {
-            const { error } = await supabase
+            // Step 1: Manually delete associated check-ins first (Manual Cascade)
+            // This ensures deletion works even if the database Foreign Key is missing 'ON DELETE CASCADE'
+            console.log('Step 1: Deleting associated check-ins...')
+            const { error: checkinsError } = await supabase
+                .from('checkins')
+                .delete()
+                .eq('net_id', netId)
+
+            if (checkinsError) {
+                console.error('Supabase check-ins delete error:', checkinsError)
+                throw new Error(`Failed to delete associated check-ins: ${checkinsError.message}`)
+            }
+
+            // Step 2: Delete the actual net record
+            console.log('Step 2: Deleting net record...')
+            const { error: netError } = await supabase
                 .from('nets')
                 .delete()
                 .eq('id', netId)
 
-            if (error) {
-                console.error('Supabase delete error:', error)
-                throw error
+            if (netError) {
+                console.error('Supabase net delete error:', netError)
+                throw netError
             }
 
             console.log('Delete successful')
@@ -246,7 +261,7 @@ export default function NetDetail() {
             router.push('/nets')
         } catch (error: any) {
             console.error('Delete exception:', error)
-            toast.error(`Failed to delete net: ${error.message}`)
+            toast.error(`Delete failed: ${error.message}`)
         } finally {
             setDeleting(false)
         }
