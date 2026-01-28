@@ -34,39 +34,52 @@ export default function Dashboard() {
 
     useEffect(() => {
         const fetchDashboardData = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
+            try {
+                console.log('Dashboard: Fetching user...')
+                const { data: { session } } = await supabase.auth.getSession()
 
-            if (!authUser) {
-                navigate('/login')
-                return
+                if (!session) {
+                    console.log('Dashboard: No session, redirecting...')
+                    navigate('/login')
+                    return
+                }
+
+                const authUser = session.user
+
+                // Get profile data
+                console.log('Dashboard: Fetching profile...')
+                const { data: profile, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', authUser.id)
+                    .single()
+
+                if (profileError) console.warn('Dashboard: Profile error:', profileError)
+
+                if (profile) setUser(profile)
+                else setUser({ id: authUser.id, email: authUser.email, callsign: 'OPERATOR' } as any)
+
+                // Fetch all nets for this user
+                console.log('Dashboard: Fetching nets...')
+                const { data: netsData, error } = await supabase
+                    .from('nets')
+                    .select('*, checkins(*)')
+                    .eq('user_id', authUser.id)
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    console.error('Dashboard: Nets error:', error)
+                    toast.error('Failed to load dashboard data')
+                } else {
+                    console.log(`Dashboard: Loaded ${netsData?.length || 0} nets`)
+                    setNets(netsData as any || [])
+                }
+            } catch (err) {
+                console.error('Dashboard: Critical error:', err)
+                toast.error('System synchronization error')
+            } finally {
+                setLoading(false)
             }
-
-            // Get profile data (for display name)
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', authUser.id)
-                .single()
-
-            if (profile) setUser(profile)
-            else setUser({ id: authUser.id, email: authUser.email, callsign: 'OPERATOR' } as any)
-
-
-            // Fetch all nets for this user
-            const { data: netsData, error } = await supabase
-                .from('nets')
-                .select('*, checkins(*)')
-                .eq('user_id', authUser.id)
-                .order('created_at', { ascending: false })
-
-            if (error) {
-                toast.error('Failed to load dashboard data')
-                console.error(error)
-            } else {
-                setNets(netsData as any || [])
-            }
-
-            setLoading(false)
         }
 
         fetchDashboardData()

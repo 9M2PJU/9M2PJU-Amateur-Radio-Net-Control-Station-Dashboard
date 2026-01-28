@@ -26,25 +26,38 @@ export default function Nets() {
 
     useEffect(() => {
         const fetchNets = async () => {
-            const { data: { user: authUser } } = await supabase.auth.getUser()
+            try {
+                console.log('Nets: Fetching session...')
+                const { data: { session } } = await supabase.auth.getSession()
 
-            if (!authUser) {
-                navigate('/login')
-                return
+                if (!session) {
+                    console.log('Nets: No session, redirecting...')
+                    navigate('/login')
+                    return
+                }
+
+                const authUser = session.user
+
+                console.log('Nets: Fetching nets...')
+                const { data, error } = await supabase
+                    .from('nets')
+                    .select('*, checkins(id)')
+                    .eq('user_id', authUser.id)
+                    .order('created_at', { ascending: false })
+
+                if (error) {
+                    console.error('Nets: Fetch error:', error)
+                    toast.error('Failed to load nets')
+                } else {
+                    console.log(`Nets: Loaded ${data?.length || 0} nets`)
+                    setNets(data as any || [])
+                }
+            } catch (err) {
+                console.error('Nets: Critical error:', err)
+                toast.error('System synchronization error')
+            } finally {
+                setLoading(false)
             }
-
-            const { data, error } = await supabase
-                .from('nets')
-                .select('*, checkins(id)')
-                .eq('user_id', authUser.id)
-                .order('created_at', { ascending: false })
-
-            if (error) {
-                toast.error('Failed to load nets')
-            } else {
-                setNets(data as any || [])
-            }
-            setLoading(false)
         }
         fetchNets()
     }, [navigate])
