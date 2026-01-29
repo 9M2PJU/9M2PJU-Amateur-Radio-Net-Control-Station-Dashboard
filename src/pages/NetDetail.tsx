@@ -648,6 +648,34 @@ export default function NetDetail() {
                                 </div>
                                 <span className="text-[9px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded animate-pulse shrink-0">STREAMING</span>
                             </div>
+
+                            {/* Mini Log Scrollable Area */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2 pr-1">
+                                {checkins.slice()
+                                    .sort((a, b) => new Date(b.checked_in_at).getTime() - new Date(a.checked_in_at).getTime())
+                                    .slice(0, 15)
+                                    .map((c) => (
+                                        <div
+                                            key={c.id}
+                                            className="flex items-center gap-2 text-[10px] font-mono border-b border-white/5 pb-1 last:border-0 hover:bg-white/5 transition-colors group"
+                                        >
+                                            <span className="text-slate-500 shrink-0">
+                                                {format(new Date(c.checked_in_at), 'HH:mm')}
+                                            </span>
+                                            <span className="text-emerald-400 font-bold group-hover:text-emerald-300">
+                                                {c.callsign}
+                                            </span>
+                                            <span className="text-slate-500 truncate">
+                                                {c.traffic ? '⚡ TRAFFIC' : '✓ CHECK-IN'}
+                                            </span>
+                                        </div>
+                                    ))}
+                                {checkins.length === 0 && (
+                                    <div className="flex flex-col items-center justify-center h-full text-slate-600 text-[10px] italic">
+                                        Waiting for traffic...
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
                         {/* Connection Status - Compact Bottom */}
