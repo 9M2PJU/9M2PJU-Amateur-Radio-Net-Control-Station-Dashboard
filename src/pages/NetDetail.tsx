@@ -99,12 +99,22 @@ export default function NetDetail() {
         try {
             console.log('NetDetail: Fetching data for net:', netId)
 
-            // Support both UUID and Slug lookups
-            const { data, error } = await supabase
+            // Extremely robust lookup: only check ID if it's a valid UUID
+            // This prevents Postgres errors (22P02) when comparing slug strings to UUID columns
+            const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+            const isUuid = uuidRegex.test(netId || '')
+
+            const query = supabase
                 .from('nets')
                 .select('*, profiles(*)')
-                .or(`id.eq.${netId},slug.eq.${netId}`)
-                .maybeSingle()
+
+            if (isUuid) {
+                query.or(`id.eq.${netId},slug.eq.${netId}`)
+            } else {
+                query.eq('slug', netId)
+            }
+
+            const { data, error } = await query.maybeSingle()
 
             if (error) {
                 console.error('Net fetch error:', error)
