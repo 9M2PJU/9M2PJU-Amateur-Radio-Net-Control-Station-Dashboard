@@ -314,6 +314,7 @@ export default function NetDetail() {
     }
 
     const handleEndNet = async () => {
+        if (!net) return
         if (!confirmEnd) {
             setConfirmEnd(true)
             return
@@ -359,6 +360,7 @@ export default function NetDetail() {
     }
 
     const handleDeleteNet = async () => {
+        if (!net) return
         if (!confirmDelete) {
             setConfirmDelete(true)
             return
