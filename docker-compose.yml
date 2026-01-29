@@ -32,9 +32,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - db-data:/var/lib/postgresql/data
-      # Initialize with default schemas if needed
-      # - ./volumes/db/init:/docker-entrypoint-initdb.d
-
+      # Initialize schemas
+      - ./schema:/docker-entrypoint-initdb.d
       # 2. GoTrue (Auth)
   auth:
     container_name: supabase-auth
