@@ -440,19 +440,35 @@ export default function NetDetail() {
                             </button>
                         </div>
 
-                        {isActive && (
-                            <button
-                                onClick={handleEndNet}
-                                disabled={ending}
-                                className={`h-8 px-3 rounded-lg font-bold text-[10px] transition-all shadow-lg flex items-center gap-1.5 uppercase ${confirmEnd
+
+                        <button
+                            onClick={isActive ? handleEndNet : undefined}
+                            disabled={ending || !isActive}
+                            className={`h-8 px-3 rounded-lg font-bold text-[10px] transition-all shadow-lg flex items-center gap-1.5 uppercase ${!isActive
+                                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                    : confirmEnd
                                         ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20 animate-pulse'
                                         : 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
-                                    }`}
-                            >
-                                {ending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <StopCircle className="w-3.5 h-3.5" />}
-                                {confirmEnd ? 'Confirm End?' : 'End Net'}
-                            </button>
-                        )}
+                                }`}
+                        >
+                            {!isActive ? (
+                                <>
+                                    <StopCircle className="w-3.5 h-3.5" />
+                                    Net Ended
+                                </>
+                            ) : ending ? (
+                                <>
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    Ending...
+                                </>
+                            ) : (
+                                <>
+                                    <StopCircle className="w-3.5 h-3.5" />
+                                    {confirmEnd ? 'Confirm End?' : 'End Net'}
+                                </>
+                            )}
+                        </button>
+
 
                         <button
                             onClick={handleDeleteNet}
