@@ -15,7 +15,10 @@ import {
     CheckCircle2
 } from 'lucide-react'
 
+import { useAuth } from '../contexts/AuthContext'
+
 export default function NetNew() {
+    const { user: authUser } = useAuth()
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [name, setName] = useState('')
@@ -29,8 +32,7 @@ export default function NetNew() {
         setLoading(true)
 
         try {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (!session) {
+            if (!authUser) {
                 toast.error('Session expired. Please login again.')
                 navigate('/login')
                 return
@@ -42,7 +44,7 @@ export default function NetNew() {
                 .from('nets')
                 .insert([
                     {
-                        user_id: session.user.id,
+                        user_id: authUser.id,
                         name: name.toUpperCase(),
                         type,
                         frequency,

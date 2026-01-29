@@ -24,31 +24,21 @@ interface NetWithCheckins extends Net {
     checkins: Checkin[]
 }
 
-    export default function Dashboard() {
+import { useAuth } from '../contexts/AuthContext'
+
+export default function Dashboard() {
+    const { user: authUser } = useAuth()
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<Profile | null>(null)
     const [nets, setNets] = useState<NetWithCheckins[]>([])
 
     useEffect(() => {
+        if (!authUser) return
+
         const controller = new AbortController()
-        
+
         const fetchDashboardData = async () => {
             try {
-                console.log('Dashboard: Fetching user...')
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-                if (sessionError) throw sessionError
-
-                if (!session) {
-                    // Handled by Layout, but safe to check
-                    setLoading(false)
-                    return
-                }
-
-                if (controller.signal.aborted) return
-
-                const authUser = session.user
-
                 // Get profile data
                 console.log('Dashboard: Fetching profile...')
                 const { data: profile, error: profileError } = await supabase
@@ -94,11 +84,11 @@ interface NetWithCheckins extends Net {
         }
 
         fetchDashboardData()
-        
+
         return () => {
             controller.abort()
         }
-    }, [])
+    }, [authUser])
 
     if (loading) {
         return (

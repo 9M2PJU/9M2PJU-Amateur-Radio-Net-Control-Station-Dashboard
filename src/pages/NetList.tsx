@@ -24,31 +24,21 @@ interface NetWithCount extends Net {
     checkins: { id: string }[]
 }
 
+import { useAuth } from '../contexts/AuthContext'
+
 export default function Nets() {
+    const { user: authUser } = useAuth()
     const [loading, setLoading] = useState(true)
     const [nets, setNets] = useState<NetWithCount[]>([])
     // navigate removed as it was unused
 
     useEffect(() => {
+        if (!authUser) return
+
         const controller = new AbortController()
 
         const fetchNets = async () => {
             try {
-                console.log('Nets: Fetching session...')
-                const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-
-                if (sessionError) throw sessionError
-
-                if (!session) {
-                    // Handled by Layout
-                    setLoading(false)
-                    return
-                }
-
-                if (controller.signal.aborted) return
-
-                const authUser = session.user
-
                 console.log('Nets: Fetching nets...')
                 const { data, error: netsError } = await supabase
                     .from('nets')
@@ -83,7 +73,7 @@ export default function Nets() {
         return () => {
             controller.abort()
         }
-    }, [])
+    }, [authUser])
 
 
     if (loading) {

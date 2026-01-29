@@ -20,7 +20,10 @@ import {
 import type { Net, Checkin } from '../lib/types'
 import { exportToADIF, exportToPDF, parseADIF, exportCertificate } from '../lib/exportUtils'
 
+import { useAuth } from '../contexts/AuthContext'
+
 export default function NetDetail() {
+    const { user: authUser } = useAuth()
     const [net, setNet] = useState<Net | null>(null)
     const [checkins, setCheckins] = useState<Checkin[]>([])
     const [loading, setLoading] = useState(true)
@@ -28,7 +31,7 @@ export default function NetDetail() {
     const [deleting, setDeleting] = useState(false)
     const [exporting, setExporting] = useState(false)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const [userId, setUserId] = useState<string | null>(null)
+    const userId = authUser?.id
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const chartRef = useRef<HTMLDivElement>(null)
@@ -60,10 +63,6 @@ export default function NetDetail() {
         }
         return () => clearTimeout(timeout)
     }, [confirmEnd])
-
-    useEffect(() => {
-        supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id || null))
-    }, [])
 
     const fetchData = useCallback(async () => {
         if (!netId) {

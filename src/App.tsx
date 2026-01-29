@@ -10,27 +10,17 @@ import NetDetail from './pages/NetDetail'
 import NetNew from './pages/NetNew'
 import Layout from './components/Layout'
 
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+
 // Protected Route Wrapper
 function ProtectedRoute() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
+  const { user, loading } = useAuth()
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setIsAuthenticated(!!session)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAuthenticated(!!session)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  if (isAuthenticated === null) {
+  if (loading) {
     return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/login" replace />
   }
 
@@ -41,25 +31,27 @@ function ProtectedRoute() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<Home />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
-        {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/nets" element={<NetList />} />
-          <Route path="/nets/new" element={<NetNew />} />
-          <Route path="/nets/:id" element={<NetDetail />} />
-        </Route>
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/nets" element={<NetList />} />
+            <Route path="/nets/new" element={<NetNew />} />
+            <Route path="/nets/:id" element={<NetDetail />} />
+          </Route>
 
-        {/* Catch-all - Redirect to home or dashboard */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </BrowserRouter>
+          {/* Catch-all - Redirect to home or dashboard */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   )
 }
 
