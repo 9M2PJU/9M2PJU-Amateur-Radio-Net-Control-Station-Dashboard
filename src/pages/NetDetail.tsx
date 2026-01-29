@@ -99,22 +99,41 @@ export default function NetDetail() {
         try {
             console.log('NetDetail: Fetching data for net:', netId)
 
-            // Extremely robust lookup: only check ID if it's a valid UUID
-            // This prevents Postgres errors (22P02) when comparing slug strings to UUID columns
             const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
             const isUuid = uuidRegex.test(netId || '')
 
-            const query = supabase
-                .from('nets')
-                .select('*, profiles(*)')
+            let data = null
+            let error = null
 
+            // Strategy: Try the most likely candidate first to avoid schema errors
             if (isUuid) {
-                query.or(`id.eq.${netId},slug.eq.${netId}`)
-            } else {
-                query.eq('slug', netId)
+                // Try UUID lookup
+                const res = await supabase
+                    .from('nets')
+                    .select('*, profiles(*)')
+                    .eq('id', netId)
+                    .maybeSingle()
+
+                data = res.data
+                error = res.error
             }
 
-            const { data, error } = await query.maybeSingle()
+            // If we didn't find it by UUID, try Slug (if no critical error happened)
+            if (!data && !error) {
+                const res = await supabase
+                    .from('nets')
+                    .select('*, profiles(*)')
+                    .eq('slug', netId)
+                    .maybeSingle()
+
+                // Code 42703 is "column does not exist" in Postgres
+                if (res.error && res.error.code === '42703') {
+                    console.warn('NetDetail: slug column does not exist in the database yet.')
+                } else {
+                    data = res.data
+                    error = res.error
+                }
+            }
 
             if (error) {
                 console.error('Net fetch error:', error)

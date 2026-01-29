@@ -39,6 +39,7 @@ export default function NetNew() {
             }
 
             const startedAt = new Date()
+            const slug = generateNetSlug(name, startedAt)
 
             const { data, error } = await supabase
                 .from('nets')
@@ -50,7 +51,8 @@ export default function NetNew() {
                         frequency,
                         mode: mode.toUpperCase(),
                         notes,
-                        started_at: startedAt.toISOString()
+                        started_at: startedAt.toISOString(),
+                        slug: slug
                     }
                 ])
                 .select()
