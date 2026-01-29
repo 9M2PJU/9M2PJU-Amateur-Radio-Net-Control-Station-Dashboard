@@ -2,17 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.2] - 2026-01-29
+## [1.1.0] - 2026-01-29
 
-### ⚡ Performance & Stability
-- **Instant Load (Caching)**: Implemented "Stale-While-Revalidate" local caching. The dashboard and Net operations now load instantly while syncing in the background.
-- **Reliable Auth**: Added safety timeouts and refined session management to prevent the "Stuck at Signing In" issue.
-- **Optimistic UI**: The "End Net" action now provides instant visual feedback, eliminating perceived latency.
-- **Slug Support**: Fixed a bug where ending a Net from a slug-based URL would fail.
+### 🛡️ Production Hardening (The "Hardened & Optimized" Update)
+- **Security**: Complete overhaul of Row Level Security (RLS) policies. Only Net Owners can now modify their session data.
+- **Performance**: Implemented "Stale-While-Revalidate" (SWR) local caching. Dashboard and net details now load instantly.
+- **Stability**: Added safety timeouts to Auth and Data fetching to prevent UI hangs.
+- **Optimization**: Route-level code splitting and manual vendor chunking implemented via Vite.
+- **Sync Fix**: Resolved UUID/Slug type mismatch in Postgres queries.
 
-### 🛡️ Security
-- **Hardened RLS**: Tightened database policies so only Net Owners can manage check-ins.
-- **Granular Cleanup**: Refined local storage cleanup to protect other site data.
+### 🧹 Maintenance
+- Consolidated 12+ legacy SQL scripts into `MASTER_MIGRATION.sql`.
+- Removed obsolete Docker and build artifacts.
+- Premium documentation overhaul with Mermaid diagrams.
 
 ## [1.0.0] - 2026-01-28
 
