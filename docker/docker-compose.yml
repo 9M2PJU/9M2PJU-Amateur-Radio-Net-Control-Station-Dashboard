@@ -125,7 +125,7 @@ services:
     image: kong:2.8.1
     restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "8002:8000"
       - "8443:8443"
     environment:
       KONG_DATABASE: "off"
@@ -152,7 +152,7 @@ services:
     image: supabase/studio:latest
     restart: unless-stopped
     ports:
-      - "8001:3000"
+      - "8003:3000"
     environment:
       STUDIO_PG_META_URL: http://meta:8080
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
