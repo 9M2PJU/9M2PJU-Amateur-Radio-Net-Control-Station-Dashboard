@@ -28,7 +28,9 @@ GRANT USAGE ON ALL SEQUENCES IN SCHEMA public TO authenticated;
 -- 2. TIGHTEN RLS FOR CHECKINS
 -- Ensure only the owner of the net can add/modify/delete checkins
 DROP POLICY IF EXISTS "Users can insert checkins" ON public.checkins;
+DROP POLICY IF EXISTS "Net owners can insert checkins" ON public.checkins;
 DROP POLICY IF EXISTS "Net owners can update checkins" ON public.checkins;
+DROP POLICY IF EXISTS "Net owners can delete checkins" ON public.checkins;
 DROP POLICY IF EXISTS "Net owners can delete checkins on their net" ON public.checkins;
 
 -- New INSERT Policy: Only the creator of the Net can add checkins to it
