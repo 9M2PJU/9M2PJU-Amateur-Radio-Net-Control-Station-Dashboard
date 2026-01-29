@@ -296,9 +296,26 @@ export default function NetDetail() {
             return
         }
 
+        const now = new Date().toISOString()
+
+        // Optimistic Update: Set local state immediately for instant feedback
+        if (net) {
+            setNet({ ...net, ended_at: now })
+        }
+
         setEnding(true)
+        setConfirmEnd(false)
+
+        // Safety timeout to handle potential DB hang
+        const endTimeout = setTimeout(() => {
+            if (ending) {
+                console.warn('handleEndNet: DB update timed out')
+                setEnding(false)
+            }
+        }, 10000)
+
         try {
-            const now = new Date().toISOString()
+            console.log('handleEndNet: Updating database...')
             const { error } = await supabase
                 .from('nets')
                 .update({ ended_at: now })
@@ -306,17 +323,14 @@ export default function NetDetail() {
 
             if (error) throw error
 
-            // Immediate local update to prevent UI lag/stuck state
-            if (net) {
-                setNet({ ...net, ended_at: now })
-            }
-
             toast.success('Net operation ended')
-            setConfirmEnd(false)
         } catch (error: any) {
-            toast.error('Failed to end net')
-            console.error(error)
+            console.error('handleEndNet error:', error)
+            toast.error('Sync error: Net ended locally but DB update failed')
+            // Don't revert the local state to avoid UI jumping, 
+            // the user can refresh if it's a critical error
         } finally {
+            clearTimeout(endTimeout)
             setEnding(false)
         }
     }
