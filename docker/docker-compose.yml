@@ -31,7 +31,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - ./volumes/db/data:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
       # Initialize with default schemas if needed
       # - ./volumes/db/init:/docker-entrypoint-initdb.d
 
@@ -117,7 +117,7 @@ services:
       REGION: stub
       GLOBAL_S3_BUCKET: stub
     volumes:
-      - ./volumes/storage:/var/lib/storage
+      - storage-data:/var/lib/storage
 
   # 6. Kong (API Gateway)
   kong:
@@ -163,3 +163,4 @@ services:
 
 volumes:
   db-data:
+  storage-data:
