@@ -25,16 +25,28 @@ interface NetWithCheckins extends Net {
 }
 
 import { useAuth } from '../contexts/AuthContext'
+import { useImpersonation } from '../contexts/ImpersonationContext'
 
 export default function Dashboard() {
     const { user: authUser, profile } = useAuth()
+    const { impersonatedUserId, isImpersonating, impersonatedUser } = useImpersonation()
     const [loadingNets, setLoadingNets] = useState(true)
     const [user, setUser] = useState<Profile | null>(null)
     const [nets, setNets] = useState<NetWithCheckins[]>([])
 
     // Sync profile from context
     useEffect(() => {
-        if (profile) {
+        if (isImpersonating && impersonatedUser) {
+            setUser({
+                id: impersonatedUserId!,
+                callsign: impersonatedUser.callsign,
+                name: null,
+                handle: null,
+                location: null,
+                grid_locator: null,
+                created_at: new Date().toISOString()
+            })
+        } else if (profile) {
             setUser(profile)
         } else if (authUser) {
             setUser({
@@ -47,7 +59,7 @@ export default function Dashboard() {
                 created_at: authUser.created_at
             })
         }
-    }, [authUser, profile])
+    }, [authUser, profile, isImpersonating, impersonatedUser, impersonatedUserId])
 
     useEffect(() => {
         if (!authUser) return
@@ -65,12 +77,15 @@ export default function Dashboard() {
 
         const fetchNets = async () => {
             try {
+                // Determine which user ID to fetch data for
+                const effectiveUserId = impersonatedUserId || authUser.id
+
                 // Fetch all nets for this user
-                console.log('Dashboard: Fetching nets...')
+                console.log(`Dashboard: Fetching nets for user ${effectiveUserId}...`)
                 const { data: netsData, error: netsError } = await supabase
                     .from('nets')
                     .select('*, checkins(*)')
-                    .eq('user_id', authUser.id)
+                    .eq('user_id', effectiveUserId)
                     .order('created_at', { ascending: false })
 
                 if (controller.signal.aborted) return
@@ -104,7 +119,7 @@ export default function Dashboard() {
             clearTimeout(loadingTimeout)
             controller.abort()
         }
-    }, [authUser])
+    }, [authUser, impersonatedUserId])
 
     // Derived state
     const allNets = nets || []

@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
+import { useImpersonation } from '../contexts/ImpersonationContext'
 import {
     LayoutDashboard,
     List,
@@ -17,6 +18,7 @@ import {
 import type { Profile } from '../lib/types'
 
 export default function Navbar() {
+    const { impersonatedUserId, isImpersonating, impersonatedUser, stopImpersonation } = useImpersonation()
     const { user: authUser, profile, isSuperAdmin } = useAuth()
     const [user, setUser] = useState<Profile | null>(null)
     const [time, setTime] = useState(new Date())
@@ -41,7 +43,18 @@ export default function Navbar() {
     }, [])
 
     useEffect(() => {
-        if (profile) {
+        if (isImpersonating && impersonatedUser) {
+            setUser({
+                id: impersonatedUserId!,
+                callsign: impersonatedUser.callsign,
+                name: null,
+                handle: null,
+                location: null,
+                grid_locator: null,
+                is_super_admin: false,
+                created_at: new Date().toISOString()
+            })
+        } else if (profile) {
             setUser(profile)
         } else if (authUser) {
             // Fallback
@@ -57,19 +70,27 @@ export default function Navbar() {
         } else {
             setUser(null)
         }
-    }, [authUser, profile])
+    }, [authUser, profile, isImpersonating, impersonatedUser, impersonatedUserId])
 
     const handleLogout = async () => {
         if (loggingOut) return // Prevent double-clicks
 
         setLoggingOut(true)
+
+        // Stop impersonation on logout if active
+        if (isImpersonating) {
+            stopImpersonation()
+        }
+
         try {
-            const { error } = await supabase.auth.signOut()
-            if (error) {
-                console.error('Logout error:', error)
-                toast.error('Failed to sign out. Please try again.')
-                setLoggingOut(false)
-                return
+            // Add a timeout to signout to prevent hanging
+            const signOutPromise = supabase.auth.signOut()
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Sign out timeout')), 3000))
+
+            try {
+                await Promise.race([signOutPromise, timeoutPromise])
+            } catch (signOutErr) {
+                console.warn('Sign out call timed out or failed, proceeding with local cleanup:', signOutErr)
             }
 
             // Clear any local storage/session data
@@ -101,6 +122,23 @@ export default function Navbar() {
 
     return (
         <div className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'pt-4 px-4' : 'pt-0 px-0'}`}>
+            {/* Impersonation Banner */}
+            {isImpersonating && impersonatedUser && (
+                <div className="bg-amber-500 text-black px-4 py-1.5 flex items-center justify-between text-[11px] font-bold tracking-wider uppercase">
+                    <div className="flex items-center gap-2">
+                        <UserCog className="w-3 h-3" />
+                        <span>Impersonating: {impersonatedUser.callsign} ({impersonatedUser.email})</span>
+                    </div>
+                    <button
+                        onClick={stopImpersonation}
+                        className="bg-black/20 hover:bg-black/30 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                    >
+                        <X className="w-3 h-3" />
+                        EXIT
+                    </button>
+                </div>
+            )}
+
             <nav className={`mx-auto transition-all duration-300 ${scrolled
                 ? 'max-w-5xl rounded-2xl glass shadow-2xl border-white/10'
                 : 'max-w-7xl border-b border-white/5 bg-slate-950/50 backdrop-blur-md'

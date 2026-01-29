@@ -25,9 +25,11 @@ interface NetWithCount extends Net {
 }
 
 import { useAuth } from '../contexts/AuthContext'
+import { useImpersonation } from '../contexts/ImpersonationContext'
 
 export default function Nets() {
     const { user: authUser } = useAuth()
+    const { impersonatedUserId } = useImpersonation()
     const [loading, setLoading] = useState(true)
     const [nets, setNets] = useState<NetWithCount[]>([])
     const [exportingId, setExportingId] = useState<string | null>(null)
@@ -49,11 +51,12 @@ export default function Nets() {
 
         const fetchNets = async () => {
             try {
-                console.log('Nets: Fetching nets...')
+                const effectiveUserId = impersonatedUserId || authUser.id
+                console.log(`Nets: Fetching nets for user ${effectiveUserId}...`)
                 const { data, error: netsError } = await supabase
                     .from('nets')
                     .select('*, checkins(id)')
-                    .eq('user_id', authUser.id)
+                    .eq('user_id', effectiveUserId)
                     .order('created_at', { ascending: false })
 
                 if (controller.signal.aborted) return
@@ -88,7 +91,7 @@ export default function Nets() {
             clearTimeout(loadingTimeout)
             controller.abort()
         }
-    }, [authUser])
+    }, [authUser, impersonatedUserId])
 
 
     if (loading) {
@@ -184,10 +187,12 @@ export default function Nets() {
             const { data: { session } } = await supabase.auth.getSession()
             if (!session) return
 
+            const effectiveUserId = impersonatedUserId || session.user.id
+
             const { data, error } = await supabase
                 .from('nets')
                 .select('*, checkins(id)')
-                .eq('user_id', session.user.id)
+                .eq('user_id', effectiveUserId)
                 .order('created_at', { ascending: false })
 
             if (error) throw error
