@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../contexts/AuthContext'
 import { toast } from 'sonner'
 import {
     LayoutDashboard,
@@ -15,6 +16,7 @@ import {
 import type { Profile } from '../lib/types'
 
 export default function Navbar() {
+    const { user: authUser, profile } = useAuth()
     const [user, setUser] = useState<Profile | null>(null)
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -37,49 +39,20 @@ export default function Navbar() {
     }, [])
 
     useEffect(() => {
-        const fetchUser = async (authUser: any) => {
-            if (!authUser) return
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('*')
-                .eq('id', authUser.id)
-                .single()
-
-            if (profile) {
-                setUser(profile)
-            } else {
-                // Fallback if profile doesn't exist yet but user is authenticated
-                setUser({
-                    id: authUser.id,
-                    callsign: authUser.user_metadata?.callsign || 'OPERATOR',
-                    name: authUser.user_metadata?.name || null,
-                    created_at: authUser.created_at
-                })
-            }
+        if (profile) {
+            setUser(profile)
+        } else if (authUser) {
+            // Fallback
+            setUser({
+                id: authUser.id,
+                callsign: authUser.user_metadata?.callsign || 'OPERATOR',
+                name: authUser.user_metadata?.name || null,
+                created_at: authUser.created_at
+            })
+        } else {
+            setUser(null)
         }
-
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession()
-            if (session?.user) {
-                await fetchUser(session.user)
-            }
-        }
-
-        checkSession()
-
-        // Listen for auth changes
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'INITIAL_SESSION') && session?.user) {
-                await fetchUser(session.user)
-            } else if (event === 'SIGNED_OUT') {
-                setUser(null)
-            }
-        })
-
-        return () => {
-            subscription.unsubscribe()
-        }
-    }, [])
+    }, [authUser, profile])
 
     const handleLogout = async () => {
         const { error } = await supabase.auth.signOut()
@@ -155,7 +128,7 @@ export default function Navbar() {
                         {/* User Menu */}
                         <div className="hidden md:flex items-center gap-4">
                             {user ? (
-                                <div className="flex items-center gap-3 pl-1 pr-4 py-1 rounded-full bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors group">
+                                <Link to="/profile" className="flex items-center gap-3 pl-1 pr-4 py-1 rounded-full bg-white/5 border border-white/10 hover:border-emerald-500/30 transition-colors group">
                                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                                         <User className="w-4 h-4 text-white" />
                                     </div>
@@ -163,7 +136,7 @@ export default function Navbar() {
                                         <span className="text-xs font-bold text-white font-mono leading-none">{user.callsign}</span>
                                         {user.name && <span className="text-[10px] text-slate-400 leading-none mt-1">{user.name}</span>}
                                     </div>
-                                </div>
+                                </Link>
                             ) : (
                                 <Link
                                     to="/login"

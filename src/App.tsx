@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard'
 import NetList from './pages/NetList'
 import NetDetail from './pages/NetDetail'
 import NetNew from './pages/NetNew'
+import Profile from './pages/Profile'
 import Layout from './components/Layout'
 
 import { AuthProvider, useAuth } from './contexts/AuthContext'
@@ -42,6 +43,7 @@ function App() {
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/nets" element={<NetList />} />
             <Route path="/nets/new" element={<NetNew />} />
             <Route path="/nets/:id" element={<NetDetail />} />

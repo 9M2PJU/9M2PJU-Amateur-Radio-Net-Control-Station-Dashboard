@@ -27,33 +27,32 @@ interface NetWithCheckins extends Net {
 import { useAuth } from '../contexts/AuthContext'
 
 export default function Dashboard() {
-    const { user: authUser } = useAuth()
-    const [loading, setLoading] = useState(true)
+    const { user: authUser, profile } = useAuth()
+    const [loadingNets, setLoadingNets] = useState(true)
     const [user, setUser] = useState<Profile | null>(null)
     const [nets, setNets] = useState<NetWithCheckins[]>([])
+
+    // Sync profile from context
+    useEffect(() => {
+        if (profile) {
+            setUser(profile)
+        } else if (authUser) {
+            setUser({
+                id: authUser.id,
+                callsign: authUser.user_metadata?.callsign || 'OPERATOR',
+                name: authUser.user_metadata?.name || null,
+                created_at: authUser.created_at
+            })
+        }
+    }, [authUser, profile])
 
     useEffect(() => {
         if (!authUser) return
 
         const controller = new AbortController()
 
-        const fetchDashboardData = async () => {
+        const fetchNets = async () => {
             try {
-                // Get profile data
-                console.log('Dashboard: Fetching profile...')
-                const { data: profile, error: profileError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', authUser.id)
-                    .single()
-
-                if (controller.signal.aborted) return
-
-                if (profileError) console.warn('Dashboard: Profile error:', profileError)
-
-                if (profile) setUser(profile)
-                else setUser({ id: authUser.id, callsign: 'OPERATOR', created_at: new Date().toISOString(), name: null })
-
                 // Fetch all nets for this user
                 console.log('Dashboard: Fetching nets...')
                 const { data: netsData, error: netsError } = await supabase
@@ -78,26 +77,19 @@ export default function Dashboard() {
                 }
             } finally {
                 if (!controller.signal.aborted) {
-                    setLoading(false)
+                    setLoadingNets(false)
                 }
             }
         }
 
-        fetchDashboardData()
+        fetchNets()
 
         return () => {
             controller.abort()
         }
     }, [authUser])
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center h-[80vh]">
-                <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />
-            </div>
-        )
-    }
-
+    // Derived state
     const allNets = nets || []
     const activeNets = allNets.filter(n => !n.ended_at)
     const totalCheckins = allNets.reduce((sum, n) => sum + (n.checkins?.length || 0), 0)

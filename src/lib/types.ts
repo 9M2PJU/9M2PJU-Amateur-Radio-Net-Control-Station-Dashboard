@@ -3,6 +3,9 @@ export interface Profile {
     id: string
     callsign: string
     name: string | null
+    handle: string | null
+    location: string | null
+    grid_locator: string | null
     created_at: string
 }
 
