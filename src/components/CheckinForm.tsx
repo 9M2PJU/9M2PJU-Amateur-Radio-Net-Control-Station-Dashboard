@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import { Send, Loader2, Radio, MapPin, User, MessageSquare, ShieldAlert, FileText } from 'lucide-react'
@@ -14,6 +14,7 @@ const readabilityOptions = [1, 2, 3, 4, 5]
 const strengthOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps) {
+    const callsignRef = useRef<HTMLInputElement>(null)
     const [callsign, setCallsign] = useState('')
     const [name, setName] = useState('')
     const [location, setLocation] = useState('')
@@ -71,6 +72,9 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
             setTrafficPrecedence('routine')
             setTrafficDetails('')
             onCheckinAdded?.()
+
+            // Re-focus callsign input for rapid entry
+            setTimeout(() => callsignRef.current?.focus(), 100)
         } catch {
             toast.error('An error occurred')
         } finally {
@@ -98,6 +102,7 @@ export default function CheckinForm({ netId, onCheckinAdded }: CheckinFormProps)
                     </label>
                     <div className="relative">
                         <input
+                            ref={callsignRef}
                             id="callsign"
                             type="text"
                             value={callsign}

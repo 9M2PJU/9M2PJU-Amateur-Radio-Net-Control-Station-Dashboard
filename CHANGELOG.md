@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.0.1] - 2026-01-29
+
+### ⚡ Improvements
+- **Performance**: Optimized "End Net" action to be instantaneous by removing redundant data refetching.
+- **UX**: Improved `CheckinForm` to automatically refocus the callsign input after logging, enabling rapid-fire check-ins.
+- **Fixes**: Resolved registration failure by correcting Supabase environment configuration.
+
 ## [1.0.0] - 2026-01-28
 
 ### 🚀 Major Release: Next.js 14 Migration

@@ -307,7 +307,8 @@ export default function NetDetail() {
 
             toast.success('Net operation ended')
             setConfirmEnd(false)
-            fetchData()
+            // No need to fetchData() here as the real-time subscription will update the UI
+            // and we want to return control to the user immediately.
         } catch (error: any) {
             toast.error('Failed to end net')
             console.error(error)
