@@ -88,14 +88,8 @@ export default function NetDetail() {
                 .from('nets')
                 .select('*, profiles(*)')
 
-            // Check if netId looks like a UUID (contains hyphens and is 36 chars)
-            const isUUID = netId.length === 36 && netId.includes('-')
-
-            if (isUUID) {
-                netQuery = netQuery.eq('id', netId)
-            } else {
-                netQuery = netQuery.eq('slug', netId)
-            }
+            // Fallback to strict ID check until 'slug' column is added to DB
+            netQuery = netQuery.eq('id', netId)
 
             const netResponse = await netQuery.single()
 
