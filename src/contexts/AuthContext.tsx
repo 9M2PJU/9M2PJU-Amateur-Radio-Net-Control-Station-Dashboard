@@ -73,11 +73,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 if (error) {
                     console.error('AuthContext: Error getting session', error)
-                    // If we have a JWT error or similar, clear local storage to fix the loop
+                    // If we have a JWT error or similar, clear only Supabase keys to fix the loop
                     if (error.message.includes('JWT') || error.status === 401 || error.status === 400) {
-                        console.warn('AuthContext: Invalid session detected, clearing local storage...')
+                        console.warn('AuthContext: Invalid session detected, clearing stale auth data...')
                         await supabase.auth.signOut()
-                        localStorage.clear() // Harsh but effective for local/cloud switching issues
+
+                        // Targeted cleanup of Supabase keys
+                        Object.keys(localStorage).forEach(key => {
+                            if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
+                                localStorage.removeItem(key)
+                            }
+                        })
                     }
                     setLoading(false)
                     return

@@ -512,8 +512,8 @@ export default function NetDetail() {
                             </div>
                         </div>
 
-                        {/* Quick Check-in Form */}
-                        {isActive && (
+                        {/* Quick Check-in Form - Only for Net Owner */}
+                        {isActive && net.user_id === authUser?.id && (
                             <div className="mt-1">
                                 <div className="flex items-center gap-2 mb-2">
                                     <div className="w-1 h-3.5 bg-emerald-500 rounded-full"></div>
