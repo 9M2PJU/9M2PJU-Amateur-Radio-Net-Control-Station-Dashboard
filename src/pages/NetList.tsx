@@ -40,14 +40,14 @@ export default function Nets() {
 
         const controller = new AbortController()
 
-        // Safety timeout - force loading to complete after 10 seconds
+        // Safety timeout - force loading to complete after 30 seconds
         const loadingTimeout = setTimeout(() => {
             if (loading) {
                 console.warn('NetList: Loading timeout - forcing completion')
                 setLoading(false)
                 toast.error('Loading took too long. Please refresh if data is missing.')
             }
-        }, 10000)
+        }, 30000)
 
         const fetchNets = async () => {
             try {

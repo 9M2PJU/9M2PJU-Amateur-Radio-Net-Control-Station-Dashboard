@@ -298,17 +298,21 @@ export default function NetDetail() {
 
         setEnding(true)
         try {
+            const now = new Date().toISOString()
             const { error } = await supabase
                 .from('nets')
-                .update({ ended_at: new Date().toISOString() })
+                .update({ ended_at: now })
                 .eq('id', netId)
 
             if (error) throw error
 
+            // Immediate local update to prevent UI lag/stuck state
+            if (net) {
+                setNet({ ...net, ended_at: now })
+            }
+
             toast.success('Net operation ended')
             setConfirmEnd(false)
-            // No need to fetchData() here as the real-time subscription will update the UI
-            // and we want to return control to the user immediately.
         } catch (error: any) {
             toast.error('Failed to end net')
             console.error(error)
@@ -445,10 +449,10 @@ export default function NetDetail() {
                             onClick={isActive ? handleEndNet : undefined}
                             disabled={ending || !isActive}
                             className={`h-8 px-3 rounded-lg font-bold text-[10px] transition-all shadow-lg flex items-center gap-1.5 uppercase ${!isActive
-                                    ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
-                                    : confirmEnd
-                                        ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20 animate-pulse'
-                                        : 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
+                                ? 'bg-slate-700 text-slate-400 cursor-not-allowed'
+                                : confirmEnd
+                                    ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20 animate-pulse'
+                                    : 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
                                 }`}
                         >
                             {!isActive ? (
