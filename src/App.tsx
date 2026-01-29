@@ -9,9 +9,11 @@ import NetList from './pages/NetList'
 import NetDetail from './pages/NetDetail'
 import NetNew from './pages/NetNew'
 import Profile from './pages/Profile'
+import SuperAdmin from './pages/SuperAdmin'
 import Layout from './components/Layout'
 
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ImpersonationProvider } from './contexts/ImpersonationContext'
 
 // Protected Route Wrapper
 function ProtectedRoute() {
@@ -33,26 +35,28 @@ function ProtectedRoute() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+      <ImpersonationProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/nets" element={<NetList />} />
-            <Route path="/nets/new" element={<NetNew />} />
-            <Route path="/nets/:id" element={<NetDetail />} />
-          </Route>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/nets" element={<NetList />} />
+              <Route path="/nets/new" element={<NetNew />} />
+              <Route path="/nets/:id" element={<NetDetail />} />
+              <Route path="/admin" element={<SuperAdmin />} />
+            </Route>
 
-          {/* Catch-all - Redirect to home or dashboard */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Catch-all - Redirect to home or dashboard */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
     </AuthProvider>
   )
 }

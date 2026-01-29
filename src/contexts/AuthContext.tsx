@@ -8,13 +8,15 @@ interface AuthContextType {
     user: User | null
     profile: Profile | null
     loading: boolean
+    isSuperAdmin: boolean
 }
 
 const AuthContext = createContext<AuthContextType>({
     session: null,
     user: null,
     profile: null,
-    loading: true
+    loading: true,
+    isSuperAdmin: false
 })
 
 export const useAuth = () => {
@@ -105,7 +107,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         user,
         profile,
-        loading
+        loading,
+        isSuperAdmin: profile?.is_super_admin || false
     }
 
     return (

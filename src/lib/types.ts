@@ -6,6 +6,7 @@ export interface Profile {
     handle: string | null
     location: string | null
     grid_locator: string | null
+    is_super_admin?: boolean
     created_at: string
 }
 

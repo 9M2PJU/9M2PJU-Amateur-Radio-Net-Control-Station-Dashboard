@@ -12,11 +12,12 @@ import {
     Menu,
     X,
     User,
+    UserCog,
 } from 'lucide-react'
 import type { Profile } from '../lib/types'
 
 export default function Navbar() {
-    const { user: authUser, profile } = useAuth()
+    const { user: authUser, profile, isSuperAdmin } = useAuth()
     const [user, setUser] = useState<Profile | null>(null)
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -93,6 +94,7 @@ export default function Navbar() {
         { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
         { href: '/nets', label: 'Nets', icon: List },
         { href: '/nets/new', label: 'New Net', icon: Plus },
+        ...(isSuperAdmin ? [{ href: '/admin', label: 'Admin', icon: UserCog }] : []),
     ]
 
     const isActive = (href: string) => pathname === href || pathname?.startsWith(href + '/')
