@@ -24,21 +24,15 @@ interface NetWithCheckins extends Net {
     checkins: Checkin[]
 }
 
-export default function Dashboard() {
+    export default function Dashboard() {
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<Profile | null>(null)
     const [nets, setNets] = useState<NetWithCheckins[]>([])
 
     useEffect(() => {
+        const controller = new AbortController()
+        
         const fetchDashboardData = async () => {
-            const timeoutId = setTimeout(() => {
-                if (loading) {
-                    console.error('Dashboard: Data fetching timed out')
-                    setLoading(false)
-                    toast.error('Dashboard synchronization timed out. Please refresh.')
-                }
-            }, 30000) // 30 second timeout
-
             try {
                 console.log('Dashboard: Fetching user...')
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -47,8 +41,11 @@ export default function Dashboard() {
 
                 if (!session) {
                     // Handled by Layout, but safe to check
+                    setLoading(false)
                     return
                 }
+
+                if (controller.signal.aborted) return
 
                 const authUser = session.user
 
@@ -60,10 +57,12 @@ export default function Dashboard() {
                     .eq('id', authUser.id)
                     .single()
 
+                if (controller.signal.aborted) return
+
                 if (profileError) console.warn('Dashboard: Profile error:', profileError)
 
                 if (profile) setUser(profile)
-                else setUser({ id: authUser.id, email: authUser.email, callsign: 'OPERATOR' } as any)
+                else setUser({ id: authUser.id, callsign: 'OPERATOR', created_at: new Date().toISOString(), name: null })
 
                 // Fetch all nets for this user
                 console.log('Dashboard: Fetching nets...')
@@ -73,24 +72,32 @@ export default function Dashboard() {
                     .eq('user_id', authUser.id)
                     .order('created_at', { ascending: false })
 
+                if (controller.signal.aborted) return
+
                 if (netsError) {
                     console.error('Dashboard: Nets error:', netsError)
                     throw netsError
                 } else {
                     console.log(`Dashboard: Loaded ${netsData?.length || 0} nets`)
-                    setNets(netsData as any || [])
+                    setNets((netsData as unknown as NetWithCheckins[]) || [])
                 }
             } catch (err: any) {
-                console.error('Dashboard: Critical error:', err)
-                toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
+                if (!controller.signal.aborted) {
+                    console.error('Dashboard: Critical error:', err)
+                    toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
+                }
             } finally {
-                clearTimeout(timeoutId)
-                setLoading(false)
+                if (!controller.signal.aborted) {
+                    setLoading(false)
+                }
             }
         }
 
         fetchDashboardData()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        
+        return () => {
+            controller.abort()
+        }
     }, [])
 
     if (loading) {

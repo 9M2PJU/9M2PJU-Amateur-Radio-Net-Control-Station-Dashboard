@@ -27,18 +27,12 @@ interface NetWithCount extends Net {
 export default function Nets() {
     const [loading, setLoading] = useState(true)
     const [nets, setNets] = useState<NetWithCount[]>([])
-    const navigate = useNavigate()
+    // navigate removed as it was unused
 
     useEffect(() => {
-        const fetchNets = async () => {
-            const timeoutId = setTimeout(() => {
-                if (loading) {
-                    console.error('Nets: Data fetching timed out')
-                    setLoading(false)
-                    toast.error('Operations log synchronization timed out. Please refresh.')
-                }
-            }, 30000) // 30 second timeout
+        const controller = new AbortController()
 
+        const fetchNets = async () => {
             try {
                 console.log('Nets: Fetching session...')
                 const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -47,8 +41,11 @@ export default function Nets() {
 
                 if (!session) {
                     // Handled by Layout
+                    setLoading(false)
                     return
                 }
+
+                if (controller.signal.aborted) return
 
                 const authUser = session.user
 
@@ -59,23 +56,32 @@ export default function Nets() {
                     .eq('user_id', authUser.id)
                     .order('created_at', { ascending: false })
 
+                if (controller.signal.aborted) return
+
                 if (netsError) {
                     console.error('Nets: Fetch error:', netsError)
                     throw netsError
                 } else {
                     console.log(`Nets: Loaded ${data?.length || 0} nets`)
-                    setNets(data as any || [])
+                    setNets((data as unknown as NetWithCount[]) || [])
                 }
-            } catch (err: any) {
-                console.error('Nets: Critical error:', err)
-                toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
+            } catch (err: unknown) {
+                if (!controller.signal.aborted) {
+                    const message = err instanceof Error ? err.message : 'Unknown error'
+                    console.error('Nets: Critical error:', err)
+                    toast.error(`System synchronization error: ${message}`)
+                }
             } finally {
-                clearTimeout(timeoutId)
-                setLoading(false)
+                if (!controller.signal.aborted) {
+                    setLoading(false)
+                }
             }
         }
         fetchNets()
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+
+        return () => {
+            controller.abort()
+        }
     }, [])
 
 
@@ -114,7 +120,7 @@ export default function Nets() {
                 }
             }
             toast.success('Net deleted successfully')
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Delete error:', error)
             toast.error('Failed to delete net')
             // Revert optimistic update

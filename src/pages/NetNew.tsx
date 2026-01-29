@@ -66,9 +66,10 @@ export default function NetNew() {
             } else {
                 navigate('/nets')
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error creating net:', error)
-            toast.error(error.message || 'Failed to initialize net')
+            const message = error instanceof Error ? error.message : 'Failed to initialize net'
+            toast.error(message)
         } finally {
             setLoading(false)
         }
@@ -125,7 +126,7 @@ export default function NetNew() {
                                     <div className="relative">
                                         <select
                                             value={type}
-                                            onChange={(e) => setType(e.target.value as any)}
+                                            onChange={(e) => setType(e.target.value as 'weekly' | 'emergency_exercise' | 'special')}
                                             className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-all appearance-none"
                                         >
                                             <option value="weekly">Weekly Net</option>
