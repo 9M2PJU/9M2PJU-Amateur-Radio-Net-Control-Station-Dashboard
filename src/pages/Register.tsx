@@ -27,6 +27,7 @@ export default function Register() {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
+        console.log('Starting registration process...')
 
         if (password !== confirmPassword) {
             toast.error('Passwords do not match')
@@ -57,17 +58,36 @@ export default function Register() {
                 }
             })
 
+            console.log('Supabase Response:', { authData, authError })
+
             if (authError) {
-                toast.error(authError.message)
+                console.error('Auth Error:', authError)
+                toast.error(`Registration Failed: ${authError.message}`)
+                return
+            }
+
+            // Check if user already exists (Supabase returns user but empty identities if obfuscated)
+            if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
+                toast.error('Account with this email already exists.')
+                return
+            }
+
+            // If session exists, user is logged in (Auto Confirm Enabled)
+            if (authData.session) {
+                toast.success('Registration successful! Logging you in...')
+                navigate('/dashboard', { replace: true })
                 return
             }
 
             if (authData.user) {
                 setRegistered(true)
                 toast.success('Check your email to verify your account')
+            } else {
+                toast.error('Registration completed but user data is missing. Please contact support.')
             }
-        } catch {
-            toast.error('An unexpected error occurred')
+        } catch (error: any) {
+            console.error('Unexpected Exception:', error)
+            toast.error(`System Error: ${error.message || 'Unknown error occurred'}`)
         } finally {
             setLoading(false)
         }

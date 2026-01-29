@@ -6,7 +6,7 @@ import type { Net, Checkin } from './types'
 
 // --- ADIF EXPORT ---
 export const exportToADIF = (net: Net, checkins: Checkin[]) => {
-    let adif = `9M2PJU NCS Dashboard Export\n`
+    let adif = `9M2PJU NCS Center Export\n`
     adif += `<ADIF_VER:5>3.1.4\n`
     adif += `<PROGRAMID:6>9M2PJU\n`
     adif += `<EOH>\n\n`
@@ -88,7 +88,7 @@ export const exportToPDF = async (net: Net, checkins: Checkin[], chartRefs: (HTM
 
     doc.setFontSize(22)
     doc.setTextColor(16, 185, 129) // Emerald-500
-    doc.text('9M2PJU NCS DASHBOARD', pageWidth / 2, 20, { align: 'center' })
+    doc.text('9M2PJU NCS CENTER', pageWidth / 2, 20, { align: 'center' })
 
     doc.setFontSize(16)
     doc.setTextColor(30, 41, 59) // Slate-800

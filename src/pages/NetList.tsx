@@ -1,10 +1,9 @@
-
-
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { format } from 'date-fns'
+import { exportToPDF } from '../lib/exportUtils'
 import {
     Radio,
     // Users,
@@ -15,10 +14,11 @@ import {
     Signal,
     Loader2,
     Trash2,
-    StopCircle
+    StopCircle,
+    FileText as FilePdf
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Net } from '../lib/types'
+import type { Net, Checkin } from '../lib/types'
 
 interface NetWithCount extends Net {
     checkins: { id: string }[]
@@ -30,6 +30,7 @@ export default function Nets() {
     const { user: authUser } = useAuth()
     const [loading, setLoading] = useState(true)
     const [nets, setNets] = useState<NetWithCount[]>([])
+    const [exportingId, setExportingId] = useState<string | null>(null)
     // navigate removed as it was unused
 
     useEffect(() => {
@@ -88,6 +89,30 @@ export default function Nets() {
 
     const formatType = (type: string) => {
         return type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+    }
+
+    const handleExportPDF = async (e: React.MouseEvent, net: Net) => {
+        e.preventDefault() // Prevent navigation
+        setExportingId(net.id)
+
+        try {
+            // Fetch checkins for this net
+            const { data: checkins, error } = await supabase
+                .from('checkins')
+                .select('*')
+                .eq('net_id', net.id)
+                .order('checked_in_at', { ascending: true })
+
+            if (error) throw error
+
+            await exportToPDF(net, checkins as Checkin[], [])
+            toast.success('PDF Report Generated')
+        } catch (error) {
+            console.error('Export error:', error)
+            toast.error('Failed to generate PDF')
+        } finally {
+            setExportingId(null)
+        }
     }
 
     const handleDeleteNet = async (id: string, name: string) => {
@@ -277,6 +302,19 @@ export default function Nets() {
                                             }`}>
                                             {formatType(net.type)}
                                         </span>
+
+                                        <button
+                                            onClick={(e) => handleExportPDF(e, net)}
+                                            disabled={exportingId === net.id}
+                                            className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                                            title="Export Report PDF"
+                                        >
+                                            {exportingId === net.id ? (
+                                                <Loader2 className="w-4 h-4 animate-spin" />
+                                            ) : (
+                                                <FilePdf className="w-4 h-4" />
+                                            )}
+                                        </button>
 
                                         {!net.ended_at && (
                                             <button
