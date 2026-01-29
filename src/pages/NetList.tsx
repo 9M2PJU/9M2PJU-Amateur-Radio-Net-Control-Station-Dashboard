@@ -70,7 +70,10 @@ export default function Nets() {
                     console.error('Nets: Critical error:', err)
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     const message = (err as any)?.message || 'Unknown error'
-                    toast.error(`System synchronization error: ${message}`)
+                    // Don't show AbortError to users - it's normal when navigating away
+                    if (!(err instanceof Error && err.name === 'AbortError')) {
+                        toast.error(`System synchronization error: ${message}`)
+                    }
                 }
             } finally {
                 if (!controller.signal.aborted) {

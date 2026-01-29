@@ -85,7 +85,10 @@ export default function Dashboard() {
             } catch (err: any) {
                 if (!controller.signal.aborted) {
                     console.error('Dashboard: Critical error:', err)
-                    toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
+                    // Don't show AbortError to users - it's normal when navigating away
+                    if (!(err instanceof Error && err.name === 'AbortError')) {
+                        toast.error(`System synchronization error: ${err.message || 'Unknown error'}`)
+                    }
                 }
             } finally {
                 if (!controller.signal.aborted) {
