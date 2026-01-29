@@ -6,8 +6,8 @@ services:
   # ----------------------------------------------------------------------------
   app:
     build:
-      context: ..
-      dockerfile: docker/Dockerfile
+      context: .
+      dockerfile: Dockerfile
     container_name: ncs-dashboard
     ports:
       - "45912:80"
@@ -129,11 +129,11 @@ services:
       - "8443:8443"
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /var/lib/kong/kong.yml
+      KONG_DECLARATIVE_CONFIG: /kong_config/kong.yml
       KONG_DNS_ORDER: LAST,A,CNAME
       KONG_PLUGINS: request-transformer,cors,key-auth,acl
     volumes:
-      - ./volumes/api/kong.yml:/var/lib/kong/kong.yml
+      - ./kong.yml:/kong_config/kong.yml
 
   # 7. Meta (Dashboard API - helper)
   meta:

@@ -6,15 +6,31 @@
   <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>9M2PJU NCS Center</title>
+  
+  <!-- Cache Control -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <script type="module" crossorigin src="/assets/index-D8YcrdBr.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DWV-ve3d.css">
+  
+  <!-- Version for cache busting - update this when deploying -->
+  <meta name="app-version" content="1.0.2" />
+  
+  <!-- Unregister any old service workers -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+  </script>
+  <script type="module" crossorigin src="/assets/index-BI1NyZeh.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CZohagBM.css">
 </head>
 
 <body>
-  <div id="root"></div>
+  <div id="root"></div>
 </body>
 
 </html>
