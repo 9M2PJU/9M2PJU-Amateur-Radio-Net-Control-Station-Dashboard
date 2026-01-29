@@ -8,6 +8,13 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['lucide-react', 'sonner', 'clsx', 'tailwind-merge'],
+          'vendor-charts': ['recharts'],
+          'vendor-maps': ['leaflet', 'react-leaflet'],
+          'vendor-utils': ['date-fns', 'jspdf', 'jspdf-autotable']
+        },
         entryFileNames: `assets/[name]-[hash].js`,
         chunkFileNames: `assets/[name]-[hash].js`,
         assetFileNames: `assets/[name]-[hash].[ext]`
