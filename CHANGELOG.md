@@ -2,12 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.0.1] - 2026-01-29
+## [1.0.2] - 2026-01-29
 
-### ⚡ Improvements
-- **Performance**: Optimized "End Net" action to be instantaneous by removing redundant data refetching.
-- **UX**: Improved `CheckinForm` to automatically refocus the callsign input after logging, enabling rapid-fire check-ins.
-- **Fixes**: Resolved registration failure by correcting Supabase environment configuration.
+### ⚡ Performance & Stability
+- **Instant Load (Caching)**: Implemented "Stale-While-Revalidate" local caching. The dashboard and Net operations now load instantly while syncing in the background.
+- **Reliable Auth**: Added safety timeouts and refined session management to prevent the "Stuck at Signing In" issue.
+- **Optimistic UI**: The "End Net" action now provides instant visual feedback, eliminating perceived latency.
+- **Slug Support**: Fixed a bug where ending a Net from a slug-based URL would fail.
+
+### 🛡️ Security
+- **Hardened RLS**: Tightened database policies so only Net Owners can manage check-ins.
+- **Granular Cleanup**: Refined local storage cleanup to protect other site data.
 
 ## [1.0.0] - 2026-01-28
 
