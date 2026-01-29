@@ -56,7 +56,7 @@ function App() {
             {/* Catch-all - Redirect to home or dashboard */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
-        </BrowserRouter>
+      </ImpersonationProvider>
     </AuthProvider>
   )
 }
