@@ -67,32 +67,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         }, 10000)
 
-        supabase.auth.getSession().then(async ({ data: { session } }) => {
-            setSession(session)
-            setUser(session?.user ?? null)
-            if (session?.user) {
-                await fetchProfile(session.user.id)
+        const initAuth = async () => {
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession()
+
+                if (error) {
+                    console.error('AuthContext: Error getting session', error)
+                    // If we have a JWT error or similar, clear local storage to fix the loop
+                    if (error.message.includes('JWT') || error.status === 401 || error.status === 400) {
+                        console.warn('AuthContext: Invalid session detected, clearing local storage...')
+                        await supabase.auth.signOut()
+                        localStorage.clear() // Harsh but effective for local/cloud switching issues
+                    }
+                    setLoading(false)
+                    return
+                }
+
+                setSession(session)
+                setUser(session?.user ?? null)
+                if (session?.user) {
+                    await fetchProfile(session.user.id)
+                }
+            } catch (err) {
+                console.error('AuthContext: Unexpected error during init', err)
+            } finally {
+                setLoading(false)
+                clearTimeout(loadingTimeout)
             }
-            setLoading(false)
-            clearTimeout(loadingTimeout)
-            console.log('AuthContext: Initial session loaded', !!session)
-        }).catch((error) => {
-            console.error('AuthContext: Error getting session', error)
-            setLoading(false)
-            clearTimeout(loadingTimeout)
-        })
+        }
+
+        initAuth()
 
         // Listen for changes
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange(async (_event, session) => {
             console.log('AuthContext: Auth state change', _event)
-            setSession(session)
-            setUser(session?.user ?? null)
-            if (session?.user) {
-                await fetchProfile(session.user.id)
-            } else {
+
+            // Handle signed out event specifically to ensure clean slate
+            if (_event === 'SIGNED_OUT') {
+                setSession(null)
+                setUser(null)
                 setProfile(null)
+            } else {
+                setSession(session)
+                setUser(session?.user ?? null)
+                if (session?.user) {
+                    await fetchProfile(session.user.id)
+                } else {
+                    setProfile(null)
+                }
             }
             setLoading(false)
         })
