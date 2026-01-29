@@ -56,6 +56,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Initial session check
         console.log('AuthContext: Initializing...')
+
+        // Safety timeout - if loading takes more than 10 seconds, force it to finish
+        const loadingTimeout = setTimeout(() => {
+            if (loading) {
+                console.warn('AuthContext: Loading timeout reached, forcing completion')
+                setLoading(false)
+            }
+        }, 10000)
+
         supabase.auth.getSession().then(async ({ data: { session } }) => {
             setSession(session)
             setUser(session?.user ?? null)
@@ -63,7 +72,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 await fetchProfile(session.user.id)
             }
             setLoading(false)
+            clearTimeout(loadingTimeout)
             console.log('AuthContext: Initial session loaded', !!session)
+        }).catch((error) => {
+            console.error('AuthContext: Error getting session', error)
+            setLoading(false)
+            clearTimeout(loadingTimeout)
         })
 
         // Listen for changes
@@ -81,7 +95,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             setLoading(false)
         })
 
-        return () => subscription.unsubscribe()
+        return () => {
+            subscription.unsubscribe()
+            clearTimeout(loadingTimeout)
+        }
     }, [])
 
     const value = {
