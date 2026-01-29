@@ -1,7 +1,6 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
-import { Toaster } from 'sonner'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -9,10 +8,10 @@ import Dashboard from './pages/Dashboard'
 import NetList from './pages/NetList'
 import NetDetail from './pages/NetDetail'
 import NetNew from './pages/NetNew'
-import Navbar from './components/Navbar'
+import Layout from './components/Layout'
 
 // Protected Route Wrapper
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
+function ProtectedRoute() {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
   useEffect(() => {
@@ -35,13 +34,14 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>
+  return (
+    <Layout />
+  )
 }
 
 function App() {
   return (
     <BrowserRouter>
-      <Toaster position="top-right" richColors />
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Home />} />
@@ -49,42 +49,13 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Protected Routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Navbar />
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nets"
-          element={
-            <ProtectedRoute>
-              <Navbar />
-              <NetList />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nets/new"
-          element={
-            <ProtectedRoute>
-              <Navbar />
-              <NetNew />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/nets/:id"
-          element={
-            <ProtectedRoute>
-              <Navbar />
-              <NetDetail />
-            </ProtectedRoute>
-          }
-        />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/nets" element={<NetList />} />
+          <Route path="/nets/new" element={<NetNew />} />
+          <Route path="/nets/:id" element={<NetDetail />} />
+        </Route>
+
         {/* Catch-all - Redirect to home or dashboard */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -1,7 +1,7 @@
 
 
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 
 import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
@@ -15,6 +15,15 @@ export default function Register() {
     const [name, setName] = useState('')
     const [loading, setLoading] = useState(false)
     const [registered, setRegistered] = useState(false)
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                navigate('/dashboard', { replace: true })
+            }
+        })
+    }, [navigate])
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault()
