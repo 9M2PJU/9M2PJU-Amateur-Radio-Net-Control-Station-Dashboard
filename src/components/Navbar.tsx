@@ -21,6 +21,7 @@ export default function Navbar() {
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
+    const [loggingOut, setLoggingOut] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
     const pathname = location.pathname
@@ -58,13 +59,34 @@ export default function Navbar() {
     }, [authUser, profile])
 
     const handleLogout = async () => {
-        const { error } = await supabase.auth.signOut()
-        if (error) {
-            toast.error('Failed to sign out')
-            return
+        if (loggingOut) return // Prevent double-clicks
+
+        setLoggingOut(true)
+        try {
+            const { error } = await supabase.auth.signOut()
+            if (error) {
+                console.error('Logout error:', error)
+                toast.error('Failed to sign out. Please try again.')
+                setLoggingOut(false)
+                return
+            }
+
+            // Clear any local storage/session data
+            localStorage.clear()
+            sessionStorage.clear()
+
+            toast.success('Signed out successfully')
+            navigate('/login', { replace: true })
+        } catch (err) {
+            console.error('Unexpected logout error:', err)
+            toast.error('An error occurred. Forcing logout...')
+            // Force logout even if there's an error
+            localStorage.clear()
+            sessionStorage.clear()
+            navigate('/login', { replace: true })
+        } finally {
+            setLoggingOut(false)
         }
-        toast.success('Signed out successfully')
-        navigate('/login')
     }
 
     const navLinks = [
