@@ -47,6 +47,9 @@ export default function Navbar() {
                 id: authUser.id,
                 callsign: authUser.user_metadata?.callsign || 'OPERATOR',
                 name: authUser.user_metadata?.name || null,
+                handle: authUser.user_metadata?.handle || null,
+                location: authUser.user_metadata?.location || null,
+                grid_locator: authUser.user_metadata?.grid_locator || null,
                 created_at: authUser.created_at
             })
         } else {
