@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
+import { generateNetSlug } from '../lib/slugify'
 import {
     Radio,
     Activity,
@@ -35,6 +36,9 @@ export default function NetNew() {
                 return
             }
 
+            const startedAt = new Date()
+            const slug = generateNetSlug(name, startedAt)
+
             const { data, error } = await supabase
                 .from('nets')
                 .insert([
@@ -45,7 +49,8 @@ export default function NetNew() {
                         frequency,
                         mode: mode.toUpperCase(),
                         notes,
-                        started_at: new Date().toISOString()
+                        slug,
+                        started_at: startedAt.toISOString()
                     }
                 ])
                 .select()
@@ -54,7 +59,9 @@ export default function NetNew() {
             if (error) throw error
 
             toast.success('Net initialized successfully')
-            if (data) {
+            if (data?.slug) {
+                navigate(`/nets/${data.slug}`)
+            } else if (data) {
                 navigate(`/nets/${data.id}`)
             } else {
                 navigate('/nets')

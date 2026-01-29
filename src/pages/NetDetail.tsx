@@ -81,18 +81,22 @@ export default function NetDetail() {
         setLoading(true)
         try {
             console.log('NetDetail: Fetching data for net:', netId)
-            const [netResponse, checkinsResponse] = await Promise.all([
-                supabase
-                    .from('nets')
-                    .select('*, profiles(*)')
-                    .eq('id', netId)
-                    .single(),
-                supabase
-                    .from('checkins')
-                    .select('*')
-                    .eq('net_id', netId)
-                    .order('checked_in_at', { ascending: true })
-            ])
+
+            // Try to fetch by slug first, then fallback to ID
+            let netQuery = supabase
+                .from('nets')
+                .select('*, profiles(*)')
+
+            // Check if netId looks like a UUID (contains hyphens and is 36 chars)
+            const isUUID = netId.length === 36 && netId.includes('-')
+
+            if (isUUID) {
+                netQuery = netQuery.eq('id', netId)
+            } else {
+                netQuery = netQuery.eq('slug', netId)
+            }
+
+            const netResponse = await netQuery.single()
 
             if (netResponse.error) {
                 console.error('Net fetch error:', netResponse.error)
@@ -107,6 +111,13 @@ export default function NetDetail() {
                 navigate('/nets')
                 return
             }
+
+            // Fetch checkins using the actual net ID
+            const checkinsResponse = await supabase
+                .from('checkins')
+                .select('*')
+                .eq('net_id', netResponse.data.id)
+                .order('checked_in_at', { ascending: true })
 
             console.log('NetDetail: Success!')
             setNet(netResponse.data)
