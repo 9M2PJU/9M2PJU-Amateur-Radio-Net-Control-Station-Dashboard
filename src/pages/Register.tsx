@@ -325,11 +325,16 @@ export default function Register() {
                     )}
 
                     {/* Footer */}
-                    <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                    <div className="mt-8 pt-6 border-t border-white/5 text-center space-y-3">
                         <p className="text-slate-400 text-sm">
                             Already have an account?{' '}
                             <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors hover:underline decoration-violet-500/30 underline-offset-4">
                                 Sign in here
+                            </Link>
+                        </p>
+                        <p className="text-slate-500 text-xs">
+                            <Link to="/" className="hover:text-slate-300 transition-colors">
+                                ← Back to Main
                             </Link>
                         </p>
                     </div>

@@ -129,11 +129,16 @@ export default function Login() {
                     </form>
 
                     {/* Footer */}
-                    <div className="mt-6 text-center">
+                    <div className="mt-6 text-center space-y-3">
                         <p className="text-slate-400 text-sm">
                             Don't have an account?{' '}
                             <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
                                 Request Access
+                            </Link>
+                        </p>
+                        <p className="text-slate-500 text-xs">
+                            <Link to="/" className="hover:text-slate-300 transition-colors">
+                                ← Back to Main
                             </Link>
                         </p>
                     </div>
