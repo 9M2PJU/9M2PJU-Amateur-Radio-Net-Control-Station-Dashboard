@@ -149,7 +149,7 @@ services:
   # 8. Studio (Dashboard UI)
   studio:
     container_name: supabase-studio
-    image: supabase/studio:20241216-791753c
+    image: supabase/studio:latest
     restart: unless-stopped
     ports:
       - "8001:3000"
