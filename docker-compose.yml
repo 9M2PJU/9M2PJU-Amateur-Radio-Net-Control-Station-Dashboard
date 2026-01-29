@@ -9,6 +9,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: ncs-dashboard
+    env_file: .env
     ports:
       - "45912:80"
     restart: unless-stopped
@@ -25,6 +26,7 @@ services:
     image: supabase/postgres:15.1.0.147
     command: postgres -c config_file=/etc/postgresql/postgresql.conf
     restart: unless-stopped
+    env_file: .env
     ports:
       - "45432:5432"
     environment:
@@ -39,6 +41,7 @@ services:
     container_name: supabase-auth
     image: supabase/gotrue:v2.158.1
     restart: unless-stopped
+    env_file: .env
     depends_on:
       - db
     environment:
@@ -64,6 +67,7 @@ services:
     container_name: supabase-rest
     image: postgrest/postgrest:v12.2.0
     restart: unless-stopped
+    env_file: .env
     depends_on:
       - db
     environment:
@@ -95,12 +99,16 @@ services:
       SECURE_CHANNELS: 'true'
       SLOT_NAME: supabase_realtime_rls
       TEMPORARY_SLOT: 'true'
+      # FORCE IPV4
+      IP_VERSION: 4
+      ERL_AFLAGS: "-proto_dist inet_tcp"
 
   # 5. Storage
   storage:
     container_name: supabase-storage
     image: supabase/storage-api:v1.11.13
     restart: unless-stopped
+    env_file: .env
     depends_on:
       - db
     environment:
@@ -123,6 +131,8 @@ services:
     container_name: supabase-kong
     image: kong:2.8.1
     restart: unless-stopped
+    env_file: .env
+    user: root
     ports:
       - "45800:8000"
       - "8443:8443"
@@ -139,6 +149,7 @@ services:
     container_name: supabase-meta
     image: supabase/postgres-meta:v0.84.2
     restart: unless-stopped
+    env_file: .env
     environment:
       PG_META_PORT: 8080
       PG_META_DB_HOST: db
@@ -150,6 +161,7 @@ services:
     container_name: supabase-studio
     image: supabase/studio:latest
     restart: unless-stopped
+    env_file: .env
     ports:
       - "45801:3000"
     environment:
