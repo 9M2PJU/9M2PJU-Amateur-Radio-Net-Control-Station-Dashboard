@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase'
 import CheckinForm from '../components/CheckinForm'
 import CheckinList from '../components/CheckinList'
 import TimeWidget from '../components/widgets/TimeWidget'
-import TopParticipantsChart from '../components/widgets/TopParticipantsChart'
+import DistributionChart from '../components/widgets/DistributionChart'
 import { toast } from 'sonner'
 import { format, differenceInMinutes } from 'date-fns'
 import {
@@ -444,10 +444,13 @@ export default function NetDetail() {
                             <button
                                 onClick={handleEndNet}
                                 disabled={ending}
-                                className="h-8 px-3 rounded-lg bg-rose-500 text-white font-bold text-[10px] hover:bg-rose-600 transition-all shadow-lg shadow-rose-500/20 flex items-center gap-1.5 uppercase"
+                                className={`h-8 px-3 rounded-lg font-bold text-[10px] transition-all shadow-lg flex items-center gap-1.5 uppercase ${confirmEnd
+                                        ? 'bg-amber-500 text-white hover:bg-amber-600 shadow-amber-500/20 animate-pulse'
+                                        : 'bg-rose-500 text-white hover:bg-rose-600 shadow-rose-500/20'
+                                    }`}
                             >
                                 {ending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <StopCircle className="w-3.5 h-3.5" />}
-                                End Net
+                                {confirmEnd ? 'Confirm End?' : 'End Net'}
                             </button>
                         )}
 
@@ -505,7 +508,7 @@ export default function NetDetail() {
                         {/* Analysis - Top Stations (Smaller) */}
                         {checkins.length > 0 && (
                             <div className="mt-2 p-2 rounded-lg bg-slate-900/30 border border-slate-800/30 h-48 overflow-hidden">
-                                <TopParticipantsChart
+                                <DistributionChart
                                     data={Object.entries(
                                         checkins.reduce((acc, c) => {
                                             acc[c.callsign] = (acc[c.callsign] || 0) + 1
