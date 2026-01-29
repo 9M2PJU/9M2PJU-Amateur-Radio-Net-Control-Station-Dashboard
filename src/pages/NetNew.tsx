@@ -37,7 +37,6 @@ export default function NetNew() {
             }
 
             const startedAt = new Date()
-            const slug = generateNetSlug(name, startedAt)
 
             const { data, error } = await supabase
                 .from('nets')
@@ -49,7 +48,6 @@ export default function NetNew() {
                         frequency,
                         mode: mode.toUpperCase(),
                         notes,
-                        slug,
                         started_at: startedAt.toISOString()
                     }
                 ])
@@ -59,9 +57,7 @@ export default function NetNew() {
             if (error) throw error
 
             toast.success('Net initialized successfully')
-            if (data?.slug) {
-                navigate(`/nets/${data.slug}`)
-            } else if (data) {
+            if (data?.id) {
                 navigate(`/nets/${data.id}`)
             } else {
                 navigate('/nets')

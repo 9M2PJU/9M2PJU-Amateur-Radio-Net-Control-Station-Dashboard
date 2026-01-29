@@ -258,7 +258,7 @@ export default function Nets() {
                                     key={net.id}
                                     className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group relative overflow-hidden"
                                 >
-                                    <Link to={`/nets/${net.slug || net.id}`} className="flex-1 flex items-center gap-4 min-w-0">
+                                    <Link to={`/nets/${net.id}`} className="flex-1 flex items-center gap-4 min-w-0">
                                         {!net.ended_at && (
                                             <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]"></div>
                                         )}
