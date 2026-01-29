@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import CheckinForm from '../components/CheckinForm'
 import CheckinList from '../components/CheckinList'
-import NetMap from '../components/widgets/NetMap'
+import TimeWidget from '../components/widgets/TimeWidget'
 import TopParticipantsChart from '../components/widgets/TopParticipantsChart'
 import { toast } from 'sonner'
 import { format, differenceInMinutes } from 'date-fns'
@@ -208,19 +208,28 @@ export default function NetDetail() {
             name: checkin.name,
             location: checkin.location,
             signal_report: checkin.signal_report,
+            readability: checkin.readability || 5,
+            signal_strength: checkin.signal_strength || 9,
             remarks: checkin.remarks,
             traffic: checkin.traffic
         })
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const saveEdit = async () => {
+    const saveEdit = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault()
         if (!editingCheckin) return
 
         try {
+            // Update signal report string if components changed
+            const updates = {
+                ...editForm,
+                signal_report: `${editForm.readability}/${editForm.signal_strength}`
+            }
+
             const { error, data } = await supabase
                 .from('checkins')
-                .update(editForm)
+                .update(updates)
                 .eq('id', editingCheckin.id)
                 .select()
                 .single()
@@ -351,8 +360,8 @@ export default function NetDetail() {
         new Date(net.started_at)
     ) : 0
 
-    // Show loading state while fetching data
-    if (loading || !net) {
+    // Show loading state ONLY during initial load
+    if (loading && !net) {
         return (
             <div className="flex items-center justify-center h-screen bg-slate-950">
                 <div className="text-center">
@@ -362,6 +371,8 @@ export default function NetDetail() {
             </div>
         )
     }
+
+    if (!net) return null // Should be handled by useEffect redirect, but for safety
 
     return (
         <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
@@ -528,14 +539,11 @@ export default function NetDetail() {
                 {/* Right Column: Visualization & Status (3 cols) */}
                 <div className="lg:col-span-3 border-l border-white/5 bg-slate-900/20 flex flex-col overflow-hidden">
                     <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
-                        {/* Map Section - Fixed Aspect Ratio */}
-                        <div className="p-3 border-b border-white/5 bg-slate-900/40">
-                            <div className="flex items-center gap-2 mb-2">
-                                <div className="w-1 h-3.5 bg-cyan-500 rounded-full"></div>
-                                <h3 className="text-[11px] font-bold text-white uppercase tracking-wider">Geo Presence</h3>
-                            </div>
-                            <div className="rounded-lg overflow-hidden border border-slate-800/50 shadow-inner h-40">
-                                <NetMap checkins={checkins} className="h-full w-full" />
+                        {/* Time Widget Section */}
+                        <div className="p-0 border-b border-white/5 bg-slate-900/40">
+                            {/* Replaced NetMap with TimeWidget */}
+                            <div className="rounded-none overflow-hidden h-40">
+                                <TimeWidget />
                             </div>
                         </div>
 
@@ -561,6 +569,106 @@ export default function NetDetail() {
                     </div>
                 </div>
             </div>
+
+            {/* Edit Modal */}
+            {editingCheckin && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-fade-in">
+                    <div className="w-full max-w-lg card glass-card p-6 shadow-2xl border border-white/10">
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-bold text-white">Edit Check-in</h3>
+                            <button
+                                onClick={() => setEditingCheckin(null)}
+                                className="text-slate-400 hover:text-white"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        <form onSubmit={saveEdit} className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Callsign</label>
+                                <input
+                                    type="text"
+                                    value={editForm.callsign || ''}
+                                    onChange={e => setEditForm(prev => ({ ...prev, callsign: e.target.value.toUpperCase() }))}
+                                    className="input uppercase font-mono"
+                                    required
+                                />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Name</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name || ''}
+                                        onChange={e => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                                        className="input"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Location</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.location || ''}
+                                        onChange={e => setEditForm(prev => ({ ...prev, location: e.target.value }))}
+                                        className="input"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Readability (1-5)</label>
+                                    <select
+                                        value={editForm.readability || 5}
+                                        onChange={e => setEditForm(prev => ({ ...prev, readability: parseInt(e.target.value) }))}
+                                        className="input"
+                                    >
+                                        {[1, 2, 3, 4, 5].map(n => <option key={n} value={n}>{n}</option>)}
+                                    </select>
+                                </div>
+                                <div>
+                                    <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Strength (1-9)</label>
+                                    <select
+                                        value={editForm.signal_strength || 9}
+                                        onChange={e => setEditForm(prev => ({ ...prev, signal_strength: parseInt(e.target.value) }))}
+                                        className="input"
+                                    >
+                                        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => <option key={n} value={n}>{n}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Remarks</label>
+                                <input
+                                    type="text"
+                                    value={editForm.remarks || ''}
+                                    onChange={e => setEditForm(prev => ({ ...prev, remarks: e.target.value }))}
+                                    className="input"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={() => setEditingCheckin(null)}
+                                    className="px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition-colors font-bold text-sm"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-6 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/20"
+                                >
+                                    Save Changes
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </main>
     )
 }
