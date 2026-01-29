@@ -67,8 +67,9 @@ export default function Nets() {
                 }
             } catch (err: unknown) {
                 if (!controller.signal.aborted) {
-                    const message = err instanceof Error ? err.message : 'Unknown error'
                     console.error('Nets: Critical error:', err)
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const message = (err as any)?.message || 'Unknown error'
                     toast.error(`System synchronization error: ${message}`)
                 }
             } finally {

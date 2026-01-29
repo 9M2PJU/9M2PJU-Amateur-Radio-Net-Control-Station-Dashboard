@@ -68,7 +68,8 @@ export default function NetNew() {
             }
         } catch (error: unknown) {
             console.error('Error creating net:', error)
-            const message = error instanceof Error ? error.message : 'Failed to initialize net'
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const message = (error as any)?.message || 'Failed to initialize net'
             toast.error(message)
         } finally {
             setLoading(false)
