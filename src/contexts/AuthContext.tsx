@@ -26,7 +26,18 @@ export const useAuth = () => {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [session, setSession] = useState<Session | null>(null)
-    const [profile, setProfile] = useState<Profile | null>(null)
+    const [profile, setProfile] = useState<Profile | null>(() => {
+        // Optimistic load from local cache
+        const saved = localStorage.getItem('9m2pju_user_profile')
+        if (saved) {
+            try {
+                return JSON.parse(saved)
+            } catch (e) {
+                return null
+            }
+        }
+        return null
+    })
     const [loading, setLoading] = useState(true)
 
     const fetchProfile = async (userId: string) => {
@@ -46,8 +57,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             if (data) {
                 setProfile(data)
+                localStorage.setItem('9m2pju_user_profile', JSON.stringify(data))
             } else {
                 setProfile(null)
+                localStorage.removeItem('9m2pju_user_profile')
             }
         } catch (err) {
             console.error('Unexpected error fetching profile:', err)
@@ -116,6 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 setSession(null)
                 setUser(null)
                 setProfile(null)
+                localStorage.removeItem('9m2pju_user_profile')
                 setLoading(false)
             } else if (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED' || _event === 'USER_UPDATED') {
                 setSession(session)

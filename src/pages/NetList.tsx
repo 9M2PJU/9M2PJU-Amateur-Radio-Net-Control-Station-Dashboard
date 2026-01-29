@@ -31,7 +31,18 @@ export default function Nets() {
     const { user: authUser } = useAuth()
     const { impersonatedUserId } = useImpersonation()
     const [loading, setLoading] = useState(true)
-    const [nets, setNets] = useState<NetWithCount[]>([])
+    const [nets, setNets] = useState<NetWithCount[]>(() => {
+        // Optimistic load from local cache
+        const saved = localStorage.getItem('9m2pju_nets_cache')
+        if (saved) {
+            try {
+                return JSON.parse(saved)
+            } catch (e) {
+                return []
+            }
+        }
+        return []
+    })
     const [exportingId, setExportingId] = useState<string | null>(null)
     // navigate removed as it was unused
 
@@ -66,7 +77,10 @@ export default function Nets() {
                     throw netsError
                 } else {
                     console.log(`Nets: Loaded ${data?.length || 0} nets`)
-                    setNets((data as unknown as NetWithCount[]) || [])
+                    const fetchedNets = (data as unknown as NetWithCount[]) || []
+                    setNets(fetchedNets)
+                    // Update cache
+                    localStorage.setItem('9m2pju_nets_cache', JSON.stringify(fetchedNets))
                 }
             } catch (err: unknown) {
                 if (!controller.signal.aborted) {
@@ -94,7 +108,7 @@ export default function Nets() {
     }, [authUser, impersonatedUserId])
 
 
-    if (loading) {
+    if (loading && nets.length === 0) {
         return (
             <div className="flex items-center justify-center h-[80vh]">
                 <Loader2 className="w-12 h-12 text-emerald-500 animate-spin" />

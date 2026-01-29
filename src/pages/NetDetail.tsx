@@ -70,13 +70,30 @@ export default function NetDetail() {
             return
         }
 
+        // Safety timeout
         const timeoutId = setTimeout(() => {
             if (loading) {
-                console.error('NetDetail: Data fetching timed out')
+                console.warn('NetDetail: Data fetch timeout')
                 setLoading(false)
-                toast.error('Sync timed out. Please refresh.')
             }
-        }, 30000)
+        }, 15000)
+
+        // Optimistic load from local cache
+        const cacheKey = `9m2pju_net_${netId}`
+        const cached = localStorage.getItem(cacheKey)
+        if (cached) {
+            try {
+                const { net: cachedNet, checkins: cachedCheckins } = JSON.parse(cached)
+                setNet(cachedNet)
+                setCheckins(cachedCheckins)
+                // If we have cached data, we can already show the UI
+                // but keep loading=true to show any refresh indicators if needed
+                // actually let's set loading to false if we have data for smoother transition
+                // but we still want the background fetch to run
+            } catch (e) {
+                console.error('Cache parse error:', e)
+            }
+        }
 
         setLoading(true)
         try {
@@ -113,8 +130,15 @@ export default function NetDetail() {
                 .order('checked_in_at', { ascending: true })
 
             console.log('NetDetail: Success!')
+            const freshCheckins = checkinsResponse.data || []
             setNet(netData)
-            setCheckins(checkinsResponse.data || [])
+            setCheckins(freshCheckins)
+
+            // Update cache
+            localStorage.setItem(cacheKey, JSON.stringify({
+                net: netData,
+                checkins: freshCheckins
+            }))
         } catch (error: any) {
             console.error('Data sync error:', error)
             toast.error(`System sync failed: ${error.message || 'Unknown error'}`)
