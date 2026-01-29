@@ -21,25 +21,47 @@ export default function Login() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
 
+        if (loading) return
         setLoading(true)
 
+        // Safety timeout for the login button
+        const loginTimeout = setTimeout(() => {
+            if (loading) {
+                console.warn('Login: Process timed out')
+                setLoading(false)
+            }
+        }, 12000)
+
         try {
-            const { error } = await supabase.auth.signInWithPassword({
+            const { error, data } = await supabase.auth.signInWithPassword({
                 email,
                 password,
             })
 
             if (error) {
+                console.error('Login error:', error)
                 toast.error(error.message)
+                setLoading(false)
+                clearTimeout(loginTimeout)
                 return
             }
 
-            toast.success('Welcome back!')
-            navigate('/dashboard')
-        } catch {
+            if (data?.session) {
+                toast.success('Welcome back!')
+                // Force a small delay to let AuthContext catch up if needed
+                setTimeout(() => {
+                    navigate('/dashboard', { replace: true })
+                    clearTimeout(loginTimeout)
+                }, 100)
+            }
+        } catch (err) {
+            console.error('Unexpected login error:', err)
             toast.error('An unexpected error occurred')
-        } finally {
             setLoading(false)
+            clearTimeout(loginTimeout)
+        } finally {
+            // Note: loading is set to false in the specific branches or timeout
+            // to avoid flickering if navigate is successful
         }
     }
 
