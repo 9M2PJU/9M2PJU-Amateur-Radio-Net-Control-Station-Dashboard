@@ -128,19 +128,32 @@ export const exportToPDF = async (net: Net, checkins: Checkin[], chartRefs: (HTM
     autoTable(doc, {
         startY: (doc as any).lastAutoTable.finalY + 10,
         head: [['#', 'Time', 'Callsign', 'Operator', 'Signal', 'Location', 'Traffic', 'Remarks']],
-        body: checkins.map((c, i) => [
-            i + 1,
-            format(new Date(c.checked_in_at), 'HH:mm'),
-            c.callsign,
-            c.name || '-',
-            c.signal_report || '-',
-            c.location || '-',
-            c.traffic ? (c.traffic_precedence?.toUpperCase() || 'YES') : 'NO',
-            c.remarks || '-'
-        ]),
+        body: checkins.map((c, i) => {
+            // Format traffic display
+            let trafficDisplay = 'NO'
+            if (c.traffic) {
+                const precedence = c.traffic_precedence?.toUpperCase() || 'YES'
+                const details = c.traffic_details ? `: ${c.traffic_details}` : ''
+                trafficDisplay = `${precedence}${details}`
+            }
+
+            return [
+                i + 1,
+                format(new Date(c.checked_in_at), 'HH:mm'),
+                c.callsign,
+                c.name || '-',
+                c.signal_report || '-',
+                c.location || '-',
+                trafficDisplay,
+                c.remarks || '-'
+            ]
+        }),
         theme: 'grid',
         headStyles: { fillColor: [30, 41, 59] },
-        styles: { fontSize: 8 }
+        styles: { fontSize: 8 },
+        columnStyles: {
+            6: { cellWidth: 'auto' } // Allow traffic column to expand for details
+        }
     })
 
     // Add Charts Page if requested
