@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { Link } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
 import {
     LayoutDashboard,
@@ -11,15 +12,21 @@ import {
     X,
     User,
 } from 'lucide-react'
-import type { Profile } from '@/lib/types'
+import type { Profile } from '../lib/types'
 
 export default function Navbar() {
     const [user, setUser] = useState<Profile | null>(null)
+    const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
     const [scrolled, setScrolled] = useState(false)
     const navigate = useNavigate()
     const location = useLocation()
     const pathname = location.pathname
+
+    useEffect(() => {
+        const timer = setInterval(() => setTime(new Date()), 1000)
+        return () => clearInterval(timer)
+    }, [])
 
     useEffect(() => {
         const handleScroll = () => {
@@ -105,16 +112,22 @@ export default function Navbar() {
                             <div className="relative">
                                 <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
                                 <div className="relative w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl overflow-hidden shadow-lg shadow-emerald-500/20 group-hover:scale-105 transition-all duration-300 border border-white/10">
-                                    <img src="/favicon.png" alt="Logo" className="w-full h-full object-cover" />
+                                    <img src="/favicon.png" alt="Logo" width="40" height="40" className="w-full h-full object-cover" />
                                 </div>
                             </div>
                             <div className="flex flex-col">
                                 <span className="text-lg md:text-xl font-bold tracking-tighter text-white">
                                     9M2PJU <span className="text-emerald-500">NCS Center</span>
                                 </span>
-                                <span className="text-[8px] md:text-[10px] text-slate-400 uppercase tracking-widest font-semibold font-mono">
-                                    NCS Center
-                                </span>
+                                <div className="flex items-center gap-3 text-[10px] md:text-xs font-mono font-bold text-slate-400 leading-none">
+                                    <span className="flex items-center gap-1">
+                                        {time.toLocaleTimeString('en-GB', { hour12: false })} <span className="text-[8px] text-slate-500">LOC</span>
+                                    </span>
+                                    <div className="w-px h-3 bg-white/10"></div>
+                                    <span className="flex items-center gap-1 text-emerald-400">
+                                        {time.toLocaleTimeString('en-GB', { timeZone: 'UTC', hour12: false })} <span className="text-[8px] text-emerald-500/50">UTC</span>
+                                    </span>
+                                </div>
                             </div>
                         </Link>
 

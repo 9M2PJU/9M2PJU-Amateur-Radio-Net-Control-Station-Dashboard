@@ -1,18 +1,27 @@
 import { createClient } from '@supabase/supabase-js'
 
-// Vite uses import.meta.env for environment variables
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Check all possible naming conventions to be extremely robust
+const supabaseUrl =
+    import.meta.env.VITE_SUPABASE_URL ||
+    import.meta.env.VITE_PUBLIC_SUPABASE_URL ||
+    import.meta.env.NEXT_PUBLIC_SUPABASE_URL
+
+const supabaseAnonKey =
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY ||
+    import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+console.log('Supabase: Initializing with URL present:', !!supabaseUrl)
 
 if (!supabaseUrl || !supabaseAnonKey) {
-    // Fallback / Warning to help debugging
     console.warn(
-        'Missing Supabase environment variables. Please check your .env.local file or Vercel settings.\n' +
-        'Expected: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY'
+        'Missing Supabase environment variables. Please check your Vercel settings.\n' +
+        'Checked: VITE_SUPABASE_URL, VITE_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_URL'
     )
 }
 
-export const supabase = createClient(
-    supabaseUrl || '',
-    supabaseAnonKey || ''
-)
+// Basic validation to prevent crashes if env vars are missing
+const url = supabaseUrl || 'https://placeholder.supabase.co'
+const key = supabaseAnonKey || 'placeholder'
+
+export const supabase = createClient(url, key)

@@ -3,12 +3,11 @@ import { ArrowRight, Users, BarChart3, Shield, Activity } from 'lucide-react'
 
 export default function Home() {
     return (
-        <div className="min-h-screen text-white overflow-hidden">
+        <div className="min-h-screen text-white overflow-hidden bg-slate-950">
             {/* Background decorations */}
             <div className="fixed top-20 right-0 -mr-20 w-96 h-96 bg-emerald-500/20 rounded-full blur-[100px] pointer-events-none"></div>
             <div className="fixed bottom-0 left-0 -ml-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] pointer-events-none"></div>
 
-            {/* Hero Section */}
             {/* Hero Section */}
             <div className="min-h-[90vh] flex flex-col pt-16 md:pt-20">
                 <main className="flex-1 flex flex-col items-center justify-center px-6 py-8 md:py-12 relative z-10">
@@ -59,7 +58,7 @@ export default function Home() {
                     </div>
                 </main>
 
-                {/* Features Section - More Compact */}
+                {/* Features Section */}
                 <section className="py-12 md:py-16 px-6 relative z-10">
                     <div className="max-w-6xl mx-auto">
                         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
@@ -103,19 +102,12 @@ export default function Home() {
                                 </div>
                                 <h3 className="text-base md:text-lg font-bold mb-2 text-white">Secure</h3>
                                 <p className="text-slate-400 text-xs leading-relaxed hidden sm:block">
-                                    Permanent, searchable logs stored in the cloud.
+                                    Enterprise-grade security for your data.
                                 </p>
                             </div>
                         </div>
                     </div>
                 </section>
-
-                {/* Footer */}
-                <footer className="py-6 px-6 border-t border-white/5 text-center relative z-10 bg-slate-950/50 backdrop-blur-lg mt-auto">
-                    <p className="text-slate-500 text-[10px] md:text-xs font-mono">
-                        73 de 9M2PJU • Built for the Amateur Radio Community
-                    </p>
-                </footer>
             </div>
         </div>
     )

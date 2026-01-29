@@ -1,3 +1,5 @@
+'use client'
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts'
 
 interface Participant {
@@ -12,12 +14,12 @@ interface TopParticipantsChartProps {
 
 export default function TopParticipantsChart({ data, title = 'Top Participants' }: TopParticipantsChartProps) {
     return (
-        <div className="w-full h-full p-6">
+        <div className="w-full h-full p-6 flex flex-col">
             <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
                 <div className="w-1 h-5 bg-cyan-500 rounded-full"></div>
                 {title}
             </h3>
-            <div className="h-[300px] w-full">
+            <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data} layout="vertical" margin={{ top: 0, right: 30, left: 30, bottom: 0 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" horizontal={false} />
@@ -52,7 +54,7 @@ export default function TopParticipantsChart({ data, title = 'Top Participants' 
                             labelStyle={{ color: '#fff', fontWeight: 'bold', fontFamily: 'monospace' }}
                         />
                         <Bar dataKey="checkins" name="Check-ins" radius={[0, 4, 4, 0]} barSize={20}>
-                            {data.map((_, index) => (
+                            {(data || []).map((_, index) => (
                                 <Cell
                                     key={`cell-${index}`}
                                     fill={`hsla(189, 94%, 48%, ${1 - index * 0.08})`} // Cyan gradient

@@ -13,6 +13,7 @@ export interface Net {
     type: 'weekly' | 'emergency_exercise' | 'special'
     frequency: string | null
     mode: string | null
+    slug: string | null
     started_at: string
     ended_at: string | null
     notes: string | null

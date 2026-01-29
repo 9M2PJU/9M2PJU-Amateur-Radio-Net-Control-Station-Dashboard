@@ -1,110 +1,95 @@
-import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
-import Layout from '@/components/Layout'
-import { Loader2 } from 'lucide-react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { supabase } from './lib/supabase'
+import { Toaster } from 'sonner'
+import Home from './pages/Home'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Dashboard from './pages/Dashboard'
+import NetList from './pages/NetList'
+import NetDetail from './pages/NetDetail'
+import NetNew from './pages/NetNew'
+import Navbar from './components/Navbar'
 
-// Lazy load pages for code splitting (Performance Optimization)
-const Home = lazy(() => import('@/pages/Home'))
-const Login = lazy(() => import('@/pages/Login'))
-const Register = lazy(() => import('@/pages/Register'))
-const Dashboard = lazy(() => import('@/pages/Dashboard'))
-const Nets = lazy(() => import('@/pages/Nets'))
-const NewNet = lazy(() => import('@/pages/NewNet'))
-const NetDetail = lazy(() => import('@/pages/NetDetail'))
-const Profile = lazy(() => import('@/pages/Profile'))
-const Settings = lazy(() => import('@/pages/Settings'))
+// Protected Route Wrapper
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null)
 
-// Loading fallback component
-const PageLoader = () => (
-    <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-    </div>
-)
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsAuthenticated(!!session)
+    })
 
-const router = createBrowserRouter([
-    {
-        path: "/",
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <Home />
-            </Suspense>
-        ),
-    },
-    {
-        path: "/login",
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <Login />
-            </Suspense>
-        ),
-    },
-    {
-        path: "/register",
-        element: (
-            <Suspense fallback={<PageLoader />}>
-                <Register />
-            </Suspense>
-        ),
-    },
-    {
-        element: <Layout />,
-        children: [
-            {
-                path: "/dashboard",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <Dashboard />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "/nets",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <Nets />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "/nets/new",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <NewNet />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "/nets/:id",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <NetDetail />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "/profile",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <Profile />
-                    </Suspense>
-                ),
-            },
-            {
-                path: "/settings",
-                element: (
-                    <Suspense fallback={<PageLoader />}>
-                        <Settings />
-                    </Suspense>
-                ),
-            },
-        ],
-    },
-    {
-        path: "*",
-        element: <Navigate to="/" replace />,
-    },
-])
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session)
+    })
 
-export default function App() {
-    return <RouterProvider router={router} />
+    return () => subscription.unsubscribe()
+  }, [])
+
+  if (isAuthenticated === null) {
+    return <div className="min-h-screen bg-slate-950 flex items-center justify-center text-white">Loading...</div>
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />
+  }
+
+  return <>{children}</>
 }
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Toaster position="top-right" richColors />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nets"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <NetList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nets/new"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <NetNew />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/nets/:id"
+          element={
+            <ProtectedRoute>
+              <Navbar />
+              <NetDetail />
+            </ProtectedRoute>
+          }
+        />
+        {/* Catch-all - Redirect to home or dashboard */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App

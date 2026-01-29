@@ -1,10 +1,14 @@
+'use client'
+
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
 import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import { Checkin } from '@/lib/types'
+// import 'leaflet/dist/leaflet.css' // Moved to globals.css
+import { Checkin } from '../../lib/types'
 import { useEffect, useState } from 'react'
-
-// Fix for default marker icons in Leaflet with Vite/React
+// Fix: Dynamic import of leaflet assets for Next.js is tricky.
+// Usually we can just use the URLs directly or rely on the CSS.
+// But standard marker icons might be broken without setting specific paths.
+// We will try without manual icon override first, or use a CDN fallback if issues.
 import icon from 'leaflet/dist/images/marker-icon.png'
 import iconShadow from 'leaflet/dist/images/marker-shadow.png'
 
@@ -79,6 +83,7 @@ function locatorToLatLng(locator: string): [number, number] | null {
  * Gets coordinates for a callsign based on prefix (fallback when grid is missing)
  */
 function getCoordsByCallsign(callsign: string): [number, number] | null {
+    if (!callsign) return null
     const cs = callsign.toUpperCase()
 
     // West Malaysia (9M2, 9W2)
@@ -98,10 +103,16 @@ function getCoordsByCallsign(callsign: string): [number, number] | null {
 
 export default function NetMap({ checkins, className = "h-[400px] w-full rounded-xl overflow-hidden" }: NetMapProps) {
     const [markers, setMarkers] = useState<StationMarker[]>([])
+    const [isClient, setIsClient] = useState(false)
 
     useEffect(() => {
+        setIsClient(true)
+        if (!checkins || !Array.isArray(checkins)) return
+
         const newMarkers: StationMarker[] = checkins
             .map(c => {
+                if (!c || !c.callsign) return null
+
                 let coords: [number, number] | null = null
 
                 if (c.grid_locator) {
@@ -126,8 +137,13 @@ export default function NetMap({ checkins, className = "h-[400px] w-full rounded
         setMarkers(newMarkers)
     }, [checkins])
 
+    if (!isClient) {
+        return <div className={`bg-slate-900 animate-pulse ${className}`} />
+    }
+
     // Default center (Malaysia as it's for 9M2PJU, but we can auto-center)
-    const center: [number, number] = markers.length > 0
+    // Safety check for markers[0]
+    const center: [number, number] = (markers.length > 0 && markers[0]?.lat && markers[0]?.lon)
         ? [markers[0].lat, markers[0].lon]
         : [4.2105, 101.9758] // Malaysia default
 

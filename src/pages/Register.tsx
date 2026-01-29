@@ -1,8 +1,11 @@
+
+
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+
+import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
-import { Radio, Mail, Lock, User, Antenna, Loader2, Star } from 'lucide-react'
+import { Mail, Lock, User, Antenna, Loader2, Star } from 'lucide-react'
 
 export default function Register() {
     const [email, setEmail] = useState('')
@@ -73,8 +76,14 @@ export default function Register() {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <Link to="/" className="inline-block group">
-                            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center shadow-lg shadow-violet-500/20 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <Radio className="w-8 h-8 text-white" strokeWidth={2.5} />
+                            <div className="relative w-20 h-20 mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <img
+                                    src="/logo.png"
+                                    alt="9M2PJU NCS Logo"
+                                    width="80" height="80"
+                                    className="object-contain drop-shadow-[0_0_15px_rgba(139,92,246,0.4)]"
+
+                                />
                             </div>
                         </Link>
                         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Create Account</h1>
@@ -88,13 +97,13 @@ export default function Register() {
                             </div>
                             <h2 className="text-2xl font-bold text-white mb-4">Registration Successful!</h2>
                             <p className="text-slate-400 mb-8 leading-relaxed">
-                                We've sent a verification link to <span className="text-emerald-400 font-bold">{email}</span>.<br />
+                                We&apos;ve sent a verification link to <span className="text-emerald-400 font-bold">{email}</span>.<br />
                                 Please check your inbox to activate your account.
                             </p>
 
                             <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 mb-8">
                                 <p className="text-sm text-amber-400 font-medium">
-                                    <span className="font-bold">Important:</span> If you don't see the email within 2 minutes, please check your <span className="underline italic">Spam</span> or <span className="underline italic">Junk</span> folder.
+                                    <span className="font-bold">Important:</span> If you don&apos;t see the email within 2 minutes, please check your <span className="underline italic">Spam</span> or <span className="underline italic">Junk</span> folder.
                                 </p>
                             </div>
 

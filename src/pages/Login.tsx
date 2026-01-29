@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '../lib/supabase'
 import { toast } from 'sonner'
-import { Radio, Mail, Lock, Loader2, ArrowRight } from 'lucide-react'
+import { Mail, Lock, Loader2, ArrowRight } from 'lucide-react'
 
 export default function Login() {
     const [email, setEmail] = useState('')
@@ -47,8 +47,12 @@ export default function Login() {
                     {/* Header */}
                     <div className="text-center mb-8">
                         <Link to="/" className="inline-block group">
-                            <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-6 group-hover:scale-110 transition-transform duration-300">
-                                <Radio className="w-8 h-8 text-white" strokeWidth={2.5} />
+                            <div className="relative w-20 h-20 mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <img
+                                    src="/logo.png"
+                                    alt="9M2PJU NCS Logo"
+                                    className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(16,185,129,0.4)]"
+                                />
                             </div>
                         </Link>
                         <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Welcome Back</h1>
@@ -63,37 +67,36 @@ export default function Login() {
                                     Email Address
                                 </label>
                                 <div className="relative">
+                                    <Mail className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
                                     <input
                                         id="email"
                                         type="email"
+                                        placeholder="callsign@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="name@example.com"
                                         required
-                                        className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3"
+                                        autoComplete="email"
+                                        className="w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                     />
-                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
                                 </div>
                             </div>
 
                             <div className="group">
-                                <div className="flex items-center justify-between mb-2">
-                                    <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 ml-1">
-                                        Password
-                                    </label>
-                                    <a href="#" className="text-xs text-emerald-400 hover:text-emerald-300 transition-colors">Forgot?</a>
-                                </div>
+                                <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                    Password
+                                </label>
                                 <div className="relative">
+                                    <Lock className="absolute left-3 top-3.5 h-5 w-5 text-slate-400" />
                                     <input
                                         id="password"
                                         type="password"
+                                        placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
-                                        placeholder="••••••••"
                                         required
-                                        className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-emerald-500/50 transition-colors py-3"
+                                        autoComplete="current-password"
+                                        className="w-full pl-11 pr-4 py-3.5 bg-slate-900/50 border border-slate-700 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
                                     />
-                                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-emerald-400 transition-colors" />
                                 </div>
                             </div>
                         </div>
@@ -101,30 +104,28 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="btn btn-primary w-full py-3.5 text-base shadow-lg shadow-emerald-500/20 group relative overflow-hidden"
+                            className="w-full py-3.5 bg-emerald-500 hover:bg-emerald-400 disabled:bg-slate-700 disabled:cursor-not-allowed text-slate-950 disabled:text-slate-500 font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] disabled:shadow-none"
                         >
-                            <span className="relative z-10 flex items-center justify-center gap-2">
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="w-5 h-5 animate-spin" />
-                                        Signing in...
-                                    </>
-                                ) : (
-                                    <>
-                                        Sign In
-                                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                                    </>
-                                )}
-                            </span>
+                            {loading ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    Signing in...
+                                </>
+                            ) : (
+                                <>
+                                    Sign In
+                                    <ArrowRight className="w-5 h-5" />
+                                </>
+                            )}
                         </button>
                     </form>
 
                     {/* Footer */}
-                    <div className="mt-8 pt-6 border-t border-white/5 text-center">
+                    <div className="mt-6 text-center">
                         <p className="text-slate-400 text-sm">
-                            Don&apos;t have an account?{' '}
-                            <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors hover:underline decoration-emerald-500/30 underline-offset-4">
-                                Create one now
+                            Don't have an account?{' '}
+                            <Link to="/register" className="text-emerald-400 hover:text-emerald-300 font-semibold transition-colors">
+                                Request Access
                             </Link>
                         </p>
                     </div>

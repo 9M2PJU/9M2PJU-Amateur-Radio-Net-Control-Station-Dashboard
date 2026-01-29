@@ -1,10 +1,13 @@
+
+
 import { useState, useEffect } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabase'
-import NetActivityChart from '@/components/widgets/NetActivityChart'
-import TopParticipantsChart from '@/components/widgets/TopParticipantsChart'
-import NetTypeDistribution from '@/components/widgets/NetTypeDistribution'
-import SignalReportChart from '@/components/widgets/SignalReportChart'
+import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import NetActivityChart from '../components/widgets/NetActivityChart'
+import TopParticipantsChart from '../components/widgets/TopParticipantsChart'
+import NetTypeDistribution from '../components/widgets/NetTypeDistribution'
+import SignalReportChart from '../components/widgets/SignalReportChart'
 import { format, subDays } from 'date-fns'
 import {
     Radio,
@@ -16,7 +19,7 @@ import {
     Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Net, Checkin, Profile } from '@/lib/types'
+import type { Net, Checkin, Profile } from '../lib/types'
 
 // Extended Net type to include checkins relation
 interface NetWithCheckins extends Net {
@@ -27,7 +30,7 @@ export default function Dashboard() {
     const [loading, setLoading] = useState(true)
     const [user, setUser] = useState<Profile | null>(null)
     const [nets, setNets] = useState<NetWithCheckins[]>([])
-    const navigate = useNavigate()
+    const router = useNavigate()
 
     useEffect(() => {
         const fetchDashboardData = async () => {
@@ -37,7 +40,7 @@ export default function Dashboard() {
                     setLoading(false)
                     toast.error('Dashboard synchronization timed out. Please refresh.')
                 }
-            }, 10000) // 10 second timeout
+            }, 30000) // 30 second timeout
 
             try {
                 console.log('Dashboard: Fetching user...')
@@ -46,8 +49,7 @@ export default function Dashboard() {
                 if (sessionError) throw sessionError
 
                 if (!session) {
-                    console.log('Dashboard: No session, redirecting...')
-                    navigate('/login')
+                    // Handled by Layout, but safe to check
                     return
                 }
 
@@ -91,7 +93,8 @@ export default function Dashboard() {
         }
 
         fetchDashboardData()
-    }, [navigate])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     if (loading) {
         return (
@@ -153,6 +156,7 @@ export default function Dashboard() {
     }))
 
     return (
+<<<<<<< HEAD
         <main className="h-screen pt-16 md:pt-20 overflow-hidden flex flex-col bg-slate-950">
             {/* Header Area - Compact Fixed Height */}
             <div className="px-4 md:px-6 py-3 border-b border-white/5 bg-slate-950/50 backdrop-blur-md z-20 shrink-0">
@@ -219,10 +223,51 @@ export default function Dashboard() {
                         <div className="min-w-0">
                             <p className="text-[9px] uppercase font-bold text-slate-500 tracking-wider truncate">Operators</p>
                             <p className="text-lg font-mono font-bold text-white">{uniqueCallsigns}</p>
+=======
+        <div className="flex flex-col h-[calc(100vh-64px)] mt-16 overflow-hidden bg-slate-950">
+            <div className="flex-1 overflow-hidden p-4 md:p-6 flex flex-col gap-4">
+                {/* Stats Row - Compact */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 shrink-0 h-24">
+                    <div className="card glass-card p-4 flex items-center gap-4 hover:bg-slate-900/80 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-emerald-500 shrink-0">
+                            <Radio className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate">Active Networks</p>
+                            <p className="text-2xl font-mono font-bold text-white truncate">{activeNets.length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4 hover:bg-slate-900/80 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20 text-cyan-500 shrink-0">
+                            <Globe className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate">Total Nets</p>
+                            <p className="text-2xl font-mono font-bold text-white truncate">{allNets.length}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4 hover:bg-slate-900/80 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500 shrink-0">
+                            <Users className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate">Total Check-ins</p>
+                            <p className="text-2xl font-mono font-bold text-white truncate">{totalCheckins}</p>
+                        </div>
+                    </div>
+                    <div className="card glass-card p-4 flex items-center gap-4 hover:bg-slate-900/80 transition-colors">
+                        <div className="w-12 h-12 rounded-xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20 text-amber-500 shrink-0">
+                            <Activity className="w-6 h-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <p className="text-[10px] uppercase font-bold text-slate-500 tracking-wider truncate">Unique Operators</p>
+                            <p className="text-2xl font-mono font-bold text-white truncate">{uniqueCallsigns}</p>
+>>>>>>> fc8523eeb482617aa02abdbead66537c1fe8912b
                         </div>
                     </div>
                 </div>
 
+<<<<<<< HEAD
                 {/* Main Dashboard Grid - Flexible Height */}
                 <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-4 overflow-hidden">
                     {/* Left Column: Activity & History (8 cols) */}
@@ -240,18 +285,47 @@ export default function Dashboard() {
                                     Recent Operations
                                 </h3>
                                 <Link to="/nets" className="text-[9px] font-bold text-emerald-400 hover:text-emerald-300">VIEW ALL</Link>
+=======
+                {/* Main Dashboard Grid - Flex Grow to fill remaining space */}
+                <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 gap-4">
+                    {/* Left Column: Activity & Operations (8 cols) */}
+                    <div className="lg:col-span-8 flex flex-col gap-4 h-full min-h-0">
+                        {/* Main Activity Chart - ~40% Height */}
+                        <div className="card glass-card p-4 h-[40%] shrink-0 flex flex-col relative min-h-0">
+                            <NetActivityChart data={activityData} title="Check-in Activity (7 Days)" />
+                        </div>
+
+                        {/* Recent Operations Panel - Fills remainig height */}
+                        <div className="card glass-card flex flex-col flex-1 min-h-0 overflow-hidden">
+                            <div className="p-3 border-b border-white/5 flex items-center justify-between shrink-0 bg-slate-950/20">
+                                <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <div className="w-1 h-3 bg-emerald-500 rounded-full"></div>
+                                    Recent Operations
+                                </h3>
+                                <Link to="/nets" className="text-[10px] font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1">
+                                    View All <ChevronRight className="w-3 h-3" />
+                                </Link>
+>>>>>>> fc8523eeb482617aa02abdbead66537c1fe8912b
                             </div>
-                            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
                                 {allNets.length === 0 ? (
+<<<<<<< HEAD
                                     <div className="p-8 text-center text-slate-500 text-xs font-mono">No operations logged</div>
                                 ) : (
                                     <div className="divide-y divide-white/5">
                                         {allNets.slice(0, 10).map((net) => (
+=======
+                                    <div className="h-full flex items-center justify-center text-slate-500 text-sm">No operations logged</div>
+                                ) : (
+                                    <div className="divide-y divide-white/5">
+                                        {allNets.map((net) => (
+>>>>>>> fc8523eeb482617aa02abdbead66537c1fe8912b
                                             <Link
                                                 key={net.id}
                                                 to={`/nets/${net.id}`}
                                                 className="flex items-center justify-between p-2.5 hover:bg-white/5 transition-colors group"
                                             >
+<<<<<<< HEAD
                                                 <div className="flex items-center gap-3 min-w-0">
                                                     <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${net.ended_at ? 'bg-slate-700' : 'bg-emerald-500 animate-pulse'}`} />
                                                     <div className="min-w-0">
@@ -266,6 +340,21 @@ export default function Dashboard() {
                                                         {net.checkins?.length || 0}
                                                     </div>
                                                     <ChevronRight className="w-4 h-4 text-slate-700 group-hover:text-emerald-500 transition-colors" />
+=======
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-2 h-2 rounded-full ${net.ended_at ? 'bg-slate-700' : 'bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]'}`} />
+                                                    <div>
+                                                        <p className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors uppercase truncate">{net.name}</p>
+                                                        <p className="text-[11px] text-slate-500 font-mono">{format(new Date(net.started_at), 'MMM d, HH:mm')}</p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-6">
+                                                    <span className="text-[10px] font-bold text-slate-400 bg-slate-800/50 px-2 py-1 rounded border border-slate-700/50 min-w-[80px] text-center">{net.type.replace('_', ' ')}</span>
+                                                    <div className="flex items-center gap-2 text-xs text-slate-300 w-12 justify-end">
+                                                        <Users className="w-3.5 h-3.5 text-slate-500" />
+                                                        {net.checkins?.length || 0}
+                                                    </div>
+>>>>>>> fc8523eeb482617aa02abdbead66537c1fe8912b
                                                 </div>
                                             </Link>
                                         ))}
@@ -276,6 +365,7 @@ export default function Dashboard() {
                     </div>
 
                     {/* Right Column: Statistics (4 cols) */}
+<<<<<<< HEAD
                     <div className="lg:col-span-4 flex flex-col gap-4 overflow-y-auto custom-scrollbar pr-1">
                         {/* Signal Strength - Responsive/Fixed */}
                         <div className="card glass-card p-3 h-[200px] shrink-0 border-white/5">
@@ -289,11 +379,26 @@ export default function Dashboard() {
 
                         {/* Net Types Distribution */}
                         <div className="card glass-card p-3 h-[180px] shrink-0 border-white/5">
+=======
+                    <div className="lg:col-span-4 flex flex-col gap-4 h-full min-h-0">
+                        {/* Signal Strength - 33% */}
+                        <div className="card glass-card p-1 flex-1 min-h-0 flex flex-col relative overflow-hidden">
+                            <SignalReportChart data={signalData} title="Signal Quality" />
+                        </div>
+
+                        {/* Top Participants - 33% */}
+                        <div className="card glass-card p-1 flex-1 min-h-0 flex flex-col relative overflow-hidden">
+                            <TopParticipantsChart data={topParticipants} title="Top Field Operators" />
+                        </div>
+
+                        {/* Net Types - 33% (Now Bar Chart) */}
+                        <div className="card glass-card p-1 flex-1 min-h-0 flex flex-col relative overflow-hidden">
+>>>>>>> fc8523eeb482617aa02abdbead66537c1fe8912b
                             <NetTypeDistribution data={netTypeData} title="Operational Breakdown" />
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     )
 }

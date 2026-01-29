@@ -1,4 +1,6 @@
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts'
+'use client'
+
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts'
 
 interface NetTypeData {
     name: string
@@ -10,51 +12,53 @@ interface NetTypeDistributionProps {
     title?: string
 }
 
-const COLORS = ['#10b981', '#f59e0b', '#06b6d4', '#8b5cf6', '#ec4899']
+const COLORS = ['#10b981', '#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899']
 
-export default function NetTypeDistribution({ data, title = 'Net Type Distribution' }: NetTypeDistributionProps) {
+export default function NetTypeDistribution({ data, title = 'Operational Breakdown' }: NetTypeDistributionProps) {
     const formatName = (name: string) => name.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase())
 
     return (
-        <div className="w-full h-full p-6">
-            <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-                <div className="w-1 h-5 bg-violet-500 rounded-full"></div>
+        <div className="w-full h-full p-4 flex flex-col">
+            <h3 className="text-sm font-bold text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
+                <div className="w-1 h-4 bg-violet-500 rounded-full"></div>
                 {title}
             </h3>
-            <div className="h-[300px] w-full">
+            <div className="flex-1 w-full min-h-0">
                 <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                        <Pie
-                            data={data}
-                            cx="50%"
-                            cy="50%"
-                            innerRadius={60}
-                            outerRadius={80}
-                            paddingAngle={5}
-                            dataKey="value"
-                        >
-                            {data.map((_, index) => (
-                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="rgba(255,255,255,0.05)" strokeWidth={1} />
-                            ))}
-                        </Pie>
+                    <BarChart
+                        data={data}
+                        layout="vertical"
+                        margin={{ top: 0, right: 30, left: 40, bottom: 0 }}
+                        barSize={20}
+                    >
+                        <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="rgba(255,255,255,0.05)" />
+                        <XAxis type="number" hide />
+                        <YAxis
+                            dataKey="name"
+                            type="category"
+                            axisLine={false}
+                            tickLine={false}
+                            tick={{ fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                            tickFormatter={formatName}
+                            width={100}
+                        />
                         <Tooltip
+                            cursor={{ fill: 'rgba(255,255,255,0.05)' }}
                             contentStyle={{
                                 backgroundColor: 'rgba(15, 23, 42, 0.9)',
                                 border: '1px solid rgba(255, 255, 255, 0.1)',
-                                borderRadius: '12px',
-                                padding: '12px',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
                                 backdropFilter: 'blur(8px)',
                             }}
-                            itemStyle={{ color: '#fff', fontWeight: 600 }}
-                            formatter={(value: number) => [value, 'Count'] as [number, string]}
+                            itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: 600 }}
                         />
-                        <Legend
-                            formatter={(value) => <span className="text-slate-300 font-medium ml-1">{formatName(value)}</span>}
-                            iconType="circle"
-                            iconSize={8}
-                        />
-                    </PieChart>
+                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                            {data.map((entry, index) => (
+                                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            ))}
+                        </Bar>
+                    </BarChart>
                 </ResponsiveContainer>
             </div>
         </div>
