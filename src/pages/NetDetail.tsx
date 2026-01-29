@@ -82,39 +82,38 @@ export default function NetDetail() {
         try {
             console.log('NetDetail: Fetching data for net:', netId)
 
-            // Try to fetch by slug first, then fallback to ID
-            let netQuery = supabase
+            // Support both UUID and Slug lookups
+            const { data, error } = await supabase
                 .from('nets')
                 .select('*, profiles(*)')
+                .or(`id.eq.${netId},slug.eq.${netId}`)
+                .maybeSingle()
 
-            // Fallback to strict ID check until 'slug' column is added to DB
-            netQuery = netQuery.eq('id', netId)
+            if (error) {
+                console.error('Net fetch error:', error)
+                toast.error('System synchronization error')
+                navigate('/nets')
+                return
+            }
 
-            const netResponse = await netQuery.single()
-
-            if (netResponse.error) {
-                console.error('Net fetch error:', netResponse.error)
+            if (!data) {
+                console.error('Net not found:', netId)
                 toast.error('Net operation not found')
                 navigate('/nets')
                 return
             }
 
-            if (!netResponse.data) {
-                console.error('Net data is null')
-                toast.error('Data corruption detected')
-                navigate('/nets')
-                return
-            }
+            const netData = data as Net
 
-            // Fetch checkins using the actual net ID
+            // Fetch checkins using the verified database UUID
             const checkinsResponse = await supabase
                 .from('checkins')
                 .select('*')
-                .eq('net_id', netResponse.data.id)
+                .eq('net_id', netData.id)
                 .order('checked_in_at', { ascending: true })
 
             console.log('NetDetail: Success!')
-            setNet(netResponse.data)
+            setNet(netData)
             setCheckins(checkinsResponse.data || [])
         } catch (error: any) {
             console.error('Data sync error:', error)
@@ -319,7 +318,7 @@ export default function NetDetail() {
             const { error } = await supabase
                 .from('nets')
                 .update({ ended_at: now })
-                .eq('id', netId)
+                .eq('id', net.id) // Use verified UUID
 
             if (error) throw error
 
@@ -346,7 +345,7 @@ export default function NetDetail() {
             const { error } = await supabase
                 .from('nets')
                 .delete()
-                .eq('id', netId)
+                .eq('id', net.id) // Use verified UUID
 
             if (error) throw error
 
