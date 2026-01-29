@@ -169,157 +169,158 @@ export default function Register() {
                                         <Antenna className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
                                     </div>
                                 </div>
+                            </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="group">
-                                        <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Operator Name
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="name"
-                                                type="text"
-                                                value={name}
-                                                onChange={(e) => setName(e.target.value)}
-                                                placeholder="Full Name"
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
-                                            />
-                                            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
-                                    </div>
-
-                                    <div className="group">
-                                        <label htmlFor="handle" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Handle (Optional)
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="handle"
-                                                type="text"
-                                                value={handle}
-                                                onChange={(e) => setHandle(e.target.value)}
-                                                placeholder="Nickname"
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
-                                            />
-                                            <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="group">
-                                        <label htmlFor="location" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Location
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="location"
-                                                type="text"
-                                                value={location}
-                                                onChange={(e) => setLocation(e.target.value)}
-                                                placeholder="City, State"
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
-                                            />
-                                            <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
-                                    </div>
-
-                                    <div className="group">
-                                        <label htmlFor="gridLocator" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Grid Square (Optional)
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="gridLocator"
-                                                type="text"
-                                                value={gridLocator}
-                                                onChange={(e) => setGridLocator(e.target.value.toUpperCase())}
-                                                placeholder="OJ11AB"
-                                                maxLength={6}
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3 uppercase font-mono"
-                                            />
-                                            <Grid className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="group">
+                                    <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Operator Name
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="name"
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) => setName(e.target.value)}
+                                            placeholder="Full Name"
+                                            className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
+                                        />
+                                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
                                     </div>
                                 </div>
 
                                 <div className="group">
-                                    <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                        Email Address <span className="text-red-400">*</span>
+                                    <label htmlFor="handle" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Handle (Optional)
                                     </label>
                                     <div className="relative">
                                         <input
-                                            id="email"
-                                            type="email"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            placeholder="name@example.com"
-                                            required
+                                            id="handle"
+                                            type="text"
+                                            value={handle}
+                                            onChange={(e) => setHandle(e.target.value)}
+                                            placeholder="Nickname"
                                             className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
                                         />
-                                        <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
+                                        <User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="group">
+                                    <label htmlFor="location" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Location
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="location"
+                                            type="text"
+                                            value={location}
+                                            onChange={(e) => setLocation(e.target.value)}
+                                            placeholder="City, State"
+                                            className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
+                                        />
+                                        <MapPin className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="group">
-                                        <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Password <span className="text-red-400">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="password"
-                                                type="password"
-                                                value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                                required
-                                                minLength={6}
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
-                                            />
-                                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
+                                <div className="group">
+                                    <label htmlFor="gridLocator" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Grid Square (Optional)
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="gridLocator"
+                                            type="text"
+                                            value={gridLocator}
+                                            onChange={(e) => setGridLocator(e.target.value.toUpperCase())}
+                                            placeholder="OJ11AB"
+                                            maxLength={6}
+                                            className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3 uppercase font-mono"
+                                        />
+                                        <Grid className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
                                     </div>
+                                </div>
+                            </div>
 
-                                    <div className="group">
-                                        <label htmlFor="confirmPassword" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
-                                            Confirm <span className="text-red-400">*</span>
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                id="confirmPassword"
-                                                type="password"
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="••••••••"
-                                                required
-                                                minLength={6}
-                                                className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
-                                            />
-                                            <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
-                                        </div>
+                            <div className="group">
+                                <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                    Email Address <span className="text-red-400">*</span>
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        placeholder="name@example.com"
+                                        required
+                                        className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
+                                    />
+                                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="group">
+                                    <label htmlFor="password" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Password <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="password"
+                                            type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            required
+                                            minLength={6}
+                                            className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
+                                        />
+                                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
                                     </div>
                                 </div>
 
-                                <button
-                                    type="submit"
-                                    disabled={loading}
-                                    className="btn bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 w-full py-3.5 text-base shadow-lg shadow-violet-500/20 group relative overflow-hidden mt-2"
-                                >
-                                    <span className="relative z-10 flex items-center justify-center gap-2">
-                                        {loading ? (
-                                            <>
-                                                <Loader2 className="w-5 h-5 animate-spin" />
-                                                Creating Account...
-                                            </>
-                                        ) : (
-                                            <>
-                                                Join Network
-                                                <Star className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
-                                            </>
-                                        )}
-                                    </span>
-                                </button>
+                                <div className="group">
+                                    <label htmlFor="confirmPassword" className="block text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2 ml-1">
+                                        Confirm <span className="text-red-400">*</span>
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="confirmPassword"
+                                            type="password"
+                                            value={confirmPassword}
+                                            onChange={(e) => setConfirmPassword(e.target.value)}
+                                            placeholder="••••••••"
+                                            required
+                                            minLength={6}
+                                            className="input pl-11 bg-slate-900/50 border-slate-700 hover:border-slate-600 focus:border-violet-500/50 transition-colors py-3"
+                                        />
+                                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-500 group-focus-within:text-violet-400 transition-colors" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="btn bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white hover:from-violet-500 hover:to-fuchsia-500 w-full py-3.5 text-base shadow-lg shadow-violet-500/20 group relative overflow-hidden mt-2"
+                            >
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    {loading ? (
+                                        <>
+                                            <Loader2 className="w-5 h-5 animate-spin" />
+                                            Creating Account...
+                                        </>
+                                    ) : (
+                                        <>
+                                            Join Network
+                                            <Star className="w-5 h-5 group-hover:scale-110 transition-transform fill-current" />
+                                        </>
+                                    )}
+                                </span>
+                            </button>
                         </form>
                     )}
 
