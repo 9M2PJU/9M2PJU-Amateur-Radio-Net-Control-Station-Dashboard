@@ -54,6 +54,15 @@ export default function Dashboard() {
 
         const controller = new AbortController()
 
+        // Safety timeout - force loading to complete after 10 seconds
+        const loadingTimeout = setTimeout(() => {
+            if (loadingNets) {
+                console.warn('Dashboard: Loading timeout - forcing completion')
+                setLoadingNets(false)
+                toast.error('Loading took too long. Please refresh if data is missing.')
+            }
+        }, 10000)
+
         const fetchNets = async () => {
             try {
                 // Fetch all nets for this user
@@ -80,6 +89,7 @@ export default function Dashboard() {
                 }
             } finally {
                 if (!controller.signal.aborted) {
+                    clearTimeout(loadingTimeout)
                     setLoadingNets(false)
                 }
             }
@@ -88,6 +98,7 @@ export default function Dashboard() {
         fetchNets()
 
         return () => {
+            clearTimeout(loadingTimeout)
             controller.abort()
         }
     }, [authUser])
