@@ -23,7 +23,7 @@ export default function NetTypeDistribution({ data, title = 'Operational Breakdo
                 <div className="w-1 h-4 bg-violet-500 rounded-full"></div>
                 {title}
             </h3>
-            <div className="flex-1 w-full min-h-0">
+            <div className="flex-1 w-full min-h-0" style={{ minHeight: '100px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                         data={data}

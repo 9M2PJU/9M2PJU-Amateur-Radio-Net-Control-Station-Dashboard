@@ -39,23 +39,18 @@ export default function SuperAdmin() {
 
                 if (error) throw error
 
-                // Get emails from auth.users
-                const userIds = data.map(u => u.id)
-                const { data: authUsers } = await supabase.auth.admin.listUsers()
+                // Map profile data to user format
+                // Note: Email is not available on frontend for security reasons
+                const usersData = data.map(profile => ({
+                    id: profile.id,
+                    email: '***@***', // Email hidden for security
+                    callsign: profile.callsign,
+                    name: profile.name,
+                    created_at: profile.created_at,
+                    net_count: profile.nets?.[0]?.count || 0
+                }))
 
-                const usersWithEmail = data.map(profile => {
-                    const authUser = authUsers?.users.find(u => u.id === profile.id)
-                    return {
-                        id: profile.id,
-                        email: authUser?.email || 'Unknown',
-                        callsign: profile.callsign,
-                        name: profile.name,
-                        created_at: profile.created_at,
-                        net_count: profile.nets?.[0]?.count || 0
-                    }
-                })
-
-                setUsers(usersWithEmail)
+                setUsers(usersData)
             } catch (error) {
                 console.error('Error fetching users:', error)
                 toast.error('Failed to load users')

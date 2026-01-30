@@ -31,7 +31,7 @@ export default function SignalReportChart({ data, title }: SignalReportChartProp
                 <h3 className="text-lg font-bold text-white">{title}</h3>
             </div>
 
-            <div className="flex-1 w-full min-h-0">
+            <div className="flex-1 w-full min-h-0" style={{ minHeight: '100px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={data}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} />

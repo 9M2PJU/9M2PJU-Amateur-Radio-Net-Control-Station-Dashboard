@@ -25,7 +25,7 @@ export default function NetActivityChart({ data, title = 'Net Activity' }: NetAc
                 <div className="w-1 h-5 bg-emerald-500 rounded-full"></div>
                 {title}
             </h3>
-            <div className="flex-1 w-full min-h-0">
+            <div className="flex-1 w-full min-h-0" style={{ minHeight: '150px' }}>
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={formattedData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
