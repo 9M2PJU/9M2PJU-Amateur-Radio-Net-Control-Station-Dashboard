@@ -3,15 +3,20 @@ import { useAuth } from '../contexts/AuthContext'
 import { Heart, Coffee } from 'lucide-react'
 
 export default function DonationPopup() {
-    const { user } = useAuth()
+    const { user, profile } = useAuth()
     const [isVisible, setIsVisible] = useState(false)
     const [timeLeft, setTimeLeft] = useState(10)
 
     useEffect(() => {
-        // Check for excluded emails
+        // Hardcoded excluded emails (super admins)
         const excludedEmails = ['9m2pju@gmail.com', '9m2pju@hamradio.my']
 
-        if (user?.email && !excludedEmails.includes(user.email)) {
+        // Check if user is excluded via email OR via profile setting
+        const isExcluded =
+            (user?.email && excludedEmails.includes(user.email)) ||
+            profile?.hide_donation_popup
+
+        if (user && !isExcluded) {
             // Show popup
             setIsVisible(true)
 
@@ -29,7 +34,7 @@ export default function DonationPopup() {
 
             return () => clearInterval(timer)
         }
-    }, [user])
+    }, [user, profile])
 
     if (!isVisible) return null
 

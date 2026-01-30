@@ -169,3 +169,16 @@ SET slug = LOWER(
   ) || '-' || TO_CHAR(created_at, 'YYYY-MM-DD')
 )
 WHERE slug IS NULL;
+
+-- 6. DONATION POPUP CONTROL
+--------------------------------------------
+-- Add hide_donation_popup column (default false)
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS hide_donation_popup BOOLEAN DEFAULT FALSE;
+
+-- Allow Super Admins to update ANY profile (to toggle donation popup)
+DROP POLICY IF EXISTS "Super Admins can update any profile" ON public.profiles;
+CREATE POLICY "Super Admins can update any profile"
+ON public.profiles FOR UPDATE
+TO authenticated
+USING (public.is_super_admin())
+WITH CHECK (public.is_super_admin());

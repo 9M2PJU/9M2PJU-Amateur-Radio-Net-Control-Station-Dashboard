@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../contexts/AuthContext'
 import { useImpersonation } from '../contexts/ImpersonationContext'
-import { Users, Search, UserCog, X, Loader2 } from 'lucide-react'
+import { Users, Search, UserCog, X, Loader2, Heart, HeartOff } from 'lucide-react'
 import { toast } from 'sonner'
 
 interface User {
@@ -12,6 +12,7 @@ interface User {
     name: string | null
     created_at: string
     net_count: number
+    hide_donation_popup: boolean
 }
 
 export default function SuperAdmin() {
@@ -33,6 +34,7 @@ export default function SuperAdmin() {
             callsign,
             name,
             created_at,
+            hide_donation_popup,
             nets:nets(count)
           `)
                     .order('created_at', { ascending: false })
@@ -47,7 +49,8 @@ export default function SuperAdmin() {
                     callsign: profile.callsign,
                     name: profile.name,
                     created_at: profile.created_at,
-                    net_count: profile.nets?.[0]?.count || 0
+                    net_count: profile.nets?.[0]?.count || 0,
+                    hide_donation_popup: profile.hide_donation_popup || false
                 }))
 
                 setUsers(usersData)
@@ -70,6 +73,28 @@ export default function SuperAdmin() {
     const handleStopImpersonation = () => {
         stopImpersonation()
         toast.success('Stopped impersonation')
+    }
+
+    const handleToggleDonationPopup = async (user: User) => {
+        try {
+            const newValue = !user.hide_donation_popup
+
+            const { error } = await supabase
+                .from('profiles')
+                .update({ hide_donation_popup: newValue })
+                .eq('id', user.id)
+
+            if (error) throw error
+
+            setUsers(users.map(u =>
+                u.id === user.id ? { ...u, hide_donation_popup: newValue } : u
+            ))
+
+            toast.success(`Donation popup ${newValue ? 'disabled' : 'enabled'} for ${user.callsign}`)
+        } catch (error) {
+            console.error('Error updating profile:', error)
+            toast.error('Failed to update settings')
+        }
     }
 
     const filteredUsers = users.filter(user =>
@@ -178,6 +203,18 @@ export default function SuperAdmin() {
                                         <p className="text-xs text-slate-500">Nets</p>
                                         <p className="text-sm font-bold text-emerald-400">{user.net_count}</p>
                                     </div>
+
+                                    <button
+                                        onClick={() => handleToggleDonationPopup(user)}
+                                        className={`p-2 rounded-lg transition-colors ${user.hide_donation_popup
+                                                ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
+                                                : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
+                                            }`}
+                                        title={user.hide_donation_popup ? "Enable Donation Popup" : "Disable Donation Popup"}
+                                    >
+                                        {user.hide_donation_popup ? <HeartOff className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
+                                    </button>
+
                                     <button
                                         onClick={() => handleImpersonate(user)}
                                         disabled={isImpersonating && impersonatedUser?.id === user.id}

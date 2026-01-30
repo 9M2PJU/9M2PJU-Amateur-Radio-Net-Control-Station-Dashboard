@@ -7,6 +7,7 @@ export interface Profile {
     location: string | null
     grid_locator: string | null
     is_super_admin?: boolean
+    hide_donation_popup?: boolean
     created_at: string
 }
 
