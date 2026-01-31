@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '../lib/types'
@@ -9,6 +9,7 @@ interface AuthContextType {
     profile: Profile | null
     loading: boolean
     isSuperAdmin: boolean
+    signOut: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -16,7 +17,8 @@ const AuthContext = createContext<AuthContextType>({
     user: null,
     profile: null,
     loading: true,
-    isSuperAdmin: false
+    isSuperAdmin: false,
+    signOut: async () => { }
 })
 
 export const useAuth = () => {
@@ -39,8 +41,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return null
     })
     const [loading, setLoading] = useState(true)
+    const mounted = useRef(true)
 
-    const fetchProfile = async (userId: string) => {
+    // Robust sign out function that clears everything immediately
+    const signOut = useCallback(async () => {
+        try {
+            // Optimistically clear local state immediately
+            if (mounted.current) {
+                setSession(null)
+                setUser(null)
+                setProfile(null)
+                setLoading(false)
+            }
+
+            // Clear all local storage
+            localStorage.clear()
+            sessionStorage.clear()
+
+            // Attempt Supabase sign out
+            const { error } = await supabase.auth.signOut()
+            if (error) throw error
+
+        } catch (error) {
+            console.error('Error signing out:', error)
+            // Force clear if something went wrong
+            localStorage.clear()
+            sessionStorage.clear()
+        }
+    }, [])
+
+    const fetchProfile = useCallback(async (userId: string) => {
         try {
             const { data, error } = await supabase
                 .from('profiles')
@@ -48,9 +78,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 .eq('id', userId)
                 .single()
 
+            if (!mounted.current) return
+
             if (error) {
                 console.error('Error fetching profile:', error)
-                // Profile might not exist yet, set to null
                 setProfile(null)
                 return
             }
@@ -64,17 +95,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         } catch (err) {
             console.error('Unexpected error fetching profile:', err)
-            setProfile(null)
+            if (mounted.current) setProfile(null)
         }
-    }
+    }, [])
 
     useEffect(() => {
-        // Initial session check
+        mounted.current = true
         console.log('AuthContext: Initializing...')
 
-        // Safety timeout - if loading takes more than 10 seconds, force it to finish
+        // Safety timeout
         const loadingTimeout = setTimeout(() => {
-            if (loading) {
+            if (mounted.current && loading) {
                 console.warn('AuthContext: Loading timeout reached, forcing completion')
                 setLoading(false)
             }
@@ -84,78 +115,69 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             try {
                 const { data: { session }, error } = await supabase.auth.getSession()
 
+                if (!mounted.current) return
+
                 if (error) {
                     console.error('AuthContext: Error getting session', error)
-                    // If we have a JWT error or similar, clear only Supabase keys to fix the loop
                     if (error.message.includes('JWT') || error.status === 401 || error.status === 400) {
-                        console.warn('AuthContext: Invalid session detected, clearing stale auth data...')
-                        await supabase.auth.signOut()
-
-                        // Targeted cleanup of Supabase keys
-                        Object.keys(localStorage).forEach(key => {
-                            if (key.includes('supabase.auth.token') || key.startsWith('sb-')) {
-                                localStorage.removeItem(key)
-                            }
-                        })
+                        await signOut()
                     }
                     setLoading(false)
                     return
                 }
 
-                setSession(session)
-                setUser(session?.user ?? null)
-                if (session?.user) {
+                if (session) {
+                    setSession(session)
+                    setUser(session.user)
                     await fetchProfile(session.user.id)
                 }
             } catch (err) {
                 console.error('AuthContext: Unexpected error during init', err)
             } finally {
-                setLoading(false)
-                clearTimeout(loadingTimeout)
+                if (mounted.current) {
+                    setLoading(false)
+                }
             }
         }
 
         initAuth()
 
-        // Listen for changes
         const {
             data: { subscription },
-        } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            console.log('AuthContext: Auth event:', _event)
+        } = supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('AuthContext: Auth event:', event)
+            if (!mounted.current) return
 
-            // Critical: Only update if the session has actually changed or if it's a major event
-            // This prevents rapid re-renders during the sign-in process
-            if (_event === 'SIGNED_OUT') {
+            if (event === 'SIGNED_OUT') {
                 setSession(null)
                 setUser(null)
                 setProfile(null)
                 localStorage.removeItem('9m2pju_user_profile')
                 setLoading(false)
-            } else if (_event === 'SIGNED_IN' || _event === 'TOKEN_REFRESHED' || _event === 'USER_UPDATED') {
+            } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
                 setSession(session)
                 setUser(session?.user ?? null)
                 if (session?.user) {
                     await fetchProfile(session.user.id)
                 }
                 setLoading(false)
-            } else if (_event === 'INITIAL_SESSION') {
-                // Handled by initAuth, but safe to set loading false here too
-                setLoading(false)
             }
         })
 
         return () => {
+            mounted.current = false
             subscription.unsubscribe()
             clearTimeout(loadingTimeout)
         }
-    }, [])
+    }, [fetchProfile, signOut]) // Added signOut to dependencies as it is now stable via useCallback
 
     const value = {
         session,
         user,
         profile,
         loading,
-        isSuperAdmin: profile?.is_super_admin || false
+        isSuperAdmin: profile?.is_super_admin || false,
+        signOut
     }
 
     return (

@@ -19,7 +19,7 @@ import type { Profile } from '../lib/types'
 
 export default function Navbar() {
     const { impersonatedUserId, isImpersonating, impersonatedUser, stopImpersonation } = useImpersonation()
-    const { user: authUser, profile, isSuperAdmin } = useAuth()
+    const { user: authUser, profile, isSuperAdmin, signOut } = useAuth()
     const [user, setUser] = useState<Profile | null>(null)
     const [time, setTime] = useState(new Date())
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -83,28 +83,13 @@ export default function Navbar() {
         }
 
         try {
-            // Add a timeout to signout to prevent hanging
-            const signOutPromise = supabase.auth.signOut()
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Sign out timeout')), 3000))
-
-            try {
-                await Promise.race([signOutPromise, timeoutPromise])
-            } catch (signOutErr) {
-                console.warn('Sign out call timed out or failed, proceeding with local cleanup:', signOutErr)
-            }
-
-            // Clear any local storage/session data
-            localStorage.clear()
-            sessionStorage.clear()
-
+            await signOut()
             toast.success('Signed out successfully')
             navigate('/login', { replace: true })
         } catch (err) {
             console.error('Unexpected logout error:', err)
-            toast.error('An error occurred. Forcing logout...')
-            // Force logout even if there's an error
-            localStorage.clear()
-            sessionStorage.clear()
+            // Even if it fails, the context tries to force clear locally
+            toast.error('Signed out')
             navigate('/login', { replace: true })
         } finally {
             setLoggingOut(false)
