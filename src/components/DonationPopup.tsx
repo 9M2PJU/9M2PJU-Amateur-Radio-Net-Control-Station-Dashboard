@@ -17,8 +17,13 @@ export default function DonationPopup() {
             profile?.hide_donation_popup
 
         if (user && !isExcluded) {
+            // Check session storage to see if we already showed it
+            const hasShown = sessionStorage.getItem(`donation_popup_shown_${user.id}`)
+            if (hasShown) return
+
             // Show popup
             setIsVisible(true)
+            sessionStorage.setItem(`donation_popup_shown_${user.id}`, 'true')
 
             // Timer to close
             const timer = setInterval(() => {
@@ -70,10 +75,23 @@ export default function DonationPopup() {
                             <Coffee className="w-4 h-4 text-amber-400" />
                             <span className="text-white font-bold text-sm">Scan to Donate</span>
                         </div>
-                        <p className="text-[10px] text-slate-400 font-mono text-center max-w-[250px]">
+                        <p className="text-[10px] text-slate-400 font-mono text-center max-w-[250px] mb-3">
                             Support 9M2PJU via DuitNow QR<br />
                             Every contribution helps keep the station on air!
                         </p>
+
+                        <div className="flex flex-col items-center gap-2 w-full pt-3 border-t border-white/5">
+                            <span className="text-[10px] text-slate-500 font-mono uppercase tracking-wider">Or via Buy Me a Coffee</span>
+                            <a
+                                href="https://buymeacoffee.com/9m2pju"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2 bg-[#FFDD00] text-black rounded-lg font-bold text-sm hover:bg-[#FFDD00]/90 transition-colors w-full justify-center"
+                            >
+                                <Coffee className="w-4 h-4" />
+                                Buy Me A Coffee
+                            </a>
+                        </div>
                     </div>
 
                     <div className="w-full bg-slate-800/50 rounded-full h-1 overflow-hidden">
