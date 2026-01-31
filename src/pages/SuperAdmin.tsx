@@ -27,30 +27,22 @@ export default function SuperAdmin() {
 
         const fetchUsers = async () => {
             try {
+                // Use the secure RPC function to get full details including email
                 const { data, error } = await supabase
-                    .from('profiles')
-                    .select(`
-            id,
-            callsign,
-            name,
-            created_at,
-            hide_donation_popup,
-            nets:nets(count)
-          `)
-                    .order('created_at', { ascending: false })
+                    .rpc('get_full_user_list_admin')
 
                 if (error) throw error
 
-                // Map profile data to user format
-                // Note: Email is not available on frontend for security reasons
-                const usersData = data.map(profile => ({
-                    id: profile.id,
-                    email: '***@***', // Email hidden for security
-                    callsign: profile.callsign,
-                    name: profile.name,
-                    created_at: profile.created_at,
-                    net_count: profile.nets?.[0]?.count || 0,
-                    hide_donation_popup: profile.hide_donation_popup || false
+                // Map data to local state
+                // RPC returns: id, email, callsign, name, created_at, net_count, hide_donation_popup
+                const usersData = (data as any[]).map(user => ({
+                    id: user.id,
+                    email: user.email || 'No Email',
+                    callsign: user.callsign,
+                    name: user.name,
+                    created_at: user.created_at,
+                    net_count: user.net_count || 0,
+                    hide_donation_popup: user.hide_donation_popup || false
                 }))
 
                 setUsers(usersData)
