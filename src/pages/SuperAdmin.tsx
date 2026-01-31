@@ -204,16 +204,31 @@ export default function SuperAdmin() {
                                         <p className="text-sm font-bold text-emerald-400">{user.net_count}</p>
                                     </div>
 
-                                    <button
-                                        onClick={() => handleToggleDonationPopup(user)}
-                                        className={`p-2 rounded-lg transition-colors ${user.hide_donation_popup
-                                                ? 'bg-rose-500/10 text-rose-400 hover:bg-rose-500/20'
-                                                : 'bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20'
-                                            }`}
-                                        title={user.hide_donation_popup ? "Enable Donation Popup" : "Disable Donation Popup"}
-                                    >
-                                        {user.hide_donation_popup ? <HeartOff className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
-                                    </button>
+                                    <div className="flex flex-col items-end gap-1 mr-2">
+                                        <button
+                                            onClick={() => handleToggleDonationPopup(user)}
+                                            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors border ${user.hide_donation_popup
+                                                ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20'
+                                                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                                                }`}
+                                            title={user.hide_donation_popup ? "Click to Enable Donation Popup" : "Click to Disable Donation Popup"}
+                                        >
+                                            {user.hide_donation_popup ? (
+                                                <>
+                                                    <HeartOff className="w-3.5 h-3.5" />
+                                                    <span className="text-xs font-bold">Popup OFF</span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Heart className="w-3.5 h-3.5" />
+                                                    <span className="text-xs font-bold">Popup ON</span>
+                                                </>
+                                            )}
+                                        </button>
+                                        <span className="text-[10px] text-slate-500 font-mono">
+                                            {user.hide_donation_popup ? 'User will NOT see donation popup' : 'User will see donation popup'}
+                                        </span>
+                                    </div>
 
                                     <button
                                         onClick={() => handleImpersonate(user)}
