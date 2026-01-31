@@ -2,39 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.1.0] - 2026-01-29
+## [v1.2.0] - 2026-01-31
 
-### 🛡️ Production Hardening (The "Hardened & Optimized" Update)
-- **Security**: Complete overhaul of Row Level Security (RLS) policies. Only Net Owners can now modify their session data.
-- **Performance**: Implemented "Stale-While-Revalidate" (SWR) local caching. Dashboard and net details now load instantly.
-- **Stability**: Added safety timeouts to Auth and Data fetching to prevent UI hangs.
-- **Optimization**: Route-level code splitting and manual vendor chunking implemented via Vite.
-- **Sync Fix**: Resolved UUID/Slug type mismatch in Postgres queries.
+### 🚀 New Features
+- **Donation Popup**: Integrated a session-aware donation popup with QR code and "Buy Me A Coffee" link.
+- **Super Admin Dashboard**:
+  - Added "User Management" view for Super Admins.
+  - **Donation Toggle**: Admins can now toggle the donation popup ON/OFF for specific users.
+  - **Real Email Visibility**: Super Admins can now view real user email addresses via secure RPC.
 
-### 🧹 Maintenance
-- Consolidated 12+ legacy SQL scripts into `MASTER_MIGRATION.sql`.
-- Removed obsolete Docker and build artifacts.
-- Premium documentation overhaul with Mermaid diagrams.
+### 🐛 Bug Fixes
+- **Authentication**: Resolved race conditions causing "stuck" login/logout states.
+- **Session Handling**: Improved `AuthContext` to reliably clear local storage on sign-out.
 
-## [1.0.0] - 2026-01-28
+### 💅 UI/UX Improvements
+- **Enhanced Admin UI**: Added clear "Popup ON/OFF" labels and status indicators.
+- **Visual Polish**: Improved glassmorphism effects and button styling.
 
-### 🚀 Major Release: Next.js 14 Migration
-Successfully migrated the entire application from Vite/React Router to Next.js 14 App Router.
+---
 
-### ✨ New Features
-- **Architecture**: Full adoption of Next.js 14 App Router (`src/app`).
-- **Performance**:
-    - "Perfect Fit" Dashboard Layout: Optimized for desktop to eliminate vertical scrolling.
-    - Image Optimization with `next/image`.
-    - Dynamic imports for heavy widgets (Maps).
-- **Authentication**: Integrated Supabase Auth with server-side compatible patterns.
+## [v1.1.0] - 2026-01-29
 
-### 🛠 Improvements
-- **Security**: Updated dependencies to resolve high/critical vulnerabilities.
-- **Cleanup**: Removed all legacy Vite configuration and backup files.
-- **Type Safety**: Enhanced TypeScript coverage across the codebase.
+### 🚀 New Features
+- **Desert Theme**: Refined light mode with high-contrast palette.
+- **Export Tools**: Enhanced PDF and ADIF export capabilities.
 
-### 🐛 Fixes
-- Fixed build errors related to `react-router-dom` residuals.
-- Resolved "Dashboard synchronization timed out" issues.
-- Fixed layout overflow issues on the dashboard.
+### 🔧 Maintenance
+- **Performance**: Optimized rendering with Stale-While-Revalidate pattern.
