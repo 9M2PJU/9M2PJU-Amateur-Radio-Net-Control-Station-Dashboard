@@ -106,9 +106,13 @@ Analyze your Net's performance with integrated analytics:
 
 If you find this dashboard useful for your station, consider supporting the development!
 
-<a href="https://buymeacoffee.com/9m2pju" target="_blank">
-  <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
-</a>
+<p align="center">
+  <a href="https://buymeacoffee.com/9m2pju" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" >
+  </a>
+  <br />
+  <img src="public/donation-qr.png" alt="Donation QR Code" width="150" />
+</p>
 
 ---
 
